@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { validateEnv } from './common/config/env.validation';
@@ -17,6 +18,7 @@ import { typeOrmConfigFactory } from './common/config/typeorm.config';
       inject: [ConfigService],
       useFactory: typeOrmConfigFactory,
     }),
+    AuthModule,
     HealthModule,
     UsersModule,
   ],
