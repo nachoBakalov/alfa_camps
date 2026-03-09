@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Camp } from '../../camps/entities/camp.entity';
+import { TeamTemplate } from '../../team-templates/entities/team-template.entity';
 
 @Entity({ name: 'camp_types' })
 export class CampType {
@@ -25,6 +28,12 @@ export class CampType {
 
   @Column({ type: 'varchar', name: 'cover_image_url', nullable: true })
   coverImageUrl!: string | null;
+
+  @OneToMany(() => TeamTemplate, (teamTemplate) => teamTemplate.campType)
+  teamTemplates!: TeamTemplate[];
+
+  @OneToMany(() => Camp, (camp) => camp.campType)
+  camps!: Camp[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
