@@ -8,6 +8,7 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "migration:run": "ts-node src/database/migrations/run-migrations.ts",
     "seed:super-admin": "ts-node src/database/seeds/run-super-admin-seed.ts"
   },
   "dependencies": {
