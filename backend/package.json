@@ -7,7 +7,8 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"src/**/*.ts\" --max-warnings=0"
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "seed:super-admin": "ts-node src/database/seeds/run-super-admin-seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.8",

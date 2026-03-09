@@ -167,9 +167,18 @@ joinedAt
 
 statistics
 
-current rank
+current ranks by category
 
 Статистиките са за конкретния лагер.
+
+Camp participation cached stats:
+- kills
+- knife_kills
+- survivals
+- duel_wins
+- mass_battle_wins
+- points
+
 
 10. Team Assignment History
 
@@ -279,6 +288,17 @@ player B
 
 winner
 
+Mass battle win rule:
+- If a team wins a mass battle, all participating players from that team receive:
+   - +1 mass_battle_win
+  - +3 individual points
+- This does not depend on whether the player survived.
+
+Mass battle player result fields:
+- kills
+- knife_kills
+- survived
+
 14. Scoring System
 Kill
 
@@ -294,7 +314,11 @@ Team Victory (Mass Battle)
 
 team gets 3 team points
 
+всеки участващ играч от този отбор получава +1 mass_battle_win
+
 всеки играч от този отбор получава 3 individual points
+
+тези бонуси не зависят от survival
 
 1vs1
 
@@ -313,27 +337,65 @@ Final Camp Ranking
 3 място → 3 точки
 4+ място → 1 точка
 
+14.1 Progression Model
+
+Progression in V1 is split into three distinct systems:
+
+- Rank: current level per category for a camp participation.
+- Achievement: automatically unlocked milestone when a condition threshold is reached.
+- Medal: special recognition badge, manual or automatic.
+
 15. Rank System
 
-Rank е прогресивно ниво, базирано на kills.
 
-Rank definition съдържа:
 
-name
+The system supports multiple rank categories.
 
-icon
+Each player participation can have one current rank per category.
 
-kill threshold
+V1 rank categories:
 
-order
+1. KILLS_RANK
+   thresholds:
+   - 1
+   - 5
+   - 10
+   - 15
+   - 20
+   - 25
+   - 30
+   - 35
+   - 40
 
-Пример:
+2. MASS_BATTLE_WINS_RANK
+   thresholds:
+   - 1
+   - 2
+   - 3
+   - 4
+   - 5
+   - 6
+   - 7
+   - 8
+   - 9
 
-Rank 1 → 5 kills
-Rank 2 → 10 kills
-Rank 3 → 20 kills
+3. CHALLENGE_WINS_RANK
+   thresholds:
+   - 1
+   - 2
+   - 3
+   - 4
+   - 5
+   - 6
+   - 7
+   - 8
+   - 9
 
-Player има един текущ rank за лагер.
+Important rules:
+- A player can hold one current rank per category.
+- Rank progress is camp-scoped.
+- Rank images are stored in the frontend public folder.
+- Backend stores only icon/image path.
 
 16. Achievements
 
@@ -413,7 +475,7 @@ date
 
 проверява achievements
 
-обновява rank
+обновява ranks by category
 
 20. Финализиране на лагер
 
@@ -554,3 +616,21 @@ Admin UI
 
 Phase 7
 Public pages
+
+28. V1 medal definitions:
+
+1. Лъвско сърце
+   condition: mass_battle_wins >= 3
+
+2. Железен кръст
+   condition: kills >= 40
+
+3. Безсмъртен войн
+   condition: survivals >= 9
+
+4. Командо
+   condition: duel_wins >= 7
+
+5. Ура
+   condition: knife_kills >= 10
+

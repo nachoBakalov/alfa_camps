@@ -248,13 +248,14 @@ Fields:
 - id: uuid, primary key
 - camp_id: uuid, not null, fk -> camps.id
 - player_id: uuid, not null, fk -> players.id
-- current_rank_id: uuid, nullable, fk -> rank_definitions.id
 - kills: integer, not null, default 0
 - survivals: integer, not null, default 0
 - duel_wins: integer, not null, default 0
 - points: integer, not null, default 0
 - created_at: timestamptz, not null
 - updated_at: timestamptz, not null
+- knife_kills: integer, not null, default 0
+- mass_battle_wins: integer, not null, default 0
 
 Notes:
 - This is the main camp-scoped player record.
@@ -265,9 +266,23 @@ Indexes:
 - index(camp_id)
 - index(player_id)
 - unique(camp_id, player_id)
-- index(current_rank_id)
 
 ---
+## 3.7.1 rank_categories
+
+Defines rank progression categories.
+
+Fields:
+- id: uuid, primary key
+- code: varchar, unique, not null
+- name: varchar, not null
+- created_at: timestamptz, not null
+- updated_at: timestamptz, not null
+
+Recommended V1 values:
+- KILLS_RANK
+- MASS_BATTLE_WINS_RANK
+- CHALLENGE_WINS_RANK
 
 ## 3.8 team_assignments
 
@@ -339,6 +354,7 @@ Fields:
 - survived: boolean, not null, default false
 - created_at: timestamptz, not null
 - updated_at: timestamptz, not null
+- knife_kills: integer, not null, default 0
 
 Notes:
 - Used only for MASS_BATTLE.
@@ -384,27 +400,54 @@ Constraints:
 
 ## 3.12 rank_definitions
 
-Defines camp progression ranks.
+Defines rank thresholds inside a rank category.
 
 Fields:
 - id: uuid, primary key
-- name: varchar, not null
+- category_id: uuid, not null, fk -> rank_categories.id
+- name: varchar, nullable
 - icon_url: varchar, nullable
-- kill_threshold: integer, not null
+- threshold: integer, not null
 - rank_order: integer, not null
 - created_at: timestamptz, not null
 - updated_at: timestamptz, not null
 
 Notes:
-- Rank is determined by kills within a camp.
-- A participation has one current rank at a time.
-- Rank logic should choose the highest rank whose threshold is met.
+- Each rank belongs to exactly one category.
+- Example:
+  - category = KILLS_RANK, threshold = 10
+  - category = MASS_BATTLE_WINS_RANK, threshold = 3
+  - category = CHALLENGE_WINS_RANK, threshold = 5
 
 Indexes:
-- unique(rank_order)
-- unique(kill_threshold)
+- index(category_id)
+- unique(category_id, threshold)
+- unique(category_id, rank_order)
 
 ---
+
+## 3.12.1 player_ranks
+
+Stores the current unlocked rank for a participation in a specific category.
+
+Fields:
+- id: uuid, primary key
+- participation_id: uuid, not null, fk -> camp_participations.id
+- category_id: uuid, not null, fk -> rank_categories.id
+- rank_definition_id: uuid, not null, fk -> rank_definitions.id
+- unlocked_at: timestamptz, not null
+- created_at: timestamptz, not null
+- updated_at: timestamptz, not null
+
+Notes:
+- A player participation can have only one current rank per category.
+- Rank must always belong to the same category.
+
+Indexes:
+- index(participation_id)
+- index(category_id)
+- index(rank_definition_id)
+- unique(participation_id, category_id)
 
 ## 3.13 achievement_definitions
 
@@ -546,6 +589,9 @@ Indexes:
 - camps -> battles = one-to-many
 - battles -> battle_player_results = one-to-many
 - battles -> duels = one-to-many
+- rank_categories -> rank_definitions = one-to-many
+- camp_participations -> player_ranks = one-to-many
+- rank_categories -> player_ranks = one-to-many
 - camp_participations -> player_achievements = one-to-many
 - camp_participations -> player_medals = one-to-many
 
@@ -569,10 +615,12 @@ Current team must be derived from the latest team assignment, but:
 
 ## Cached / derived data
 - camp_participations.kills
+- camp_participations.knife_kills
 - camp_participations.survivals
 - camp_participations.duel_wins
+- camp_participations.mass_battle_wins
 - camp_participations.points
-- camp_participations.current_rank_id
+- player_ranks (current rank per category)
 - camp_teams.team_points
 
 Notes:
@@ -589,7 +637,9 @@ For each completed mass battle:
 - each kill = +1 individual point
 - each survival = +2 individual points
 - winning team receives +3 team points
+- each participating player from the winning team gets +1 mass_battle_win
 - each player from the winning team in that battle receives +3 individual points
+- the +1 mass_battle_win and +3 individual points are granted regardless of survival status
 
 ## Duel session
 For each duel:
