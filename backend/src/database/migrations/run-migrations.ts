@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import { BattlePlayerResult } from '../../modules/battle-player-results/entities/battle-player-result.entity';
 import { Battle } from '../../modules/battles/entities/battle.entity';
+import { Duel } from '../../modules/duels/entities/duel.entity';
 import { CampTeam } from '../../modules/camp-teams/entities/camp-team.entity';
 import { CampParticipation } from '../../modules/camp-participations/entities/camp-participation.entity';
 import { Camp } from '../../modules/camps/entities/camp.entity';
@@ -18,6 +20,8 @@ import { CreatePlayersTable1760000000000 } from './1760000000000-create-players-
 import { CreateCampParticipationsTable1770000000000 } from './1770000000000-create-camp-participations-table';
 import { CreateTeamAssignmentsTable1780000000000 } from './1780000000000-create-team-assignments-table';
 import { CreateBattlesTable1790000000000 } from './1790000000000-create-battles-table';
+import { CreateBattlePlayerResultsTable1800000000000 } from './1800000000000-create-battle-player-results-table';
+import { CreateDuelsTable1810000000000 } from './1810000000000-create-duels-table';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -43,6 +47,8 @@ async function run(): Promise<void> {
       TeamTemplate,
       Camp,
       Battle,
+      BattlePlayerResult,
+      Duel,
       CampTeam,
       CampParticipation,
       Player,
@@ -58,6 +64,8 @@ async function run(): Promise<void> {
       CreateCampParticipationsTable1770000000000,
       CreateTeamAssignmentsTable1780000000000,
       CreateBattlesTable1790000000000,
+      CreateBattlePlayerResultsTable1800000000000,
+      CreateDuelsTable1810000000000,
     ],
     synchronize: false,
   });
