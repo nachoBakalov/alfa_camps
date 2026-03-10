@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -46,7 +47,7 @@ export class MedalsController {
 
   @Get('medal-definitions/:id')
   @UseGuards(JwtAuthGuard)
-  findOneDefinition(@Param('id') id: string) {
+  findOneDefinition(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.medalsService.findOneDefinition(id);
   }
 
@@ -54,7 +55,7 @@ export class MedalsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   updateDefinition(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateMedalDefinitionDto: UpdateMedalDefinitionDto,
   ) {
     return this.medalsService.updateDefinition(id, updateMedalDefinitionDto);
@@ -63,13 +64,13 @@ export class MedalsController {
   @Delete('medal-definitions/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  removeDefinition(@Param('id') id: string) {
+  removeDefinition(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.medalsService.removeDefinition(id);
   }
 
   @Get('camp-participations/:participationId/medals')
   @UseGuards(JwtAuthGuard)
-  findMedalsByParticipation(@Param('participationId') participationId: string) {
+  findMedalsByParticipation(@Param('participationId', new ParseUUIDPipe()) participationId: string) {
     return this.medalsService.findMedalsByParticipation(participationId);
   }
 
@@ -82,7 +83,7 @@ export class MedalsController {
 
   @Delete('player-medals/:id')
   @UseGuards(JwtAuthGuard)
-  removeAward(@Param('id') id: string) {
+  removeAward(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.medalsService.removeAward(id);
   }
 }

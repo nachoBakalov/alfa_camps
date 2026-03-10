@@ -10,6 +10,8 @@ import { CampStatus } from '../camps/enums/camp-status.enum';
 import { CampParticipation } from '../camp-participations/entities/camp-participation.entity';
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Duel } from '../duels/entities/duel.entity';
+import { AchievementsService } from '../achievements/achievements.service';
+import { RanksService } from '../ranks/ranks.service';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
 import { FinalizeCampScoreResultDto } from './dto/finalize-camp-score-result.dto';
 import { ApplyBattleScoreResultDto } from './dto/apply-battle-score-result.dto';
@@ -31,6 +33,10 @@ export class ScoringService {
     private readonly battlePlayerResultsRepository: Repository<BattlePlayerResult>,
     @InjectRepository(Duel)
     private readonly duelsRepository: Repository<Duel>,
+    @InjectRepository(CampParticipation)
+    private readonly campParticipationsRepository: Repository<CampParticipation>,
+    private readonly ranksService: RanksService,
+    private readonly achievementsService: AchievementsService,
   ) {}
 
   async previewBattleScore(battleId: string): Promise<BattleScorePreviewDto> {
@@ -179,6 +185,15 @@ export class ScoringService {
       }
     });
 
+    const affectedParticipationIds = Array.from(
+      new Set(preview.participationDeltas.map((row) => row.participationId)),
+    );
+
+    for (const participationId of affectedParticipationIds) {
+      await this.ranksService.recomputeParticipationRanks(participationId);
+      await this.achievementsService.unlockParticipationAchievements(participationId);
+    }
+
     return {
       battleId: preview.battleId,
       battleType: preview.battleType,
@@ -195,7 +210,7 @@ export class ScoringService {
       throw new NotFoundException(`Camp with id ${campId} was not found`);
     }
 
-    return this.campsRepository.manager.transaction(async (manager) => {
+    const result = await this.campsRepository.manager.transaction(async (manager) => {
       const existingLedger = await manager.findOne(CampFinalizationLedger, { where: { campId } });
 
       if (existingLedger && camp.status === CampStatus.FINISHED) {
@@ -309,6 +324,14 @@ export class ScoringService {
         message: 'Camp score finalized successfully',
       };
     });
+
+    const campParticipations = await this.campParticipationsRepository.find({ where: { campId } });
+
+    for (const participation of campParticipations) {
+      await this.achievementsService.unlockParticipationAchievements(participation.id);
+    }
+
+    return result;
   }
 
   private async previewMassBattle(battle: Battle): Promise<BattleScorePreviewDto> {

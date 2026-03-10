@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -35,27 +36,27 @@ export class TeamTemplatesController {
 
   @Get('team-templates/:id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.teamTemplatesService.findOne(id);
   }
 
   @Get('camp-types/:campTypeId/team-templates')
   @UseGuards(JwtAuthGuard)
-  findByCampType(@Param('campTypeId') campTypeId: string) {
+  findByCampType(@Param('campTypeId', new ParseUUIDPipe()) campTypeId: string) {
     return this.teamTemplatesService.findByCampType(campTypeId);
   }
 
   @Patch('team-templates/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  update(@Param('id') id: string, @Body() updateTeamTemplateDto: UpdateTeamTemplateDto) {
+  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateTeamTemplateDto: UpdateTeamTemplateDto) {
     return this.teamTemplatesService.update(id, updateTeamTemplateDto);
   }
 
   @Delete('team-templates/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.teamTemplatesService.remove(id);
   }
 }

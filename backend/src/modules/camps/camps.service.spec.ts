@@ -55,6 +55,7 @@ describe('CampsService', () => {
     id: 'camp-id',
     campTypeId,
     campType,
+    campTeams: [],
     title: 'Summer Camp',
     year: 2026,
     startDate: '2026-07-01',

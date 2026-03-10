@@ -21,6 +21,7 @@ import { AchievementDefinition } from '../../modules/achievements/entities/achie
 import { PlayerAchievement } from '../../modules/achievements/entities/player-achievement.entity';
 import { MedalDefinition } from '../../modules/medals/entities/medal-definition.entity';
 import { PlayerMedal } from '../../modules/medals/entities/player-medal.entity';
+import { Photo } from '../../modules/photos/entities/photo.entity';
 import { CreateUsersTable1710000000000 } from './1710000000000-create-users-table';
 import { CreateCampTypesTable1720000000000 } from './1720000000000-create-camp-types-table';
 import { CreateTeamTemplatesTable1730000000000 } from './1730000000000-create-team-templates-table';
@@ -37,6 +38,7 @@ import { CreateCampFinalizationLedgerTable1830000000000 } from './1830000000000-
 import { CreateRanksTables1840000000000 } from './1840000000000-create-ranks-tables';
 import { CreateAchievementsTables1850000000000 } from './1850000000000-create-achievements-tables';
 import { CreateMedalsTables1860000000000 } from './1860000000000-create-medals-tables';
+import { CreatePhotosTable1870000000000 } from './1870000000000-create-photos-table';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -78,6 +80,7 @@ async function run(): Promise<void> {
       PlayerAchievement,
       MedalDefinition,
       PlayerMedal,
+      Photo,
     ],
     migrations: [
       CreateUsersTable1710000000000,
@@ -96,6 +99,7 @@ async function run(): Promise<void> {
       CreateRanksTables1840000000000,
       CreateAchievementsTables1850000000000,
       CreateMedalsTables1860000000000,
+      CreatePhotosTable1870000000000,
     ],
     synchronize: false,
   });

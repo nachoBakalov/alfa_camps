@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -35,33 +36,33 @@ export class CampTeamsController {
 
   @Get('camp-teams/:id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.campTeamsService.findOne(id);
   }
 
   @Get('camps/:campId/camp-teams')
   @UseGuards(JwtAuthGuard)
-  findByCamp(@Param('campId') campId: string) {
+  findByCamp(@Param('campId', new ParseUUIDPipe()) campId: string) {
     return this.campTeamsService.findByCamp(campId);
   }
 
   @Patch('camp-teams/:id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateCampTeamDto: UpdateCampTeamDto) {
+  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateCampTeamDto: UpdateCampTeamDto) {
     return this.campTeamsService.update(id, updateCampTeamDto);
   }
 
   @Delete('camp-teams/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.campTeamsService.remove(id);
   }
 
   @Post('camps/:campId/camp-teams/clone-from-templates')
   @UseGuards(JwtAuthGuard)
   cloneFromCampTypeTemplates(
-    @Param('campId') campId: string,
+    @Param('campId', new ParseUUIDPipe()) campId: string,
     @Body() _dto: CloneCampTypeTemplatesDto,
   ) {
     return this.campTeamsService.cloneFromCampTypeTemplates(campId);

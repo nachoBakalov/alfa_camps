@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -36,14 +37,14 @@ export class BattlePlayerResultsController {
 
   @Get('battle-player-results/:id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.battlePlayerResultsService.findOne(id);
   }
 
   @Patch('battle-player-results/:id')
   @UseGuards(JwtAuthGuard)
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateBattlePlayerResultDto: UpdateBattlePlayerResultDto,
   ) {
     return this.battlePlayerResultsService.update(id, updateBattlePlayerResultDto);
@@ -52,19 +53,19 @@ export class BattlePlayerResultsController {
   @Delete('battle-player-results/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.battlePlayerResultsService.remove(id);
   }
 
   @Get('battles/:battleId/player-results')
   @UseGuards(JwtAuthGuard)
-  findByBattle(@Param('battleId') battleId: string) {
+  findByBattle(@Param('battleId', new ParseUUIDPipe()) battleId: string) {
     return this.battlePlayerResultsService.findByBattle(battleId);
   }
 
   @Get('camp-participations/:participationId/battle-results')
   @UseGuards(JwtAuthGuard)
-  findByParticipation(@Param('participationId') participationId: string) {
+  findByParticipation(@Param('participationId', new ParseUUIDPipe()) participationId: string) {
     return this.battlePlayerResultsService.findByParticipation(participationId);
   }
 }

@@ -6,6 +6,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
+type SafeUser = Omit<User, 'passwordHash'>;
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -13,7 +15,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<SafeUser> {
     const passwordHash = await bcrypt.hash(createUserDto.password, 10);
 
     const user = this.usersRepository.create({
@@ -24,35 +26,54 @@ export class UsersService {
       role: createUserDto.role,
     });
 
-    return this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
+    return this.toSafeUser(savedUser);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
+  async findAll(): Promise<SafeUser[]> {
+    const users = await this.usersRepository.find({
       order: {
         createdAt: 'DESC',
       },
     });
+
+    return users.map((user) => this.toSafeUser(user));
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOne(id: string): Promise<SafeUser> {
     const user = await this.usersRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} was not found`);
     }
 
-    return user;
+    return this.toSafeUser(user);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-    const updatedUser = this.usersRepository.merge(user, updateUserDto);
-    return this.usersRepository.save(updatedUser);
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<SafeUser> {
+    const existingUser = await this.usersRepository.findOne({ where: { id } });
+
+    if (!existingUser) {
+      throw new NotFoundException(`User with id ${id} was not found`);
+    }
+
+    const updatedUser = this.usersRepository.merge(existingUser, updateUserDto);
+    const savedUser = await this.usersRepository.save(updatedUser);
+    return this.toSafeUser(savedUser);
   }
 
   async remove(id: string): Promise<void> {
-    const user = await this.findOne(id);
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} was not found`);
+    }
+
     await this.usersRepository.remove(user);
+  }
+
+  private toSafeUser(user: User): SafeUser {
+    const { passwordHash, ...safeUser } = user;
+    return safeUser;
   }
 }

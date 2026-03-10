@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -34,32 +35,32 @@ export class DuelsController {
 
   @Get('duels/:id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.duelsService.findOne(id);
   }
 
   @Patch('duels/:id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateDuelDto: UpdateDuelDto) {
+  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateDuelDto: UpdateDuelDto) {
     return this.duelsService.update(id, updateDuelDto);
   }
 
   @Delete('duels/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.duelsService.remove(id);
   }
 
   @Get('battles/:battleId/duels')
   @UseGuards(JwtAuthGuard)
-  findByBattle(@Param('battleId') battleId: string) {
+  findByBattle(@Param('battleId', new ParseUUIDPipe()) battleId: string) {
     return this.duelsService.findByBattle(battleId);
   }
 
   @Get('camp-participations/:participationId/duels')
   @UseGuards(JwtAuthGuard)
-  findByParticipation(@Param('participationId') participationId: string) {
+  findByParticipation(@Param('participationId', new ParseUUIDPipe()) participationId: string) {
     return this.duelsService.findByParticipation(participationId);
   }
 }

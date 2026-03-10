@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -35,21 +36,21 @@ export class CampTypesController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.campTypesService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  update(@Param('id') id: string, @Body() updateCampTypeDto: UpdateCampTypeDto) {
+  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateCampTypeDto: UpdateCampTypeDto) {
     return this.campTypesService.update(id, updateCampTypeDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.campTypesService.remove(id);
   }
 }

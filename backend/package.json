@@ -10,6 +10,7 @@
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "migration:run": "ts-node src/database/migrations/run-migrations.ts",
     "seed:super-admin": "ts-node src/database/seeds/run-super-admin-seed.ts",
+    "seed:progression": "ts-node src/database/seeds/run-progression-seed.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage"

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -36,14 +37,14 @@ export class CampParticipationsController {
 
   @Get('camp-participations/:id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.campParticipationsService.findOne(id);
   }
 
   @Patch('camp-participations/:id')
   @UseGuards(JwtAuthGuard)
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateCampParticipationDto: UpdateCampParticipationDto,
   ) {
     return this.campParticipationsService.update(id, updateCampParticipationDto);
@@ -52,19 +53,19 @@ export class CampParticipationsController {
   @Delete('camp-participations/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.campParticipationsService.remove(id);
   }
 
   @Get('camps/:campId/participations')
   @UseGuards(JwtAuthGuard)
-  findByCamp(@Param('campId') campId: string) {
+  findByCamp(@Param('campId', new ParseUUIDPipe()) campId: string) {
     return this.campParticipationsService.findByCamp(campId);
   }
 
   @Get('players/:playerId/participations')
   @UseGuards(JwtAuthGuard)
-  findByPlayer(@Param('playerId') playerId: string) {
+  findByPlayer(@Param('playerId', new ParseUUIDPipe()) playerId: string) {
     return this.campParticipationsService.findByPlayer(playerId);
   }
 }

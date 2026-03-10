@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -36,7 +37,7 @@ export class AchievementsController {
 
   @Get('achievement-definitions/:id')
   @UseGuards(JwtAuthGuard)
-  findOneDefinition(@Param('id') id: string) {
+  findOneDefinition(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.achievementsService.findOneDefinition(id);
   }
 
@@ -44,7 +45,7 @@ export class AchievementsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   updateDefinition(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateAchievementDefinitionDto: UpdateAchievementDefinitionDto,
   ) {
     return this.achievementsService.updateDefinition(id, updateAchievementDefinitionDto);
@@ -53,20 +54,20 @@ export class AchievementsController {
   @Delete('achievement-definitions/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  removeDefinition(@Param('id') id: string) {
+  removeDefinition(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.achievementsService.removeDefinition(id);
   }
 
   @Get('camp-participations/:participationId/achievements')
   @UseGuards(JwtAuthGuard)
-  findAchievementsByParticipation(@Param('participationId') participationId: string) {
+  findAchievementsByParticipation(@Param('participationId', new ParseUUIDPipe()) participationId: string) {
     return this.achievementsService.findAchievementsByParticipation(participationId);
   }
 
   @Post('camp-participations/:participationId/unlock-achievements')
   @UseGuards(JwtAuthGuard)
   unlockParticipationAchievements(
-    @Param('participationId') participationId: string,
+    @Param('participationId', new ParseUUIDPipe()) participationId: string,
   ): Promise<UnlockParticipationAchievementsResultDto> {
     return this.achievementsService.unlockParticipationAchievements(participationId);
   }

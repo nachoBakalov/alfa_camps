@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -38,21 +39,21 @@ export class RanksController {
 
   @Get('rank-categories/:id')
   @UseGuards(JwtAuthGuard)
-  findOneCategory(@Param('id') id: string) {
+  findOneCategory(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.ranksService.findOneCategory(id);
   }
 
   @Patch('rank-categories/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  updateCategory(@Param('id') id: string, @Body() updateRankCategoryDto: UpdateRankCategoryDto) {
+  updateCategory(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateRankCategoryDto: UpdateRankCategoryDto) {
     return this.ranksService.updateCategory(id, updateRankCategoryDto);
   }
 
   @Delete('rank-categories/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  removeCategory(@Param('id') id: string) {
+  removeCategory(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.ranksService.removeCategory(id);
   }
 
@@ -71,13 +72,13 @@ export class RanksController {
 
   @Get('rank-categories/:categoryId/rank-definitions')
   @UseGuards(JwtAuthGuard)
-  findDefinitionsByCategory(@Param('categoryId') categoryId: string) {
+  findDefinitionsByCategory(@Param('categoryId', new ParseUUIDPipe()) categoryId: string) {
     return this.ranksService.findDefinitionsByCategory(categoryId);
   }
 
   @Get('rank-definitions/:id')
   @UseGuards(JwtAuthGuard)
-  findOneDefinition(@Param('id') id: string) {
+  findOneDefinition(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.ranksService.findOneDefinition(id);
   }
 
@@ -85,7 +86,7 @@ export class RanksController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   updateDefinition(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateRankDefinitionDto: UpdateRankDefinitionDto,
   ) {
     return this.ranksService.updateDefinition(id, updateRankDefinitionDto);
@@ -94,14 +95,14 @@ export class RanksController {
   @Delete('rank-definitions/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  removeDefinition(@Param('id') id: string) {
+  removeDefinition(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.ranksService.removeDefinition(id);
   }
 
   @Post('camp-participations/:participationId/recompute-ranks')
   @UseGuards(JwtAuthGuard)
   recomputeParticipationRanks(
-    @Param('participationId') participationId: string,
+    @Param('participationId', new ParseUUIDPipe()) participationId: string,
   ): Promise<RecomputeParticipationRanksResultDto> {
     return this.ranksService.recomputeParticipationRanks(participationId);
   }

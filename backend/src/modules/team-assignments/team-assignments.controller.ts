@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -48,14 +49,14 @@ export class TeamAssignmentsController {
 
   @Get('team-assignments/:id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.teamAssignmentsService.findOne(id);
   }
 
   @Patch('team-assignments/:id')
   @UseGuards(JwtAuthGuard)
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateTeamAssignmentDto: UpdateTeamAssignmentDto,
   ) {
     return this.teamAssignmentsService.update(id, updateTeamAssignmentDto);
@@ -64,19 +65,19 @@ export class TeamAssignmentsController {
   @Delete('team-assignments/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.teamAssignmentsService.remove(id);
   }
 
   @Get('camp-participations/:participationId/team-assignments')
   @UseGuards(JwtAuthGuard)
-  findByParticipation(@Param('participationId') participationId: string) {
+  findByParticipation(@Param('participationId', new ParseUUIDPipe()) participationId: string) {
     return this.teamAssignmentsService.findByParticipation(participationId);
   }
 
   @Get('camp-participations/:participationId/current-team-assignment')
   @UseGuards(JwtAuthGuard)
-  findCurrentByParticipation(@Param('participationId') participationId: string) {
+  findCurrentByParticipation(@Param('participationId', new ParseUUIDPipe()) participationId: string) {
     return this.teamAssignmentsService.findCurrentByParticipation(participationId);
   }
 }

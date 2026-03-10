@@ -7,6 +7,8 @@ import { Camp } from '../camps/entities/camp.entity';
 import { CampParticipation } from '../camp-participations/entities/camp-participation.entity';
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Duel } from '../duels/entities/duel.entity';
+import { AchievementsModule } from '../achievements/achievements.module';
+import { RanksModule } from '../ranks/ranks.module';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
 import { BattleParticipationScoreLedger } from './entities/battle-participation-score-ledger.entity';
 import { BattleTeamScoreLedger } from './entities/battle-team-score-ledger.entity';
@@ -16,6 +18,8 @@ import { ScoringService } from './scoring.service';
 
 @Module({
   imports: [
+    RanksModule,
+    AchievementsModule,
     TypeOrmModule.forFeature([
       Battle,
       Camp,

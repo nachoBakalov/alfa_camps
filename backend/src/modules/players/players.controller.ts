@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -36,20 +37,20 @@ export class PlayersController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.playersService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updatePlayerDto: UpdatePlayerDto) {
+  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updatePlayerDto: UpdatePlayerDto) {
     return this.playersService.update(id, updatePlayerDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.playersService.remove(id);
   }
 }

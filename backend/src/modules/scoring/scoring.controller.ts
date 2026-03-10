@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApplyBattleScoreResultDto } from './dto/apply-battle-score-result.dto';
 import { BattleScorePreviewDto } from './dto/battle-score-preview.dto';
@@ -11,19 +11,19 @@ export class ScoringController {
 
   @Get('battles/:battleId/score-preview')
   @UseGuards(JwtAuthGuard)
-  previewBattleScore(@Param('battleId') battleId: string): Promise<BattleScorePreviewDto> {
+  previewBattleScore(@Param('battleId', new ParseUUIDPipe()) battleId: string): Promise<BattleScorePreviewDto> {
     return this.scoringService.previewBattleScore(battleId);
   }
 
   @Post('battles/:battleId/apply-score')
   @UseGuards(JwtAuthGuard)
-  applyBattleScore(@Param('battleId') battleId: string): Promise<ApplyBattleScoreResultDto> {
+  applyBattleScore(@Param('battleId', new ParseUUIDPipe()) battleId: string): Promise<ApplyBattleScoreResultDto> {
     return this.scoringService.applyBattleScore(battleId);
   }
 
   @Post('camps/:campId/finalize-score')
   @UseGuards(JwtAuthGuard)
-  finalizeCampScore(@Param('campId') campId: string): Promise<FinalizeCampScoreResultDto> {
+  finalizeCampScore(@Param('campId', new ParseUUIDPipe()) campId: string): Promise<FinalizeCampScoreResultDto> {
     return this.scoringService.finalizeCampScore(campId);
   }
 }

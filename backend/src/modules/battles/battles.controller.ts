@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  ParseUUIDPipe,
   Param,
   Patch,
   Post,
@@ -45,26 +46,26 @@ export class BattlesController {
 
   @Get('battles/:id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.battlesService.findOne(id);
   }
 
   @Patch('battles/:id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateBattleDto: UpdateBattleDto) {
+  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateBattleDto: UpdateBattleDto) {
     return this.battlesService.update(id, updateBattleDto);
   }
 
   @Delete('battles/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.battlesService.remove(id);
   }
 
   @Get('camps/:campId/battles')
   @UseGuards(JwtAuthGuard)
-  findByCamp(@Param('campId') campId: string) {
+  findByCamp(@Param('campId', new ParseUUIDPipe()) campId: string) {
     return this.battlesService.findByCamp(campId);
   }
 }
