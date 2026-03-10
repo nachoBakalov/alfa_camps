@@ -1,8 +1,10 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { CampTeam } from '../../modules/camp-teams/entities/camp-team.entity';
+import { CampParticipation } from '../../modules/camp-participations/entities/camp-participation.entity';
 import { Camp } from '../../modules/camps/entities/camp.entity';
 import { CampType } from '../../modules/camp-types/entities/camp-type.entity';
+import { Player } from '../../modules/players/entities/player.entity';
 import { TeamTemplate } from '../../modules/team-templates/entities/team-template.entity';
 import { User } from '../../modules/users/entities/user.entity';
 import { CreateUsersTable1710000000000 } from './1710000000000-create-users-table';
@@ -10,6 +12,8 @@ import { CreateCampTypesTable1720000000000 } from './1720000000000-create-camp-t
 import { CreateTeamTemplatesTable1730000000000 } from './1730000000000-create-team-templates-table';
 import { CreateCampsTable1740000000000 } from './1740000000000-create-camps-table';
 import { CreateCampTeamsTable1750000000000 } from './1750000000000-create-camp-teams-table';
+import { CreatePlayersTable1760000000000 } from './1760000000000-create-players-table';
+import { CreateCampParticipationsTable1770000000000 } from './1770000000000-create-camp-participations-table';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -29,13 +33,23 @@ async function run(): Promise<void> {
     username: requireEnv('DB_USERNAME'),
     password: requireEnv('DB_PASSWORD'),
     database: requireEnv('DB_NAME'),
-    entities: [User, CampType, TeamTemplate, Camp, CampTeam],
+    entities: [
+      User,
+      CampType,
+      TeamTemplate,
+      Camp,
+      CampTeam,
+      CampParticipation,
+      Player,
+    ],
     migrations: [
       CreateUsersTable1710000000000,
       CreateCampTypesTable1720000000000,
       CreateTeamTemplatesTable1730000000000,
       CreateCampsTable1740000000000,
       CreateCampTeamsTable1750000000000,
+      CreatePlayersTable1760000000000,
+      CreateCampParticipationsTable1770000000000,
     ],
     synchronize: false,
   });
