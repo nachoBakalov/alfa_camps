@@ -1,0 +1,24 @@
+LOGIN:200
+GET_CAMP_TYPES:200
+CREATE_CAMP1:200
+CREATE_CAMP2:200
+CREATE_TEAM1:200
+CREATE_TEAM2:200
+CREATE_PLAYER1:200
+CREATE_PLAYER2:200
+CREATE_PART1:200
+CREATE_PART2:200
+CREATE_BATTLE_MASS:200
+CREATE_BATTLE_DUEL:200
+CASE1_POST_RESULT:200
+CASE1_RESULT_ID:73ae4f51-721a-48ef-a764-93eccef7623f
+CASE2_GET_BY_BATTLE:200
+CASE2_COUNT:
+CASE3_GET_BY_PARTICIPATION:200
+CASE3_COUNT:
+CASE4_KNIFE_GT_KILLS:400
+{"message":"Participation must belong to the same camp as battle","error":"Bad Request","statusCode":400}
+CASE5_DUEL_SESSION:400
+{"message":"Battle player results are allowed only for MASS_BATTLE","error":"Bad Request","statusCode":400}
+CASE6_OTHER_CAMP:400
+{"message":"Participation must belong to the same camp as battle","error":"Bad Request","statusCode":400}

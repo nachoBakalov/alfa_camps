@@ -11,6 +11,16 @@ import { Player } from '../../modules/players/entities/player.entity';
 import { TeamAssignment } from '../../modules/team-assignments/entities/team-assignment.entity';
 import { TeamTemplate } from '../../modules/team-templates/entities/team-template.entity';
 import { User } from '../../modules/users/entities/user.entity';
+import { BattleParticipationScoreLedger } from '../../modules/scoring/entities/battle-participation-score-ledger.entity';
+import { BattleTeamScoreLedger } from '../../modules/scoring/entities/battle-team-score-ledger.entity';
+import { CampFinalizationLedger } from '../../modules/scoring/entities/camp-finalization-ledger.entity';
+import { PlayerRank } from '../../modules/ranks/entities/player-rank.entity';
+import { RankCategory } from '../../modules/ranks/entities/rank-category.entity';
+import { RankDefinition } from '../../modules/ranks/entities/rank-definition.entity';
+import { AchievementDefinition } from '../../modules/achievements/entities/achievement-definition.entity';
+import { PlayerAchievement } from '../../modules/achievements/entities/player-achievement.entity';
+import { MedalDefinition } from '../../modules/medals/entities/medal-definition.entity';
+import { PlayerMedal } from '../../modules/medals/entities/player-medal.entity';
 import { CreateUsersTable1710000000000 } from './1710000000000-create-users-table';
 import { CreateCampTypesTable1720000000000 } from './1720000000000-create-camp-types-table';
 import { CreateTeamTemplatesTable1730000000000 } from './1730000000000-create-team-templates-table';
@@ -22,6 +32,11 @@ import { CreateTeamAssignmentsTable1780000000000 } from './1780000000000-create-
 import { CreateBattlesTable1790000000000 } from './1790000000000-create-battles-table';
 import { CreateBattlePlayerResultsTable1800000000000 } from './1800000000000-create-battle-player-results-table';
 import { CreateDuelsTable1810000000000 } from './1810000000000-create-duels-table';
+import { CreateBattleScoreLedgerTables1820000000000 } from './1820000000000-create-battle-score-ledger-tables';
+import { CreateCampFinalizationLedgerTable1830000000000 } from './1830000000000-create-camp-finalization-ledger-table';
+import { CreateRanksTables1840000000000 } from './1840000000000-create-ranks-tables';
+import { CreateAchievementsTables1850000000000 } from './1850000000000-create-achievements-tables';
+import { CreateMedalsTables1860000000000 } from './1860000000000-create-medals-tables';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -53,6 +68,16 @@ async function run(): Promise<void> {
       CampParticipation,
       Player,
       TeamAssignment,
+      BattleParticipationScoreLedger,
+      BattleTeamScoreLedger,
+      CampFinalizationLedger,
+      RankCategory,
+      RankDefinition,
+      PlayerRank,
+      AchievementDefinition,
+      PlayerAchievement,
+      MedalDefinition,
+      PlayerMedal,
     ],
     migrations: [
       CreateUsersTable1710000000000,
@@ -66,6 +91,11 @@ async function run(): Promise<void> {
       CreateBattlesTable1790000000000,
       CreateBattlePlayerResultsTable1800000000000,
       CreateDuelsTable1810000000000,
+      CreateBattleScoreLedgerTables1820000000000,
+      CreateCampFinalizationLedgerTable1830000000000,
+      CreateRanksTables1840000000000,
+      CreateAchievementsTables1850000000000,
+      CreateMedalsTables1860000000000,
     ],
     synchronize: false,
   });

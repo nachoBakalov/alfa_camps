@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AchievementsModule } from './modules/achievements/achievements.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BattlePlayerResultsModule } from './modules/battle-player-results/battle-player-results.module';
 import { BattlesModule } from './modules/battles/battles.module';
@@ -10,8 +11,11 @@ import { CampTeamsModule } from './modules/camp-teams/camp-teams.module';
 import { CampsModule } from './modules/camps/camps.module';
 import { CampTypesModule } from './modules/camp-types/camp-types.module';
 import { HealthModule } from './modules/health/health.module';
+import { MedalsModule } from './modules/medals/medals.module';
 import { PlayersModule } from './modules/players/players.module';
 import { DuelsModule } from './modules/duels/duels.module';
+import { ScoringModule } from './modules/scoring/scoring.module';
+import { RanksModule } from './modules/ranks/ranks.module';
 import { TeamAssignmentsModule } from './modules/team-assignments/team-assignments.module';
 import { TeamTemplatesModule } from './modules/team-templates/team-templates.module';
 import { UsersModule } from './modules/users/users.module';
@@ -28,6 +32,7 @@ import { typeOrmConfigFactory } from './common/config/typeorm.config';
       inject: [ConfigService],
       useFactory: typeOrmConfigFactory,
     }),
+    AchievementsModule,
     AuthModule,
     BattlePlayerResultsModule,
     BattlesModule,
@@ -37,7 +42,10 @@ import { typeOrmConfigFactory } from './common/config/typeorm.config';
     CampTypesModule,
     DuelsModule,
     HealthModule,
+    MedalsModule,
     PlayersModule,
+    RanksModule,
+    ScoringModule,
     TeamAssignmentsModule,
     TeamTemplatesModule,
     UsersModule,

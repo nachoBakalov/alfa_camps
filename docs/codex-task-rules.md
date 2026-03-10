@@ -12,3 +12,6 @@
 10. Do not introduce unnecessary abstractions.
 11. Prefer explicit, readable code over clever code.
 12. If an assumption is needed, choose the simplest stable option and state it clearly.
+13. Always follow the backend architecture defined in docs/backend-architecture.md
+14. Do not create new folder structures unless explicitly instructed.
+15. Follow the architecture rules defined in docs/ARCHITECTURE_DECISIONS.md
