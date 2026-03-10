@@ -3,12 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
+import { BattlesModule } from './modules/battles/battles.module';
 import { CampParticipationsModule } from './modules/camp-participations/camp-participations.module';
 import { CampTeamsModule } from './modules/camp-teams/camp-teams.module';
 import { CampsModule } from './modules/camps/camps.module';
 import { CampTypesModule } from './modules/camp-types/camp-types.module';
 import { HealthModule } from './modules/health/health.module';
 import { PlayersModule } from './modules/players/players.module';
+import { TeamAssignmentsModule } from './modules/team-assignments/team-assignments.module';
 import { TeamTemplatesModule } from './modules/team-templates/team-templates.module';
 import { UsersModule } from './modules/users/users.module';
 import { validateEnv } from './common/config/env.validation';
@@ -25,12 +27,14 @@ import { typeOrmConfigFactory } from './common/config/typeorm.config';
       useFactory: typeOrmConfigFactory,
     }),
     AuthModule,
+    BattlesModule,
     CampParticipationsModule,
     CampTeamsModule,
     CampsModule,
     CampTypesModule,
     HealthModule,
     PlayersModule,
+    TeamAssignmentsModule,
     TeamTemplatesModule,
     UsersModule,
   ],
