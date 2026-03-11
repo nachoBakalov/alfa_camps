@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { Camp, CampInput, CampStatus } from '../../api/camps.api';
 import { Badge } from '../../components/ui/Badge';
+import { AssetPicker } from '../../components/ui/AssetPicker';
+import { ModalDrawer } from '../../components/ui/ModalDrawer';
 import { SectionCard } from '../../components/cards/SectionCard';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
@@ -133,17 +135,13 @@ function CampForm({
   const submitLabel = mode.kind === 'create' ? 'Create Camp' : 'Save Changes';
 
   return (
-    <SectionCard
-      title={mode.kind === 'create' ? 'Create Camp' : `Edit: ${mode.camp.title}`}
-      description="Fill in the core camp information."
+    <form
+      className="space-y-4"
+      onSubmit={form.handleSubmit(async (values) => {
+        await onSubmit(toPayload(values, mode));
+      })}
+      noValidate
     >
-      <form
-        className="space-y-4"
-        onSubmit={form.handleSubmit(async (values) => {
-          await onSubmit(toPayload(values, mode));
-        })}
-        noValidate
-      >
         <div>
           <label htmlFor="campTypeId" className="mb-1 block text-sm font-medium text-slate-700">
             Camp Type
@@ -254,6 +252,17 @@ function CampForm({
             {form.formState.errors.logoUrl ? (
               <p className="mt-1 text-sm text-red-600">{form.formState.errors.logoUrl.message}</p>
             ) : null}
+
+            <div className="mt-3">
+              <AssetPicker
+                manifest="camp-logos"
+                title="Or choose from camp logos"
+                selectedUrl={form.watch('logoUrl') ?? ''}
+                onSelect={(url) => {
+                  form.setValue('logoUrl', url, { shouldValidate: true, shouldDirty: true });
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -282,6 +291,17 @@ function CampForm({
           {form.formState.errors.coverImageUrl ? (
             <p className="mt-1 text-sm text-red-600">{form.formState.errors.coverImageUrl.message}</p>
           ) : null}
+
+          <div className="mt-3">
+            <AssetPicker
+              manifest="camp-covers"
+              title="Or choose from camp covers"
+              selectedUrl={form.watch('coverImageUrl') ?? ''}
+              onSelect={(url) => {
+                form.setValue('coverImageUrl', url, { shouldValidate: true, shouldDirty: true });
+              }}
+            />
+          </div>
         </div>
 
         {mode.kind === 'edit' ? (
@@ -303,24 +323,23 @@ function CampForm({
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Saving...' : submitLabel}
-          </button>
-        </div>
-      </form>
-    </SectionCard>
+      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Saving...' : submitLabel}
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -441,28 +460,36 @@ export function CampsPage() {
         </div>
       ) : null}
 
-      {formMode ? (
-        <CampForm
-          mode={formMode}
-          campTypeOptions={(campTypesQuery.data ?? []).map((campType) => ({
-            id: campType.id,
-            name: campType.name,
-          }))}
-          isCampTypesLoading={campTypesQuery.isLoading}
-          isSubmitting={isMutating}
-          onCancel={() => {
-            setFormMode(null);
-          }}
-          onSubmit={async (payload) => {
-            if (formMode.kind === 'create') {
-              await handleCreate(payload);
-              return;
-            }
+      <ModalDrawer
+        open={Boolean(formMode)}
+        title={formMode?.kind === 'create' ? 'Create Camp' : `Edit: ${formMode?.camp.title ?? ''}`}
+        onClose={() => {
+          setFormMode(null);
+        }}
+      >
+        {formMode ? (
+          <CampForm
+            mode={formMode}
+            campTypeOptions={(campTypesQuery.data ?? []).map((campType) => ({
+              id: campType.id,
+              name: campType.name,
+            }))}
+            isCampTypesLoading={campTypesQuery.isLoading}
+            isSubmitting={isMutating}
+            onCancel={() => {
+              setFormMode(null);
+            }}
+            onSubmit={async (payload) => {
+              if (formMode.kind === 'create') {
+                await handleCreate(payload);
+                return;
+              }
 
-            await handleEdit(formMode.camp.id, payload);
-          }}
-        />
-      ) : null}
+              await handleEdit(formMode.camp.id, payload);
+            }}
+          />
+        ) : null}
+      </ModalDrawer>
 
       <SectionCard title="Filter" description="Optionally filter camps by status.">
         <label htmlFor="statusFilter" className="mb-1 block text-sm font-medium text-slate-700">

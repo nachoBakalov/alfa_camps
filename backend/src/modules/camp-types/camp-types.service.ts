@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
+import { Camp } from '../camps/entities/camp.entity';
+import { TeamTemplate } from '../team-templates/entities/team-template.entity';
 import { CreateCampTypeDto } from './dto/create-camp-type.dto';
 import { UpdateCampTypeDto } from './dto/update-camp-type.dto';
 import { CampType } from './entities/camp-type.entity';
@@ -14,6 +16,10 @@ export class CampTypesService {
   constructor(
     @InjectRepository(CampType)
     private readonly campTypesRepository: Repository<CampType>,
+    @InjectRepository(TeamTemplate)
+    private readonly teamTemplatesRepository: Repository<TeamTemplate>,
+    @InjectRepository(Camp)
+    private readonly campsRepository: Repository<Camp>,
   ) {}
 
   async create(createCampTypeDto: CreateCampTypeDto): Promise<CampType> {
@@ -59,7 +65,33 @@ export class CampTypesService {
 
   async remove(id: string): Promise<void> {
     const campType = await this.findOne(id);
-    await this.campTypesRepository.remove(campType);
+
+    const [teamTemplateCount, campCount] = await Promise.all([
+      this.teamTemplatesRepository.count({ where: { campTypeId: id } }),
+      this.campsRepository.count({ where: { campTypeId: id } }),
+    ]);
+
+    if (teamTemplateCount > 0 || campCount > 0) {
+      throw new ConflictException(
+        'Cannot delete camp type because it is referenced by camps or team templates',
+      );
+    }
+
+    try {
+      await this.campTypesRepository.remove(campType);
+    } catch (error: unknown) {
+      if (error instanceof QueryFailedError) {
+        const driverError = error.driverError as { code?: string };
+
+        if (driverError.code === '23503') {
+          throw new ConflictException(
+            'Cannot delete camp type because it is referenced by camps or team templates',
+          );
+        }
+      }
+
+      throw error;
+    }
   }
 
   private handleUniqueConstraintError(error: unknown): void {

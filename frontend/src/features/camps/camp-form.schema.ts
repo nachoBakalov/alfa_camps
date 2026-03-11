@@ -1,10 +1,5 @@
 import { z } from 'zod';
-
-const optionalUrl = z
-  .string()
-  .trim()
-  .url('Must be a valid URL')
-  .or(z.literal(''));
+import { optionalImagePathOrUrlSchema } from '../../lib/validation';
 
 export const campFormSchema = z
   .object({
@@ -18,8 +13,8 @@ export const campFormSchema = z
     endDate: z.string().trim().min(1, 'End date is required'),
     location: z.string().trim().optional(),
     description: z.string().trim().optional(),
-    logoUrl: optionalUrl,
-    coverImageUrl: optionalUrl,
+    logoUrl: optionalImagePathOrUrlSchema,
+    coverImageUrl: optionalImagePathOrUrlSchema,
     status: z.enum(['DRAFT', 'ACTIVE', 'FINISHED']).optional(),
   })
   .refine(

@@ -1,0 +1,67 @@
+[
+  {
+    "id": "team-token-black",
+    "label": "Black",
+    "url": "/assets/team_token/black.png"
+  },
+  {
+    "id": "team-token-bull",
+    "label": "Bull",
+    "url": "/assets/team_token/bull.png"
+  },
+  {
+    "id": "team-token-chimera",
+    "label": "Chimera",
+    "url": "/assets/team_token/chimera.png"
+  },
+  {
+    "id": "team-token-dragon",
+    "label": "Dragon",
+    "url": "/assets/team_token/dragon.png"
+  },
+  {
+    "id": "team-token-eagle",
+    "label": "Eagle",
+    "url": "/assets/team_token/eagle.png"
+  },
+  {
+    "id": "team-token-green",
+    "label": "Green",
+    "url": "/assets/team_token/green.png"
+  },
+  {
+    "id": "team-token-griffon",
+    "label": "Griffon",
+    "url": "/assets/team_token/griffon.png"
+  },
+  {
+    "id": "team-token-lion",
+    "label": "Lion",
+    "url": "/assets/team_token/lion.png"
+  },
+  {
+    "id": "team-token-minotaur",
+    "label": "Minotaur",
+    "url": "/assets/team_token/minotaur.png"
+  },
+  {
+    "id": "team-token-ram",
+    "label": "Ram",
+    "url": "/assets/team_token/ram.png"
+  },
+  {
+    "id": "team-token-red",
+    "label": "Red",
+    "url": "/assets/team_token/red.png"
+  },
+  {
+    "id": "team-token-werwolf",
+    "label": "Werwolf",
+    "url": "/assets/team_token/werwolf.png"
+  },
+  {
+    "id": "team-token-white",
+    "label": "White",
+    "url": "/assets/team_token/white.png"
+  }
+]

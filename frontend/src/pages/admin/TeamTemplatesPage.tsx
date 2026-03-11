@@ -6,7 +6,9 @@ import { SectionCard } from '../../components/cards/SectionCard';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
+import { AssetPicker } from '../../components/ui/AssetPicker';
 import { Badge } from '../../components/ui/Badge';
+import { ModalDrawer } from '../../components/ui/ModalDrawer';
 import type { TeamTemplate, TeamTemplateInput } from '../../api/team-templates.api';
 import { ApiClientError } from '../../lib/errors';
 import { useCampTypesQuery } from '../../features/camp-types/use-camp-types-query';
@@ -101,19 +103,16 @@ function TeamTemplateForm({
   }, [form, mode]);
 
   const submitLabel = mode.kind === 'create' ? 'Create Team Template' : 'Save Changes';
+  const selectedColor = form.watch('color')?.trim() || '#1E293B';
 
   return (
-    <SectionCard
-      title={mode.kind === 'create' ? 'Create Team Template' : `Edit: ${mode.teamTemplate.name}`}
-      description="Manage template details for a selected camp type."
+    <form
+      className="space-y-4"
+      onSubmit={form.handleSubmit(async (values) => {
+        await onSubmit(toPayload(values));
+      })}
+      noValidate
     >
-      <form
-        className="space-y-4"
-        onSubmit={form.handleSubmit(async (values) => {
-          await onSubmit(toPayload(values));
-        })}
-        noValidate
-      >
         <div>
           <label htmlFor="campTypeId" className="mb-1 block text-sm font-medium text-slate-700">
             Camp Type
@@ -168,56 +167,80 @@ function TeamTemplateForm({
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="color" className="mb-1 block text-sm font-medium text-slate-700">
-              Color (hex)
-            </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="colorHex" className="mb-1 block text-sm font-medium text-slate-700">
+            Color
+          </label>
+          <div className="flex items-center gap-2">
             <input
-              id="color"
+              id="colorPicker"
+              type="color"
+              value={/^#[0-9A-Fa-f]{6}$/.test(selectedColor) ? selectedColor : '#1E293B'}
+              onChange={(event) => {
+                form.setValue('color', event.target.value.toUpperCase(), {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
+              className="h-10 w-12 cursor-pointer rounded border border-slate-300 bg-white p-1"
+            />
+            <input
+              id="colorHex"
               placeholder="#1E293B"
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
               {...form.register('color')}
             />
-            {form.formState.errors.color ? (
-              <p className="mt-1 text-sm text-red-600">{form.formState.errors.color.message}</p>
-            ) : null}
           </div>
+          {form.formState.errors.color ? (
+            <p className="mt-1 text-sm text-red-600">{form.formState.errors.color.message}</p>
+          ) : null}
+        </div>
 
-          <div>
-            <label htmlFor="logoUrl" className="mb-1 block text-sm font-medium text-slate-700">
-              Logo URL
-            </label>
-            <input
-              id="logoUrl"
-              placeholder="https://..."
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
-              {...form.register('logoUrl')}
+        <div>
+          <label htmlFor="logoUrl" className="mb-1 block text-sm font-medium text-slate-700">
+            Logo URL
+          </label>
+          <input
+            id="logoUrl"
+            placeholder="https://..."
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
+            {...form.register('logoUrl')}
+          />
+          {form.formState.errors.logoUrl ? (
+            <p className="mt-1 text-sm text-red-600">{form.formState.errors.logoUrl.message}</p>
+          ) : null}
+
+          <div className="mt-3">
+            <AssetPicker
+              manifest="team-tokens"
+              title="Or choose from team tokens"
+              selectedUrl={form.watch('logoUrl') ?? ''}
+              onSelect={(url) => {
+                form.setValue('logoUrl', url, { shouldValidate: true, shouldDirty: true });
+              }}
             />
-            {form.formState.errors.logoUrl ? (
-              <p className="mt-1 text-sm text-red-600">{form.formState.errors.logoUrl.message}</p>
-            ) : null}
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Saving...' : submitLabel}
-          </button>
-        </div>
-      </form>
-    </SectionCard>
+      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Saving...' : submitLabel}
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -323,28 +346,40 @@ export function TeamTemplatesPage() {
         </div>
       ) : null}
 
-      {formMode ? (
-        <TeamTemplateForm
-          mode={formMode}
-          campTypeOptions={(campTypesQuery.data ?? []).map((campType) => ({
-            id: campType.id,
-            name: campType.name,
-          }))}
-          isCampTypesLoading={campTypesQuery.isLoading}
-          isSubmitting={isMutating}
-          onCancel={() => {
-            setFormMode(null);
-          }}
-          onSubmit={async (payload) => {
-            if (formMode.kind === 'create') {
-              await handleCreate(payload);
-              return;
-            }
+      <ModalDrawer
+        open={Boolean(formMode)}
+        title={
+          formMode?.kind === 'create'
+            ? 'Create Team Template'
+            : `Edit: ${formMode?.teamTemplate.name ?? ''}`
+        }
+        onClose={() => {
+          setFormMode(null);
+        }}
+      >
+        {formMode ? (
+          <TeamTemplateForm
+            mode={formMode}
+            campTypeOptions={(campTypesQuery.data ?? []).map((campType) => ({
+              id: campType.id,
+              name: campType.name,
+            }))}
+            isCampTypesLoading={campTypesQuery.isLoading}
+            isSubmitting={isMutating}
+            onCancel={() => {
+              setFormMode(null);
+            }}
+            onSubmit={async (payload) => {
+              if (formMode.kind === 'create') {
+                await handleCreate(payload);
+                return;
+              }
 
-            await handleEdit(formMode.teamTemplate.id, payload);
-          }}
-        />
-      ) : null}
+              await handleEdit(formMode.teamTemplate.id, payload);
+            }}
+          />
+        ) : null}
+      </ModalDrawer>
 
       <SectionCard title="Filter" description="Narrow templates by camp type.">
         <label htmlFor="campTypeFilter" className="mb-1 block text-sm font-medium text-slate-700">

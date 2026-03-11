@@ -1,0 +1,632 @@
+﻿[
+    {
+        "id":  "avatar-1",
+        "label":  "Avatar 1",
+        "url":  "/assets/avatars/1.png"
+    },
+    {
+        "id":  "avatar-2",
+        "label":  "Avatar 2",
+        "url":  "/assets/avatars/2.png"
+    },
+    {
+        "id":  "avatar-3",
+        "label":  "Avatar 3",
+        "url":  "/assets/avatars/3.png"
+    },
+    {
+        "id":  "avatar-4",
+        "label":  "Avatar 4",
+        "url":  "/assets/avatars/4.png"
+    },
+    {
+        "id":  "avatar-5",
+        "label":  "Avatar 5",
+        "url":  "/assets/avatars/5.png"
+    },
+    {
+        "id":  "avatar-6",
+        "label":  "Avatar 6",
+        "url":  "/assets/avatars/6.png"
+    },
+    {
+        "id":  "avatar-7",
+        "label":  "Avatar 7",
+        "url":  "/assets/avatars/7.png"
+    },
+    {
+        "id":  "avatar-8",
+        "label":  "Avatar 8",
+        "url":  "/assets/avatars/8.png"
+    },
+    {
+        "id":  "avatar-9",
+        "label":  "Avatar 9",
+        "url":  "/assets/avatars/9.png"
+    },
+    {
+        "id":  "avatar-10",
+        "label":  "Avatar 10",
+        "url":  "/assets/avatars/10.png"
+    },
+    {
+        "id":  "avatar-11",
+        "label":  "Avatar 11",
+        "url":  "/assets/avatars/11.png"
+    },
+    {
+        "id":  "avatar-12",
+        "label":  "Avatar 12",
+        "url":  "/assets/avatars/12.png"
+    },
+    {
+        "id":  "avatar-13",
+        "label":  "Avatar 13",
+        "url":  "/assets/avatars/13.png"
+    },
+    {
+        "id":  "avatar-14",
+        "label":  "Avatar 14",
+        "url":  "/assets/avatars/14.png"
+    },
+    {
+        "id":  "avatar-15",
+        "label":  "Avatar 15",
+        "url":  "/assets/avatars/15.png"
+    },
+    {
+        "id":  "avatar-16",
+        "label":  "Avatar 16",
+        "url":  "/assets/avatars/16.png"
+    },
+    {
+        "id":  "avatar-17",
+        "label":  "Avatar 17",
+        "url":  "/assets/avatars/17.png"
+    },
+    {
+        "id":  "avatar-18",
+        "label":  "Avatar 18",
+        "url":  "/assets/avatars/18.png"
+    },
+    {
+        "id":  "avatar-19",
+        "label":  "Avatar 19",
+        "url":  "/assets/avatars/19.png"
+    },
+    {
+        "id":  "avatar-20",
+        "label":  "Avatar 20",
+        "url":  "/assets/avatars/20.png"
+    },
+    {
+        "id":  "avatar-21",
+        "label":  "Avatar 21",
+        "url":  "/assets/avatars/21.png"
+    },
+    {
+        "id":  "avatar-22",
+        "label":  "Avatar 22",
+        "url":  "/assets/avatars/22.png"
+    },
+    {
+        "id":  "avatar-23",
+        "label":  "Avatar 23",
+        "url":  "/assets/avatars/23.png"
+    },
+    {
+        "id":  "avatar-24",
+        "label":  "Avatar 24",
+        "url":  "/assets/avatars/24.png"
+    },
+    {
+        "id":  "avatar-25",
+        "label":  "Avatar 25",
+        "url":  "/assets/avatars/25.png"
+    },
+    {
+        "id":  "avatar-26",
+        "label":  "Avatar 26",
+        "url":  "/assets/avatars/26.png"
+    },
+    {
+        "id":  "avatar-27",
+        "label":  "Avatar 27",
+        "url":  "/assets/avatars/27.png"
+    },
+    {
+        "id":  "avatar-28",
+        "label":  "Avatar 28",
+        "url":  "/assets/avatars/28.png"
+    },
+    {
+        "id":  "avatar-29",
+        "label":  "Avatar 29",
+        "url":  "/assets/avatars/29.png"
+    },
+    {
+        "id":  "avatar-30",
+        "label":  "Avatar 30",
+        "url":  "/assets/avatars/30.png"
+    },
+    {
+        "id":  "avatar-31",
+        "label":  "Avatar 31",
+        "url":  "/assets/avatars/31.png"
+    },
+    {
+        "id":  "avatar-32",
+        "label":  "Avatar 32",
+        "url":  "/assets/avatars/32.png"
+    },
+    {
+        "id":  "avatar-33",
+        "label":  "Avatar 33",
+        "url":  "/assets/avatars/33.png"
+    },
+    {
+        "id":  "avatar-34",
+        "label":  "Avatar 34",
+        "url":  "/assets/avatars/34.png"
+    },
+    {
+        "id":  "avatar-35",
+        "label":  "Avatar 35",
+        "url":  "/assets/avatars/35.png"
+    },
+    {
+        "id":  "avatar-36",
+        "label":  "Avatar 36",
+        "url":  "/assets/avatars/36.png"
+    },
+    {
+        "id":  "avatar-37",
+        "label":  "Avatar 37",
+        "url":  "/assets/avatars/37.png"
+    },
+    {
+        "id":  "avatar-38",
+        "label":  "Avatar 38",
+        "url":  "/assets/avatars/38.png"
+    },
+    {
+        "id":  "avatar-39",
+        "label":  "Avatar 39",
+        "url":  "/assets/avatars/39.png"
+    },
+    {
+        "id":  "avatar-40",
+        "label":  "Avatar 40",
+        "url":  "/assets/avatars/40.png"
+    },
+    {
+        "id":  "avatar-41",
+        "label":  "Avatar 41",
+        "url":  "/assets/avatars/41.png"
+    },
+    {
+        "id":  "avatar-42",
+        "label":  "Avatar 42",
+        "url":  "/assets/avatars/42.png"
+    },
+    {
+        "id":  "avatar-43",
+        "label":  "Avatar 43",
+        "url":  "/assets/avatars/43.png"
+    },
+    {
+        "id":  "avatar-44",
+        "label":  "Avatar 44",
+        "url":  "/assets/avatars/44.png"
+    },
+    {
+        "id":  "avatar-45",
+        "label":  "Avatar 45",
+        "url":  "/assets/avatars/45.png"
+    },
+    {
+        "id":  "avatar-46",
+        "label":  "Avatar 46",
+        "url":  "/assets/avatars/46.png"
+    },
+    {
+        "id":  "avatar-47",
+        "label":  "Avatar 47",
+        "url":  "/assets/avatars/47.png"
+    },
+    {
+        "id":  "avatar-48",
+        "label":  "Avatar 48",
+        "url":  "/assets/avatars/48.png"
+    },
+    {
+        "id":  "avatar-49",
+        "label":  "Avatar 49",
+        "url":  "/assets/avatars/49.png"
+    },
+    {
+        "id":  "avatar-50",
+        "label":  "Avatar 50",
+        "url":  "/assets/avatars/50.png"
+    },
+    {
+        "id":  "avatar-51",
+        "label":  "Avatar 51",
+        "url":  "/assets/avatars/51.png"
+    },
+    {
+        "id":  "avatar-52",
+        "label":  "Avatar 52",
+        "url":  "/assets/avatars/52.png"
+    },
+    {
+        "id":  "avatar-53",
+        "label":  "Avatar 53",
+        "url":  "/assets/avatars/53.png"
+    },
+    {
+        "id":  "avatar-54",
+        "label":  "Avatar 54",
+        "url":  "/assets/avatars/54.png"
+    },
+    {
+        "id":  "avatar-55",
+        "label":  "Avatar 55",
+        "url":  "/assets/avatars/55.png"
+    },
+    {
+        "id":  "avatar-56",
+        "label":  "Avatar 56",
+        "url":  "/assets/avatars/56.png"
+    },
+    {
+        "id":  "avatar-57",
+        "label":  "Avatar 57",
+        "url":  "/assets/avatars/57.png"
+    },
+    {
+        "id":  "avatar-58",
+        "label":  "Avatar 58",
+        "url":  "/assets/avatars/58.png"
+    },
+    {
+        "id":  "avatar-59",
+        "label":  "Avatar 59",
+        "url":  "/assets/avatars/59.png"
+    },
+    {
+        "id":  "avatar-60",
+        "label":  "Avatar 60",
+        "url":  "/assets/avatars/60.png"
+    },
+    {
+        "id":  "avatar-61",
+        "label":  "Avatar 61",
+        "url":  "/assets/avatars/61.png"
+    },
+    {
+        "id":  "avatar-62",
+        "label":  "Avatar 62",
+        "url":  "/assets/avatars/62.png"
+    },
+    {
+        "id":  "avatar-63",
+        "label":  "Avatar 63",
+        "url":  "/assets/avatars/63.png"
+    },
+    {
+        "id":  "avatar-64",
+        "label":  "Avatar 64",
+        "url":  "/assets/avatars/64.png"
+    },
+    {
+        "id":  "avatar-65",
+        "label":  "Avatar 65",
+        "url":  "/assets/avatars/65.png"
+    },
+    {
+        "id":  "avatar-66",
+        "label":  "Avatar 66",
+        "url":  "/assets/avatars/66.png"
+    },
+    {
+        "id":  "avatar-67",
+        "label":  "Avatar 67",
+        "url":  "/assets/avatars/67.png"
+    },
+    {
+        "id":  "avatar-68",
+        "label":  "Avatar 68",
+        "url":  "/assets/avatars/68.png"
+    },
+    {
+        "id":  "avatar-69",
+        "label":  "Avatar 69",
+        "url":  "/assets/avatars/69.png"
+    },
+    {
+        "id":  "avatar-70",
+        "label":  "Avatar 70",
+        "url":  "/assets/avatars/70.png"
+    },
+    {
+        "id":  "avatar-71",
+        "label":  "Avatar 71",
+        "url":  "/assets/avatars/71.png"
+    },
+    {
+        "id":  "avatar-72",
+        "label":  "Avatar 72",
+        "url":  "/assets/avatars/72.png"
+    },
+    {
+        "id":  "avatar-73",
+        "label":  "Avatar 73",
+        "url":  "/assets/avatars/73.png"
+    },
+    {
+        "id":  "avatar-74",
+        "label":  "Avatar 74",
+        "url":  "/assets/avatars/74.png"
+    },
+    {
+        "id":  "avatar-75",
+        "label":  "Avatar 75",
+        "url":  "/assets/avatars/75.png"
+    },
+    {
+        "id":  "avatar-76",
+        "label":  "Avatar 76",
+        "url":  "/assets/avatars/76.png"
+    },
+    {
+        "id":  "avatar-77",
+        "label":  "Avatar 77",
+        "url":  "/assets/avatars/77.png"
+    },
+    {
+        "id":  "avatar-78",
+        "label":  "Avatar 78",
+        "url":  "/assets/avatars/78.png"
+    },
+    {
+        "id":  "avatar-79",
+        "label":  "Avatar 79",
+        "url":  "/assets/avatars/79.png"
+    },
+    {
+        "id":  "avatar-80",
+        "label":  "Avatar 80",
+        "url":  "/assets/avatars/80.png"
+    },
+    {
+        "id":  "avatar-81",
+        "label":  "Avatar 81",
+        "url":  "/assets/avatars/81.png"
+    },
+    {
+        "id":  "avatar-82",
+        "label":  "Avatar 82",
+        "url":  "/assets/avatars/82.png"
+    },
+    {
+        "id":  "avatar-83",
+        "label":  "Avatar 83",
+        "url":  "/assets/avatars/83.png"
+    },
+    {
+        "id":  "avatar-84",
+        "label":  "Avatar 84",
+        "url":  "/assets/avatars/84.png"
+    },
+    {
+        "id":  "avatar-85",
+        "label":  "Avatar 85",
+        "url":  "/assets/avatars/85.png"
+    },
+    {
+        "id":  "avatar-86",
+        "label":  "Avatar 86",
+        "url":  "/assets/avatars/86.png"
+    },
+    {
+        "id":  "avatar-87",
+        "label":  "Avatar 87",
+        "url":  "/assets/avatars/87.png"
+    },
+    {
+        "id":  "avatar-88",
+        "label":  "Avatar 88",
+        "url":  "/assets/avatars/88.png"
+    },
+    {
+        "id":  "avatar-89",
+        "label":  "Avatar 89",
+        "url":  "/assets/avatars/89.png"
+    },
+    {
+        "id":  "avatar-90",
+        "label":  "Avatar 90",
+        "url":  "/assets/avatars/90.png"
+    },
+    {
+        "id":  "avatar-91",
+        "label":  "Avatar 91",
+        "url":  "/assets/avatars/91.png"
+    },
+    {
+        "id":  "avatar-92",
+        "label":  "Avatar 92",
+        "url":  "/assets/avatars/92.png"
+    },
+    {
+        "id":  "avatar-93",
+        "label":  "Avatar 93",
+        "url":  "/assets/avatars/93.png"
+    },
+    {
+        "id":  "avatar-94",
+        "label":  "Avatar 94",
+        "url":  "/assets/avatars/94.png"
+    },
+    {
+        "id":  "avatar-95",
+        "label":  "Avatar 95",
+        "url":  "/assets/avatars/95.png"
+    },
+    {
+        "id":  "avatar-96",
+        "label":  "Avatar 96",
+        "url":  "/assets/avatars/96.png"
+    },
+    {
+        "id":  "avatar-97",
+        "label":  "Avatar 97",
+        "url":  "/assets/avatars/97.png"
+    },
+    {
+        "id":  "avatar-98",
+        "label":  "Avatar 98",
+        "url":  "/assets/avatars/98.png"
+    },
+    {
+        "id":  "avatar-99",
+        "label":  "Avatar 99",
+        "url":  "/assets/avatars/99.png"
+    },
+    {
+        "id":  "avatar-100",
+        "label":  "Avatar 100",
+        "url":  "/assets/avatars/100.png"
+    },
+    {
+        "id":  "avatar-101",
+        "label":  "Avatar 101",
+        "url":  "/assets/avatars/101.png"
+    },
+    {
+        "id":  "avatar-102",
+        "label":  "Avatar 102",
+        "url":  "/assets/avatars/102.png"
+    },
+    {
+        "id":  "avatar-103",
+        "label":  "Avatar 103",
+        "url":  "/assets/avatars/103.png"
+    },
+    {
+        "id":  "avatar-104",
+        "label":  "Avatar 104",
+        "url":  "/assets/avatars/104.png"
+    },
+    {
+        "id":  "avatar-105",
+        "label":  "Avatar 105",
+        "url":  "/assets/avatars/105.png"
+    },
+    {
+        "id":  "avatar-106",
+        "label":  "Avatar 106",
+        "url":  "/assets/avatars/106.png"
+    },
+    {
+        "id":  "avatar-107",
+        "label":  "Avatar 107",
+        "url":  "/assets/avatars/107.png"
+    },
+    {
+        "id":  "avatar-108",
+        "label":  "Avatar 108",
+        "url":  "/assets/avatars/108.png"
+    },
+    {
+        "id":  "avatar-109",
+        "label":  "Avatar 109",
+        "url":  "/assets/avatars/109.png"
+    },
+    {
+        "id":  "avatar-110",
+        "label":  "Avatar 110",
+        "url":  "/assets/avatars/110.png"
+    },
+    {
+        "id":  "avatar-111",
+        "label":  "Avatar 111",
+        "url":  "/assets/avatars/111.png"
+    },
+    {
+        "id":  "avatar-112",
+        "label":  "Avatar 112",
+        "url":  "/assets/avatars/112.png"
+    },
+    {
+        "id":  "avatar-113",
+        "label":  "Avatar 113",
+        "url":  "/assets/avatars/113.png"
+    },
+    {
+        "id":  "avatar-114",
+        "label":  "Avatar 114",
+        "url":  "/assets/avatars/114.png"
+    },
+    {
+        "id":  "avatar-115",
+        "label":  "Avatar 115",
+        "url":  "/assets/avatars/115.png"
+    },
+    {
+        "id":  "avatar-116",
+        "label":  "Avatar 116",
+        "url":  "/assets/avatars/116.png"
+    },
+    {
+        "id":  "avatar-117",
+        "label":  "Avatar 117",
+        "url":  "/assets/avatars/117.png"
+    },
+    {
+        "id":  "avatar-118",
+        "label":  "Avatar 118",
+        "url":  "/assets/avatars/118.png"
+    },
+    {
+        "id":  "avatar-119",
+        "label":  "Avatar 119",
+        "url":  "/assets/avatars/119.png"
+    },
+    {
+        "id":  "avatar-120",
+        "label":  "Avatar 120",
+        "url":  "/assets/avatars/120.png"
+    },
+    {
+        "id":  "avatar-121",
+        "label":  "Avatar 121",
+        "url":  "/assets/avatars/121.png"
+    },
+    {
+        "id":  "avatar-122",
+        "label":  "Avatar 122",
+        "url":  "/assets/avatars/122.png"
+    },
+    {
+        "id":  "avatar-123",
+        "label":  "Avatar 123",
+        "url":  "/assets/avatars/123.png"
+    },
+    {
+        "id":  "avatar-124",
+        "label":  "Avatar 124",
+        "url":  "/assets/avatars/124.png"
+    },
+    {
+        "id":  "avatar-125",
+        "label":  "Avatar 125",
+        "url":  "/assets/avatars/125.png"
+    },
+    {
+        "id":  "avatar-126",
+        "label":  "Avatar 126",
+        "url":  "/assets/avatars/126.png"
+    }
+]

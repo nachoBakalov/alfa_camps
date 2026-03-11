@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalImagePathOrUrlSchema } from '../../lib/validation';
 
 const optionalColor = z
   .string()
@@ -6,17 +7,11 @@ const optionalColor = z
   .regex(/^$|^#[0-9A-Fa-f]{6}$/, 'Use a hex color like #1E293B')
   .or(z.literal(''));
 
-const optionalUrl = z
-  .string()
-  .trim()
-  .url('Must be a valid URL')
-  .or(z.literal(''));
-
 export const teamTemplateFormSchema = z.object({
   campTypeId: z.string().trim().min(1, 'Camp type is required'),
   name: z.string().trim().min(1, 'Name is required'),
   color: optionalColor,
-  logoUrl: optionalUrl,
+  logoUrl: optionalImagePathOrUrlSchema,
   sortOrder: z
     .string()
     .trim()

@@ -2,6 +2,8 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { QueryFailedError } from 'typeorm';
+import { Camp } from '../camps/entities/camp.entity';
+import { TeamTemplate } from '../team-templates/entities/team-template.entity';
 import { CampTypesService } from './camp-types.service';
 import { CampType } from './entities/camp-type.entity';
 
@@ -10,6 +12,7 @@ type MockRepository = {
   save: jest.Mock;
   find: jest.Mock;
   findOne: jest.Mock;
+  count: jest.Mock;
   merge: jest.Mock;
   remove: jest.Mock;
 };
@@ -19,6 +22,7 @@ const createRepositoryMock = (): MockRepository => ({
   save: jest.fn(),
   find: jest.fn(),
   findOne: jest.fn(),
+  count: jest.fn(),
   merge: jest.fn(),
   remove: jest.fn(),
 });
@@ -29,9 +33,16 @@ const createUniqueError = (constraint: string): QueryFailedError =>
     constraint,
   } as unknown as Error);
 
+const createForeignKeyError = (): QueryFailedError =>
+  new QueryFailedError('QUERY', [], {
+    code: '23503',
+  } as unknown as Error);
+
 describe('CampTypesService', () => {
   let service: CampTypesService;
-  let repository: MockRepository;
+  let campTypesRepository: MockRepository;
+  let teamTemplatesRepository: MockRepository;
+  let campsRepository: MockRepository;
 
   const campType: CampType = {
     id: 'camp-type-id',
@@ -47,14 +58,24 @@ describe('CampTypesService', () => {
   };
 
   beforeEach(async () => {
-    repository = createRepositoryMock();
+    campTypesRepository = createRepositoryMock();
+    teamTemplatesRepository = createRepositoryMock();
+    campsRepository = createRepositoryMock();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CampTypesService,
         {
           provide: getRepositoryToken(CampType),
-          useValue: repository,
+          useValue: campTypesRepository,
+        },
+        {
+          provide: getRepositoryToken(TeamTemplate),
+          useValue: teamTemplatesRepository,
+        },
+        {
+          provide: getRepositoryToken(Camp),
+          useValue: campsRepository,
         },
       ],
     }).compile();
@@ -63,8 +84,8 @@ describe('CampTypesService', () => {
   });
 
   it('create() success', async () => {
-    repository.create.mockReturnValue(campType);
-    repository.save.mockResolvedValue(campType);
+    campTypesRepository.create.mockReturnValue(campType);
+    campTypesRepository.save.mockResolvedValue(campType);
 
     const result = await service.create({
       name: 'Camp Type',
@@ -74,14 +95,14 @@ describe('CampTypesService', () => {
       coverImageUrl: '/cover.jpg',
     });
 
-    expect(repository.create).toHaveBeenCalled();
-    expect(repository.save).toHaveBeenCalledWith(campType);
+    expect(campTypesRepository.create).toHaveBeenCalled();
+    expect(campTypesRepository.save).toHaveBeenCalledWith(campType);
     expect(result).toEqual(campType);
   });
 
   it('create() duplicate name conflict handling', async () => {
-    repository.create.mockReturnValue(campType);
-    repository.save.mockRejectedValue(createUniqueError('UQ_camp_types_name'));
+    campTypesRepository.create.mockReturnValue(campType);
+    campTypesRepository.save.mockRejectedValue(createUniqueError('UQ_camp_types_name'));
 
     await expect(
       service.create({
@@ -92,8 +113,8 @@ describe('CampTypesService', () => {
   });
 
   it('create() duplicate slug conflict handling', async () => {
-    repository.create.mockReturnValue(campType);
-    repository.save.mockRejectedValue(createUniqueError('UQ_camp_types_slug'));
+    campTypesRepository.create.mockReturnValue(campType);
+    campTypesRepository.save.mockRejectedValue(createUniqueError('UQ_camp_types_slug'));
 
     await expect(
       service.create({
@@ -104,11 +125,11 @@ describe('CampTypesService', () => {
   });
 
   it('findAll() returns list', async () => {
-    repository.find.mockResolvedValue([campType]);
+    campTypesRepository.find.mockResolvedValue([campType]);
 
     const result = await service.findAll();
 
-    expect(repository.find).toHaveBeenCalledWith({
+    expect(campTypesRepository.find).toHaveBeenCalledWith({
       order: {
         createdAt: 'DESC',
       },
@@ -117,16 +138,16 @@ describe('CampTypesService', () => {
   });
 
   it('findOne() success', async () => {
-    repository.findOne.mockResolvedValue(campType);
+    campTypesRepository.findOne.mockResolvedValue(campType);
 
     const result = await service.findOne(campType.id);
 
-    expect(repository.findOne).toHaveBeenCalledWith({ where: { id: campType.id } });
+    expect(campTypesRepository.findOne).toHaveBeenCalledWith({ where: { id: campType.id } });
     expect(result).toEqual(campType);
   });
 
   it('findOne() not found', async () => {
-    repository.findOne.mockResolvedValue(null);
+    campTypesRepository.findOne.mockResolvedValue(null);
 
     await expect(service.findOne('missing-id')).rejects.toThrow(NotFoundException);
   });
@@ -135,19 +156,19 @@ describe('CampTypesService', () => {
     const payload = { name: 'Updated Name' };
     const updatedCampType = { ...campType, ...payload };
 
-    repository.findOne.mockResolvedValue(campType);
-    repository.merge.mockReturnValue(updatedCampType);
-    repository.save.mockResolvedValue(updatedCampType);
+    campTypesRepository.findOne.mockResolvedValue(campType);
+    campTypesRepository.merge.mockReturnValue(updatedCampType);
+    campTypesRepository.save.mockResolvedValue(updatedCampType);
 
     const result = await service.update(campType.id, payload);
 
-    expect(repository.merge).toHaveBeenCalledWith(campType, payload);
-    expect(repository.save).toHaveBeenCalledWith(updatedCampType);
+    expect(campTypesRepository.merge).toHaveBeenCalledWith(campType, payload);
+    expect(campTypesRepository.save).toHaveBeenCalledWith(updatedCampType);
     expect(result).toEqual(updatedCampType);
   });
 
   it('update() not found', async () => {
-    repository.findOne.mockResolvedValue(null);
+    campTypesRepository.findOne.mockResolvedValue(null);
 
     await expect(service.update('missing-id', { name: 'Updated' })).rejects.toThrow(
       NotFoundException,
@@ -155,9 +176,9 @@ describe('CampTypesService', () => {
   });
 
   it('update() duplicate unique field conflict handling', async () => {
-    repository.findOne.mockResolvedValue(campType);
-    repository.merge.mockReturnValue(campType);
-    repository.save.mockRejectedValue(createUniqueError('UQ_camp_types_slug'));
+    campTypesRepository.findOne.mockResolvedValue(campType);
+    campTypesRepository.merge.mockReturnValue(campType);
+    campTypesRepository.save.mockRejectedValue(createUniqueError('UQ_camp_types_slug'));
 
     await expect(service.update(campType.id, { slug: 'duplicate' })).rejects.toThrow(
       new ConflictException('Camp type slug already exists'),
@@ -165,17 +186,52 @@ describe('CampTypesService', () => {
   });
 
   it('remove() success', async () => {
-    repository.findOne.mockResolvedValue(campType);
-    repository.remove.mockResolvedValue(campType);
+    campTypesRepository.findOne.mockResolvedValue(campType);
+    teamTemplatesRepository.count.mockResolvedValue(0);
+    campsRepository.count.mockResolvedValue(0);
+    campTypesRepository.remove.mockResolvedValue(campType);
 
     await service.remove(campType.id);
 
-    expect(repository.remove).toHaveBeenCalledWith(campType);
+    expect(campTypesRepository.remove).toHaveBeenCalledWith(campType);
   });
 
   it('remove() not found', async () => {
-    repository.findOne.mockResolvedValue(null);
+    campTypesRepository.findOne.mockResolvedValue(null);
 
     await expect(service.remove('missing-id')).rejects.toThrow(NotFoundException);
+  });
+
+  it('remove() with existing team templates returns conflict', async () => {
+    campTypesRepository.findOne.mockResolvedValue(campType);
+    teamTemplatesRepository.count.mockResolvedValue(1);
+    campsRepository.count.mockResolvedValue(0);
+
+    await expect(service.remove(campType.id)).rejects.toThrow(
+      new ConflictException('Cannot delete camp type because it is referenced by camps or team templates'),
+    );
+    expect(campTypesRepository.remove).not.toHaveBeenCalled();
+  });
+
+  it('remove() with existing camps returns conflict', async () => {
+    campTypesRepository.findOne.mockResolvedValue(campType);
+    teamTemplatesRepository.count.mockResolvedValue(0);
+    campsRepository.count.mockResolvedValue(2);
+
+    await expect(service.remove(campType.id)).rejects.toThrow(
+      new ConflictException('Cannot delete camp type because it is referenced by camps or team templates'),
+    );
+    expect(campTypesRepository.remove).not.toHaveBeenCalled();
+  });
+
+  it('remove() foreign key violation fallback returns conflict', async () => {
+    campTypesRepository.findOne.mockResolvedValue(campType);
+    teamTemplatesRepository.count.mockResolvedValue(0);
+    campsRepository.count.mockResolvedValue(0);
+    campTypesRepository.remove.mockRejectedValue(createForeignKeyError());
+
+    await expect(service.remove(campType.id)).rejects.toThrow(
+      new ConflictException('Cannot delete camp type because it is referenced by camps or team templates'),
+    );
   });
 });

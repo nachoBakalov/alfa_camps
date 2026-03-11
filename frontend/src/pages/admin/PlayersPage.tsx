@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import type { Player, PlayerInput } from '../../api/players.api';
 import { Badge } from '../../components/ui/Badge';
+import { AssetPicker } from '../../components/ui/AssetPicker';
+import { ModalDrawer } from '../../components/ui/ModalDrawer';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
@@ -79,6 +81,7 @@ function PlayerForm({
   onCancel: () => void;
   onSubmit: (payload: PlayerInput) => Promise<void>;
 }) {
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const form = useForm<PlayerFormValues>({
     resolver: zodResolver(playerFormSchema),
     defaultValues: {
@@ -103,10 +106,7 @@ function PlayerForm({
   const submitLabel = mode.kind === 'create' ? 'Create Player' : 'Save Changes';
 
   return (
-    <SectionCard
-      title={mode.kind === 'create' ? 'Create Player' : `Edit: ${mode.player.firstName}`}
-      description="Manage basic player profile fields."
-    >
+    <>
       <form
         className="space-y-4"
         onSubmit={form.handleSubmit(async (values) => {
@@ -166,6 +166,19 @@ function PlayerForm({
             {form.formState.errors.avatarUrl ? (
               <p className="mt-1 text-sm text-red-600">{form.formState.errors.avatarUrl.message}</p>
             ) : null}
+
+            <div className="mt-3 flex items-center gap-3">
+              <PlayerAvatar src={form.watch('avatarUrl') || null} fullName={form.watch('firstName') || 'Player'} />
+              <button
+                type="button"
+                onClick={() => {
+                  setAvatarPickerOpen(true);
+                }}
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Choose Avatar
+              </button>
+            </div>
           </div>
         </div>
 
@@ -195,7 +208,27 @@ function PlayerForm({
           </button>
         </div>
       </form>
-    </SectionCard>
+
+      <ModalDrawer
+        open={avatarPickerOpen}
+        title="Choose Avatar"
+        onClose={() => {
+          setAvatarPickerOpen(false);
+        }}
+      >
+        <div className="max-h-[70vh] overflow-y-auto pr-1">
+          <AssetPicker
+            manifest="avatars"
+            selectedUrl={form.watch('avatarUrl') ?? ''}
+            onSelect={(url) => {
+              form.setValue('avatarUrl', url, { shouldValidate: true, shouldDirty: true });
+              setAvatarPickerOpen(false);
+            }}
+            title="Select one avatar"
+          />
+        </div>
+      </ModalDrawer>
+    </>
   );
 }
 
@@ -301,23 +334,31 @@ export function PlayersPage() {
         </div>
       ) : null}
 
-      {formMode ? (
-        <PlayerForm
-          mode={formMode}
-          isSubmitting={isMutating}
-          onCancel={() => {
-            setFormMode(null);
-          }}
-          onSubmit={async (payload) => {
-            if (formMode.kind === 'create') {
-              await handleCreate(payload);
-              return;
-            }
+      <ModalDrawer
+        open={Boolean(formMode)}
+        title={formMode?.kind === 'create' ? 'Create Player' : `Edit: ${formMode?.player.firstName ?? ''}`}
+        onClose={() => {
+          setFormMode(null);
+        }}
+      >
+        {formMode ? (
+          <PlayerForm
+            mode={formMode}
+            isSubmitting={isMutating}
+            onCancel={() => {
+              setFormMode(null);
+            }}
+            onSubmit={async (payload) => {
+              if (formMode.kind === 'create') {
+                await handleCreate(payload);
+                return;
+              }
 
-            await handleEdit(formMode.player.id, payload);
-          }}
-        />
-      ) : null}
+              await handleEdit(formMode.player.id, payload);
+            }}
+          />
+        ) : null}
+      </ModalDrawer>
 
       <SectionCard title="Search" description="Use q search to filter players.">
         <form className="flex flex-col gap-2 sm:flex-row" onSubmit={handleSearchSubmit}>

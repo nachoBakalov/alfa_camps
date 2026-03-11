@@ -1,0 +1,284 @@
+﻿[
+    {
+        "id":  "rank-challenges-1_wins_challenges",
+        "label":  "1 wins challenges",
+        "url":  "/assets/ranks/challenges/1_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  1
+    },
+    {
+        "id":  "rank-challenges-2_wins_challenges",
+        "label":  "2 wins challenges",
+        "url":  "/assets/ranks/challenges/2_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  2
+    },
+    {
+        "id":  "rank-challenges-3_wins_challenges",
+        "label":  "3 wins challenges",
+        "url":  "/assets/ranks/challenges/3_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  3
+    },
+    {
+        "id":  "rank-challenges-4_wins_challenges",
+        "label":  "4 wins challenges",
+        "url":  "/assets/ranks/challenges/4_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  4
+    },
+    {
+        "id":  "rank-challenges-5_wins_challenges",
+        "label":  "5 wins challenges",
+        "url":  "/assets/ranks/challenges/5_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  5
+    },
+    {
+        "id":  "rank-challenges-6_wins_challenges",
+        "label":  "6 wins challenges",
+        "url":  "/assets/ranks/challenges/6_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  6
+    },
+    {
+        "id":  "rank-challenges-7_wins_challenges",
+        "label":  "7 wins challenges",
+        "url":  "/assets/ranks/challenges/7_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  7
+    },
+    {
+        "id":  "rank-challenges-8_wins_challenges",
+        "label":  "8 wins challenges",
+        "url":  "/assets/ranks/challenges/8_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  8
+    },
+    {
+        "id":  "rank-challenges-9_wins_challenges",
+        "label":  "9 wins challenges",
+        "url":  "/assets/ranks/challenges/9_wins_challenges.png",
+        "category":  "challenges",
+        "threshold":  9
+    },
+    {
+        "id":  "rank-kills-1_kills",
+        "label":  "1 kills",
+        "url":  "/assets/ranks/kills/1_kills.png",
+        "category":  "kills",
+        "threshold":  1
+    },
+    {
+        "id":  "rank-kills-10_kills",
+        "label":  "10 kills",
+        "url":  "/assets/ranks/kills/10_kills.png",
+        "category":  "kills",
+        "threshold":  10
+    },
+    {
+        "id":  "rank-kills-15_kills",
+        "label":  "15 kills",
+        "url":  "/assets/ranks/kills/15_kills.png",
+        "category":  "kills",
+        "threshold":  15
+    },
+    {
+        "id":  "rank-kills-20_kills",
+        "label":  "20 kills",
+        "url":  "/assets/ranks/kills/20_kills.png",
+        "category":  "kills",
+        "threshold":  20
+    },
+    {
+        "id":  "rank-kills-25_kills",
+        "label":  "25 kills",
+        "url":  "/assets/ranks/kills/25_kills.png",
+        "category":  "kills",
+        "threshold":  25
+    },
+    {
+        "id":  "rank-kills-30_kills",
+        "label":  "30 kills",
+        "url":  "/assets/ranks/kills/30_kills.png",
+        "category":  "kills",
+        "threshold":  30
+    },
+    {
+        "id":  "rank-kills-35_kills",
+        "label":  "35 kills",
+        "url":  "/assets/ranks/kills/35_kills.png",
+        "category":  "kills",
+        "threshold":  35
+    },
+    {
+        "id":  "rank-kills-40_kills",
+        "label":  "40 kills",
+        "url":  "/assets/ranks/kills/40_kills.png",
+        "category":  "kills",
+        "threshold":  40
+    },
+    {
+        "id":  "rank-kills-5_kills",
+        "label":  "5 kills",
+        "url":  "/assets/ranks/kills/5_kills.png",
+        "category":  "kills",
+        "threshold":  5
+    },
+    {
+        "id":  "rank-mass_battles-1_wins_mass_battles",
+        "label":  "1 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/1_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  1
+    },
+    {
+        "id":  "rank-mass_battles-2_wins_mass_battles",
+        "label":  "2 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/2_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  2
+    },
+    {
+        "id":  "rank-mass_battles-3_wins_mass_battles",
+        "label":  "3 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/3_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  3
+    },
+    {
+        "id":  "rank-mass_battles-4_wins_mass_battles",
+        "label":  "4 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/4_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  4
+    },
+    {
+        "id":  "rank-mass_battles-5_wins_mass_battles",
+        "label":  "5 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/5_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  5
+    },
+    {
+        "id":  "rank-mass_battles-6_wins_mass_battles",
+        "label":  "6 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/6_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  6
+    },
+    {
+        "id":  "rank-mass_battles-7_wins_mass_battles",
+        "label":  "7 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/7_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  7
+    },
+    {
+        "id":  "rank-mass_battles-8_wins_mass_battles",
+        "label":  "8 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/8_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  8
+    },
+    {
+        "id":  "rank-mass_battles-9_wins_mass_battles",
+        "label":  "9 wins mass battles",
+        "url":  "/assets/ranks/mass_battles/9_wins_mass_battles.png",
+        "category":  "mass_battles",
+        "threshold":  9
+    },
+    {
+        "id":  "rank-medals-comando",
+        "label":  "comando",
+        "url":  "/assets/ranks/medals/comando.png",
+        "category":  "medals"
+    },
+    {
+        "id":  "rank-medals-horeey",
+        "label":  "horeey",
+        "url":  "/assets/ranks/medals/horeey.png",
+        "category":  "medals"
+    },
+    {
+        "id":  "rank-medals-ironcrest",
+        "label":  "ironcrest",
+        "url":  "/assets/ranks/medals/ironcrest.png",
+        "category":  "medals"
+    },
+    {
+        "id":  "rank-medals-lionheart",
+        "label":  "lionheart",
+        "url":  "/assets/ranks/medals/lionheart.png",
+        "category":  "medals"
+    },
+    {
+        "id":  "rank-medals-survivor",
+        "label":  "survivor",
+        "url":  "/assets/ranks/medals/survivor.png",
+        "category":  "medals"
+    },
+    {
+        "id":  "rank-survive-1_survive",
+        "label":  "1 survive",
+        "url":  "/assets/ranks/survive/1_survive.png",
+        "category":  "survive",
+        "threshold":  1
+    },
+    {
+        "id":  "rank-survive-2_survive",
+        "label":  "2 survive",
+        "url":  "/assets/ranks/survive/2_survive.png",
+        "category":  "survive",
+        "threshold":  2
+    },
+    {
+        "id":  "rank-survive-3_survive",
+        "label":  "3 survive",
+        "url":  "/assets/ranks/survive/3_survive.png",
+        "category":  "survive",
+        "threshold":  3
+    },
+    {
+        "id":  "rank-survive-4_survive",
+        "label":  "4 survive",
+        "url":  "/assets/ranks/survive/4_survive.png",
+        "category":  "survive",
+        "threshold":  4
+    },
+    {
+        "id":  "rank-survive-5_survive",
+        "label":  "5 survive",
+        "url":  "/assets/ranks/survive/5_survive.png",
+        "category":  "survive",
+        "threshold":  5
+    },
+    {
+        "id":  "rank-survive-6_survive",
+        "label":  "6 survive",
+        "url":  "/assets/ranks/survive/6_survive.png",
+        "category":  "survive",
+        "threshold":  6
+    },
+    {
+        "id":  "rank-survive-7_survive",
+        "label":  "7 survive",
+        "url":  "/assets/ranks/survive/7_survive.png",
+        "category":  "survive",
+        "threshold":  7
+    },
+    {
+        "id":  "rank-survive-8_survive",
+        "label":  "8 survive",
+        "url":  "/assets/ranks/survive/8_survive.png",
+        "category":  "survive",
+        "threshold":  8
+    },
+    {
+        "id":  "rank-survive-9_survive",
+        "label":  "9 survive",
+        "url":  "/assets/ranks/survive/9_survive.png",
+        "category":  "survive",
+        "threshold":  9
+    }
+]
