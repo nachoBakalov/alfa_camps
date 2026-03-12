@@ -7,6 +7,18 @@ export function AdminNav() {
         <Link to="/admin" className="rounded-md bg-white px-3 py-1.5 text-sm text-slate-700">
           Dashboard
         </Link>
+        <Link to="/admin/ranks" className="rounded-md bg-white px-3 py-1.5 text-sm text-slate-700">
+          Ranks
+        </Link>
+        <Link to="/admin/achievements" className="rounded-md bg-white px-3 py-1.5 text-sm text-slate-700">
+          Achievements
+        </Link>
+        <Link to="/admin/medals" className="rounded-md bg-white px-3 py-1.5 text-sm text-slate-700">
+          Medals
+        </Link>
+        <Link to="/admin/photos" className="rounded-md bg-white px-3 py-1.5 text-sm text-slate-700">
+          Photos
+        </Link>
       </div>
     </nav>
   );

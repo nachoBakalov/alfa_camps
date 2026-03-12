@@ -4,10 +4,14 @@ import { AdminLayout } from '../components/layout/AdminLayout';
 import { PublicLayout } from '../components/layout/PublicLayout';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminCampDetailPage } from '../pages/admin/AdminCampDetailPage';
+import { AchievementsPage } from '../pages/admin/AchievementsPage';
 import { BattleDetailPage } from '../pages/admin/BattleDetailPage';
 import { CampsPage } from '../pages/admin/CampsPage';
 import { CampTypesPage } from '../pages/admin/CampTypesPage';
+import { MedalsPage } from '../pages/admin/MedalsPage';
 import { PlayersPage } from '../pages/admin/PlayersPage';
+import { PhotosPage } from '../pages/admin/PhotosPage';
+import { RanksPage } from '../pages/admin/RanksPage';
 import { TeamTemplatesPage } from '../pages/admin/TeamTemplatesPage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { CampPublicPage } from '../pages/public/CampPublicPage';
@@ -56,6 +60,22 @@ export const router = createBrowserRouter([
           {
             path: 'players',
             element: <PlayersPage />,
+          },
+          {
+            path: 'achievements',
+            element: <AchievementsPage />,
+          },
+          {
+            path: 'ranks',
+            element: <RanksPage />,
+          },
+          {
+            path: 'medals',
+            element: <MedalsPage />,
+          },
+          {
+            path: 'photos',
+            element: <PhotosPage />,
           },
           {
             path: '*',
