@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import type { Camp, CampInput, CampStatus } from '../../api/camps.api';
 import { Badge } from '../../components/ui/Badge';
 import { AssetPicker } from '../../components/ui/AssetPicker';
@@ -567,6 +568,12 @@ export function CampsPage() {
                   </div>
 
                   <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <Link
+                      to={`/admin/camps/${camp.id}`}
+                      className="rounded-md border border-slate-300 bg-white px-3 py-2 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      Open
+                    </Link>
                     <button
                       type="button"
                       onClick={() => {

@@ -1,9 +1,14 @@
 import { Link } from 'react-router-dom';
+import type { Camp, CampStatus } from '../../api/camps.api';
 import { SectionCard } from '../../components/cards/SectionCard';
 import { StatCard } from '../../components/cards/StatCard';
 import { EmptyState } from '../../components/feedback/EmptyState';
+import { ErrorState } from '../../components/feedback/ErrorState';
+import { LoadingState } from '../../components/feedback/LoadingState';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Badge } from '../../components/ui/Badge';
+import { useCampsQuery } from '../../features/camps/use-camps-query';
+import { ApiClientError } from '../../lib/errors';
 
 const QUICK_ACTIONS = [
   { label: 'Camp Types', to: '/admin/camp-types' },
@@ -12,7 +17,99 @@ const QUICK_ACTIONS = [
   { label: 'Players', to: '/admin/players' },
 ] as const;
 
+function formatDateRange(startDate: string, endDate: string): string {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return `${startDate} - ${endDate}`;
+  }
+
+  return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+}
+
+function getStatusTone(status: CampStatus): 'success' | 'warning' | 'neutral' {
+  if (status === 'ACTIVE') {
+    return 'success';
+  }
+
+  if (status === 'FINISHED') {
+    return 'warning';
+  }
+
+  return 'neutral';
+}
+
+function getCampErrorMessage(error: unknown): string {
+  if (error instanceof ApiClientError) {
+    return error.message;
+  }
+
+  return 'Unable to load camps right now.';
+}
+
+function ActiveCampActions({ campId }: { campId: string }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <Link
+        to={`/admin/camps/${campId}`}
+        className="rounded-md bg-slate-900 px-3 py-2 text-center text-sm font-medium text-white hover:bg-slate-800"
+      >
+        Open Camp
+      </Link>
+      <Link
+        to={`/admin/camps/${campId}?tab=participations`}
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        Participations
+      </Link>
+      <Link
+        to={`/admin/camps/${campId}?tab=battles`}
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        Battles
+      </Link>
+      <Link
+        to={`/admin/camps/${campId}?tab=rankings`}
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        Rankings
+      </Link>
+    </div>
+  );
+}
+
+function ActiveCampDetails({ camp }: { camp: Camp }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">{camp.title}</h3>
+          <p className="text-sm text-slate-600">Year: {camp.year}</p>
+        </div>
+        <Badge tone={getStatusTone(camp.status)}>{camp.status}</Badge>
+      </div>
+
+      <dl className="grid grid-cols-1 gap-2 text-sm text-slate-700 sm:grid-cols-2">
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-slate-500">Location</dt>
+          <dd className="mt-1 font-medium text-slate-900">{camp.location || 'Not specified'}</dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-slate-500">Date Range</dt>
+          <dd className="mt-1 font-medium text-slate-900">{formatDateRange(camp.startDate, camp.endDate)}</dd>
+        </div>
+      </dl>
+
+      <ActiveCampActions campId={camp.id} />
+    </div>
+  );
+}
+
 export function AdminDashboardPage() {
+  const campsQuery = useCampsQuery();
+  const activeCamps = (campsQuery.data ?? []).filter((camp) => camp.status === 'ACTIVE');
+
   return (
     <div className="space-y-5 sm:space-y-6">
       <PageHeader
@@ -21,11 +118,62 @@ export function AdminDashboardPage() {
         actions={<Badge tone="neutral">Overview</Badge>}
       />
 
+      <SectionCard title="Active Camps" description="Current active camp visibility for quick operations.">
+        {campsQuery.isLoading ? <LoadingState label="Loading active camps..." /> : null}
+
+        {campsQuery.isError ? (
+          <ErrorState
+            message={getCampErrorMessage(campsQuery.error)}
+            onRetry={() => {
+              void campsQuery.refetch();
+            }}
+          />
+        ) : null}
+
+        {campsQuery.isSuccess && activeCamps.length === 0 ? (
+          <EmptyState
+            title="No active camp"
+            description="Activate a camp from Camps to make it visible here."
+            action={
+              <Link
+                to="/admin/camps"
+                className="inline-flex rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Open Camps
+              </Link>
+            }
+          />
+        ) : null}
+
+        {campsQuery.isSuccess && activeCamps.length === 1 ? (
+          <div className="rounded-lg border-2 border-emerald-200 bg-emerald-50/40 p-4">
+            <ActiveCampDetails camp={activeCamps[0]} />
+          </div>
+        ) : null}
+
+        {campsQuery.isSuccess && activeCamps.length > 1 ? (
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600">Multiple active camps are currently running.</p>
+            <div className="space-y-3">
+              {activeCamps.map((camp) => (
+                <div key={camp.id} className="rounded-lg border border-slate-200 bg-white p-4">
+                  <ActiveCampDetails camp={camp} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </SectionCard>
+
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Camps" value={0} hint="Placeholder" />
+        <StatCard label="Camps" value={campsQuery.data?.length ?? 0} hint="From current camps data" />
         <StatCard label="Players" value={0} hint="No data wired yet" />
         <StatCard label="Battles" value={0} hint="No data wired yet" />
-        <StatCard label="Finished Camps" value={0} hint="Placeholder" />
+        <StatCard
+          label="Finished Camps"
+          value={(campsQuery.data ?? []).filter((camp) => camp.status === 'FINISHED').length}
+          hint="From current camps data"
+        />
       </section>
 
       <SectionCard title="Quick Actions" description="Jump to the main admin management areas.">

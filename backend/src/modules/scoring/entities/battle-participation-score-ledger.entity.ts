@@ -41,7 +41,7 @@ export class BattleParticipationScoreLedger {
   @JoinColumn({ name: 'participation_id' })
   participation!: CampParticipation;
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'integer', name: 'kills_delta', default: 0 })
   killsDelta!: number;
 
   @Column({ type: 'integer', name: 'knife_kills_delta', default: 0 })

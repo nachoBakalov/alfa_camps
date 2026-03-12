@@ -1,6 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, QueryFailedError, Repository } from 'typeorm';
 import { BattlePlayerResult } from '../battle-player-results/entities/battle-player-result.entity';
 import { Battle } from '../battles/entities/battle.entity';
 import { BattleStatus } from '../battles/enums/battle-status.enum';
@@ -24,6 +30,8 @@ import { TeamScoreDelta } from './interfaces/team-score-delta.interface';
 
 @Injectable()
 export class ScoringService {
+  private readonly logger = new Logger(ScoringService.name);
+
   constructor(
     @InjectRepository(Battle)
     private readonly battlesRepository: Repository<Battle>,
@@ -64,143 +72,175 @@ export class ScoringService {
       throw new BadRequestException('Score can be applied only for COMPLETED battles');
     }
 
-    const preview = await this.previewBattleScore(battleId);
+    try {
+      const preview = await this.previewBattleScore(battleId);
 
-    await this.battlesRepository.manager.transaction(async (manager) => {
-      const existingParticipationLedgers = await manager.find(BattleParticipationScoreLedger, {
-        where: { battleId },
+      await this.battlesRepository.manager.transaction(async (manager) => {
+        const existingParticipationLedgers = await manager.find(BattleParticipationScoreLedger, {
+          where: { battleId },
+        });
+        const existingTeamLedgers = await manager.find(BattleTeamScoreLedger, {
+          where: { battleId },
+        });
+
+        const existingParticipationMap = new Map<string, BattleParticipationScoreLedger>(
+          existingParticipationLedgers.map((row) => [row.participationId, row]),
+        );
+        const existingTeamMap = new Map<string, BattleTeamScoreLedger>(
+          existingTeamLedgers.map((row) => [row.teamId, row]),
+        );
+
+        const allParticipationIds = new Set<string>([
+          ...existingParticipationMap.keys(),
+          ...preview.participationDeltas.map((row) => row.participationId),
+        ]);
+        const allTeamIds = new Set<string>([
+          ...existingTeamMap.keys(),
+          ...preview.teamDeltas.map((row) => row.teamId),
+        ]);
+
+        const newParticipationMap = new Map<string, ParticipationScoreDelta>(
+          preview.participationDeltas.map((row) => [row.participationId, row]),
+        );
+        const newTeamMap = new Map<string, TeamScoreDelta>(
+          preview.teamDeltas.map((row) => [row.teamId, row]),
+        );
+
+        for (const participationId of allParticipationIds) {
+          const oldRow = existingParticipationMap.get(participationId);
+          const newRow = newParticipationMap.get(participationId);
+
+          const netKills = (newRow?.killsDelta ?? 0) - (oldRow?.killsDelta ?? 0);
+          const netKnifeKills = (newRow?.knifeKillsDelta ?? 0) - (oldRow?.knifeKillsDelta ?? 0);
+          const netSurvivals = (newRow?.survivalsDelta ?? 0) - (oldRow?.survivalsDelta ?? 0);
+          const netDuelWins = (newRow?.duelWinsDelta ?? 0) - (oldRow?.duelWinsDelta ?? 0);
+          const netMassBattleWins =
+            (newRow?.massBattleWinsDelta ?? 0) - (oldRow?.massBattleWinsDelta ?? 0);
+          const netPoints = (newRow?.pointsDelta ?? 0) - (oldRow?.pointsDelta ?? 0);
+
+          if (netKills !== 0) {
+            await manager.increment(CampParticipation, { id: participationId }, 'kills', netKills);
+          }
+          if (netKnifeKills !== 0) {
+            await manager.increment(
+              CampParticipation,
+              { id: participationId },
+              'knifeKills',
+              netKnifeKills,
+            );
+          }
+          if (netSurvivals !== 0) {
+            await manager.increment(
+              CampParticipation,
+              { id: participationId },
+              'survivals',
+              netSurvivals,
+            );
+          }
+          if (netDuelWins !== 0) {
+            await manager.increment(CampParticipation, { id: participationId }, 'duelWins', netDuelWins);
+          }
+          if (netMassBattleWins !== 0) {
+            await manager.increment(
+              CampParticipation,
+              { id: participationId },
+              'massBattleWins',
+              netMassBattleWins,
+            );
+          }
+          if (netPoints !== 0) {
+            await manager.increment(CampParticipation, { id: participationId }, 'points', netPoints);
+          }
+        }
+
+        for (const teamId of allTeamIds) {
+          const oldRow = existingTeamMap.get(teamId);
+          const newRow = newTeamMap.get(teamId);
+          const netTeamPoints = (newRow?.teamPointsDelta ?? 0) - (oldRow?.teamPointsDelta ?? 0);
+
+          if (netTeamPoints !== 0) {
+            await manager.increment(CampTeam, { id: teamId }, 'teamPoints', netTeamPoints);
+          }
+        }
+
+        await manager.delete(BattleParticipationScoreLedger, { battleId });
+        await manager.delete(BattleTeamScoreLedger, { battleId });
+
+        if (preview.participationDeltas.length > 0) {
+          await manager.insert(
+            BattleParticipationScoreLedger,
+            preview.participationDeltas.map((row) => ({
+              battleId,
+              participationId: row.participationId,
+              killsDelta: row.killsDelta,
+              knifeKillsDelta: row.knifeKillsDelta,
+              survivalsDelta: row.survivalsDelta,
+              duelWinsDelta: row.duelWinsDelta,
+              massBattleWinsDelta: row.massBattleWinsDelta,
+              pointsDelta: row.pointsDelta,
+            })),
+          );
+        }
+
+        if (preview.teamDeltas.length > 0) {
+          await manager.insert(
+            BattleTeamScoreLedger,
+            preview.teamDeltas.map((row) => ({
+              battleId,
+              teamId: row.teamId,
+              teamPointsDelta: row.teamPointsDelta,
+            })),
+          );
+        }
       });
-      const existingTeamLedgers = await manager.find(BattleTeamScoreLedger, {
-        where: { battleId },
-      });
 
-      const existingParticipationMap = new Map<string, BattleParticipationScoreLedger>(
-        existingParticipationLedgers.map((row) => [row.participationId, row]),
-      );
-      const existingTeamMap = new Map<string, BattleTeamScoreLedger>(
-        existingTeamLedgers.map((row) => [row.teamId, row]),
+      const affectedParticipationIds = Array.from(
+        new Set(preview.participationDeltas.map((row) => row.participationId)),
       );
 
-      const allParticipationIds = new Set<string>([
-        ...existingParticipationMap.keys(),
-        ...preview.participationDeltas.map((row) => row.participationId),
-      ]);
-      const allTeamIds = new Set<string>([
-        ...existingTeamMap.keys(),
-        ...preview.teamDeltas.map((row) => row.teamId),
-      ]);
-
-      const newParticipationMap = new Map<string, ParticipationScoreDelta>(
-        preview.participationDeltas.map((row) => [row.participationId, row]),
-      );
-      const newTeamMap = new Map<string, TeamScoreDelta>(
-        preview.teamDeltas.map((row) => [row.teamId, row]),
-      );
-
-      for (const participationId of allParticipationIds) {
-        const oldRow = existingParticipationMap.get(participationId);
-        const newRow = newParticipationMap.get(participationId);
-
-        const netKills = (newRow?.killsDelta ?? 0) - (oldRow?.killsDelta ?? 0);
-        const netKnifeKills = (newRow?.knifeKillsDelta ?? 0) - (oldRow?.knifeKillsDelta ?? 0);
-        const netSurvivals = (newRow?.survivalsDelta ?? 0) - (oldRow?.survivalsDelta ?? 0);
-        const netDuelWins = (newRow?.duelWinsDelta ?? 0) - (oldRow?.duelWinsDelta ?? 0);
-        const netMassBattleWins =
-          (newRow?.massBattleWinsDelta ?? 0) - (oldRow?.massBattleWinsDelta ?? 0);
-        const netPoints = (newRow?.pointsDelta ?? 0) - (oldRow?.pointsDelta ?? 0);
-
-        if (netKills !== 0) {
-          await manager.increment(CampParticipation, { id: participationId }, 'kills', netKills);
-        }
-        if (netKnifeKills !== 0) {
-          await manager.increment(
-            CampParticipation,
-            { id: participationId },
-            'knifeKills',
-            netKnifeKills,
-          );
-        }
-        if (netSurvivals !== 0) {
-          await manager.increment(
-            CampParticipation,
-            { id: participationId },
-            'survivals',
-            netSurvivals,
-          );
-        }
-        if (netDuelWins !== 0) {
-          await manager.increment(CampParticipation, { id: participationId }, 'duelWins', netDuelWins);
-        }
-        if (netMassBattleWins !== 0) {
-          await manager.increment(
-            CampParticipation,
-            { id: participationId },
-            'massBattleWins',
-            netMassBattleWins,
-          );
-        }
-        if (netPoints !== 0) {
-          await manager.increment(CampParticipation, { id: participationId }, 'points', netPoints);
-        }
+      for (const participationId of affectedParticipationIds) {
+        await this.ranksService.recomputeParticipationRanks(participationId);
+        await this.achievementsService.unlockParticipationAchievements(participationId);
       }
 
-      for (const teamId of allTeamIds) {
-        const oldRow = existingTeamMap.get(teamId);
-        const newRow = newTeamMap.get(teamId);
-        const netTeamPoints = (newRow?.teamPointsDelta ?? 0) - (oldRow?.teamPointsDelta ?? 0);
-
-        if (netTeamPoints !== 0) {
-          await manager.increment(CampTeam, { id: teamId }, 'teamPoints', netTeamPoints);
-        }
+      return {
+        battleId: preview.battleId,
+        battleType: preview.battleType,
+        appliedParticipationCount: preview.participationDeltas.length,
+        appliedTeamCount: preview.teamDeltas.length,
+        message: 'Battle score deltas applied successfully',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
       }
 
-      await manager.delete(BattleParticipationScoreLedger, { battleId });
-      await manager.delete(BattleTeamScoreLedger, { battleId });
+      if (error instanceof QueryFailedError) {
+        const databaseError = error as QueryFailedError & {
+          driverError?: { message?: string; code?: string; detail?: string };
+        };
+        const driverMessage = databaseError.driverError?.message ?? error.message;
+        const driverCode = databaseError.driverError?.code ?? 'unknown';
+        const driverDetail = databaseError.driverError?.detail;
 
-      if (preview.participationDeltas.length > 0) {
-        await manager.insert(
-          BattleParticipationScoreLedger,
-          preview.participationDeltas.map((row) => ({
-            battleId,
-            participationId: row.participationId,
-            killsDelta: row.killsDelta,
-            knifeKillsDelta: row.knifeKillsDelta,
-            survivalsDelta: row.survivalsDelta,
-            duelWinsDelta: row.duelWinsDelta,
-            massBattleWinsDelta: row.massBattleWinsDelta,
-            pointsDelta: row.pointsDelta,
-          })),
+        this.logger.error(
+          `Database query failed during applyBattleScore for battleId=${battleId} (code=${driverCode}). message=${driverMessage}${driverDetail ? ` detail=${driverDetail}` : ''}`,
+          error.stack,
+        );
+
+        throw new InternalServerErrorException(
+          'Unable to apply battle score due to database schema/data issue. Ensure scoring migrations are applied and data is consistent.',
         );
       }
 
-      if (preview.teamDeltas.length > 0) {
-        await manager.insert(
-          BattleTeamScoreLedger,
-          preview.teamDeltas.map((row) => ({
-            battleId,
-            teamId: row.teamId,
-            teamPointsDelta: row.teamPointsDelta,
-          })),
-        );
-      }
-    });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Unexpected applyBattleScore failure for battleId=${battleId}. message=${errorMessage}`,
+        error instanceof Error ? error.stack : undefined,
+      );
 
-    const affectedParticipationIds = Array.from(
-      new Set(preview.participationDeltas.map((row) => row.participationId)),
-    );
-
-    for (const participationId of affectedParticipationIds) {
-      await this.ranksService.recomputeParticipationRanks(participationId);
-      await this.achievementsService.unlockParticipationAchievements(participationId);
+      throw new InternalServerErrorException('Unable to apply battle score right now');
     }
-
-    return {
-      battleId: preview.battleId,
-      battleType: preview.battleType,
-      appliedParticipationCount: preview.participationDeltas.length,
-      appliedTeamCount: preview.teamDeltas.length,
-      message: 'Battle score deltas applied successfully',
-    };
   }
 
   async finalizeCampScore(campId: string): Promise<FinalizeCampScoreResultDto> {

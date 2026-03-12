@@ -3,6 +3,8 @@ import { ProtectedRoute } from './protected-route';
 import { AdminLayout } from '../components/layout/AdminLayout';
 import { PublicLayout } from '../components/layout/PublicLayout';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminCampDetailPage } from '../pages/admin/AdminCampDetailPage';
+import { BattleDetailPage } from '../pages/admin/BattleDetailPage';
 import { CampsPage } from '../pages/admin/CampsPage';
 import { CampTypesPage } from '../pages/admin/CampTypesPage';
 import { PlayersPage } from '../pages/admin/PlayersPage';
@@ -34,6 +36,14 @@ export const router = createBrowserRouter([
           {
             path: 'camps',
             element: <CampsPage />,
+          },
+          {
+            path: 'camps/:campId',
+            element: <AdminCampDetailPage />,
+          },
+          {
+            path: 'battles/:battleId',
+            element: <BattleDetailPage />,
           },
           {
             path: 'camp-types',
