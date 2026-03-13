@@ -95,7 +95,7 @@ function CampTypeForm({
     });
   }, [form, mode]);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Camp Type' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Create Camp Type' : 'Запази промените';
 
   return (
     <form
@@ -217,7 +217,7 @@ function CampTypeForm({
           disabled={isSubmitting}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? 'Запазване...' : submitLabel}
         </button>
       </div>
     </form>

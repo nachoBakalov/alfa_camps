@@ -160,7 +160,7 @@ export function BattleScoringSection({
               disabled={applyMutation.isPending || previewQuery.isLoading}
               className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {applyMutation.isPending ? 'Applying...' : 'Apply Score'}
+              {applyMutation.isPending ? 'Прилагане...' : 'Приложи точки'}
             </button>
           </div>
         </div>

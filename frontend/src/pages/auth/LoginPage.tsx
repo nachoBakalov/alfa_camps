@@ -50,20 +50,20 @@ export function LoginPage() {
         return;
       }
 
-      setSubmitError('Login failed. Please try again.');
+      setSubmitError('Неуспешно влизане. Опитай отново.');
     }
   });
 
   return (
     <main className="min-h-screen p-8">
       <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-900">Login</h1>
-        <p className="mt-2 text-slate-600">Sign in with your admin credentials.</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Вход</h1>
+        <p className="mt-2 text-slate-600">Влез с администраторските си данни.</p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
-              Email
+              Имейл
             </label>
             <input
               id="email"
@@ -77,7 +77,7 @@ export function LoginPage() {
 
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-              Password
+              Парола
             </label>
             <input
               id="password"
@@ -98,7 +98,7 @@ export function LoginPage() {
             disabled={isSubmitting}
             className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? 'Влизане...' : 'Влез'}
           </button>
         </form>
       </div>

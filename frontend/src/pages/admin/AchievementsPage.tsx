@@ -135,7 +135,7 @@ function AchievementDefinitionForm({
     });
   }, [form, mode]);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Achievement' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Create Achievement' : 'Запази промените';
 
   return (
     <form
@@ -175,7 +175,7 @@ function AchievementDefinitionForm({
       </div>
 
       <div>
-        <p className="mb-1 block text-sm font-medium text-slate-700">Current Icon</p>
+        <p className="mb-1 block text-sm font-medium text-slate-700">Текуща икона</p>
         <AchievementIconPreview iconUrl={form.watch('iconUrl')} />
       </div>
 
@@ -200,7 +200,7 @@ function AchievementDefinitionForm({
           }}
           className="mt-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
-          {showIconPicker ? 'Hide Icon Picker' : 'Choose Icon'}
+          {showIconPicker ? 'Скрий избор на икона' : 'Избери икона'}
         </button>
 
         {showIconPicker ? (
@@ -269,7 +269,7 @@ function AchievementDefinitionForm({
           disabled={isSubmitting}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? 'Запазване...' : submitLabel}
         </button>
       </div>
     </form>
@@ -394,7 +394,7 @@ export function AchievementsPage() {
         open={Boolean(formMode)}
         title={
           formMode?.kind === 'create'
-            ? 'Create Achievement Definition'
+            ? 'Създай дефиниция на постижение'
             : `Edit Achievement: ${formMode?.definition.name ?? ''}`
         }
         onClose={() => {

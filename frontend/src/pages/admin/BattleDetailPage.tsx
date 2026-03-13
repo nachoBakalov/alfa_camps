@@ -100,7 +100,7 @@ export function BattleDetailPage() {
 
               <dl className="grid grid-cols-1 gap-2 text-sm text-slate-700 sm:grid-cols-2">
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Type</dt>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Тип</dt>
                   <dd className="mt-1">{battleQuery.data.battleType}</dd>
                 </div>
                 <div>
@@ -112,11 +112,11 @@ export function BattleDetailPage() {
                   <dd className="mt-1">{battleQuery.data.session || 'N/A'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Status</dt>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Статус</dt>
                   <dd className="mt-1">{battleQuery.data.status}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Winning Team</dt>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Победил отбор</dt>
                   <dd className="mt-1">
                     {battleQuery.data.winningTeamId
                       ? campTeamsQuery.data?.find((team) => team.id === battleQuery.data.winningTeamId)?.name ||

@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PhotosController } from './photos.controller';
 import { PhotosService } from './photos.service';
+import { UploadedImageFile } from './types/uploaded-image-file.type';
 
 const createServiceMock = () => ({
   create: jest.fn(),
+  createFromUpload: jest.fn(),
   remove: jest.fn(),
   findByCamp: jest.fn(),
   findByTeam: jest.fn(),
@@ -42,6 +44,30 @@ describe('PhotosController', () => {
       'user-1',
     );
     expect(result).toEqual({ id: 'photo-1' });
+  });
+
+  it('upload delegates to service', async () => {
+    const file = {
+      originalname: 'photo.png',
+      mimetype: 'image/png',
+      size: 100,
+      buffer: Buffer.from('file-bytes'),
+    } as UploadedImageFile;
+
+    service.createFromUpload.mockResolvedValue({ id: 'photo-2' });
+
+    const result = await controller.upload(
+      file,
+      { campId: 'camp-1' },
+      { user: { sub: 'user-1' } },
+    );
+
+    expect(service.createFromUpload).toHaveBeenCalledWith(
+      { campId: 'camp-1' },
+      file,
+      'user-1',
+    );
+    expect(result).toEqual({ id: 'photo-2' });
   });
 
   it('delete delegates to service', async () => {

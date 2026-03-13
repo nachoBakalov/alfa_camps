@@ -20,7 +20,7 @@ import { ApiClientError } from '../../lib/errors';
 const STATUS_OPTIONS: Array<{ value: '' | CampStatus; label: string }> = [
   { value: '', label: 'All statuses' },
   { value: 'DRAFT', label: 'Draft' },
-  { value: 'ACTIVE', label: 'Active' },
+  { value: 'ACTIVE', label: 'Активен' },
   { value: 'FINISHED', label: 'Finished' },
 ];
 
@@ -133,7 +133,7 @@ function CampForm({
     });
   }, [form, mode]);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Camp' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Създай лагер' : 'Запази промените';
 
   return (
     <form
@@ -337,7 +337,7 @@ function CampForm({
           disabled={isSubmitting}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? 'Запазване...' : submitLabel}
         </button>
       </div>
     </form>
@@ -463,7 +463,7 @@ export function CampsPage() {
 
       <ModalDrawer
         open={Boolean(formMode)}
-        title={formMode?.kind === 'create' ? 'Create Camp' : `Edit: ${formMode?.camp.title ?? ''}`}
+        title={formMode?.kind === 'create' ? 'Създай лагер' : `Edit: ${formMode?.camp.title ?? ''}`}
         onClose={() => {
           setFormMode(null);
         }}

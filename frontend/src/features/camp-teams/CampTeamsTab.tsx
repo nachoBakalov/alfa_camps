@@ -117,7 +117,7 @@ function TeamForm({
     });
   }, [form, mode]);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Team' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Създай отбор' : 'Запази промените';
 
   return (
     <>
@@ -236,7 +236,7 @@ function TeamForm({
             disabled={isSubmitting}
             className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Saving...' : submitLabel}
+            {isSubmitting ? 'Запазване...' : submitLabel}
           </button>
         </div>
       </form>
@@ -459,7 +459,7 @@ export function CampTeamsTab({ campId }: { campId: string }) {
                     </div>
                   </div>
                   <Badge tone={team.isActive ? 'success' : 'danger'}>
-                    {team.isActive ? 'Active' : 'Inactive'}
+                    {team.isActive ? 'Активен' : 'Неактивен'}
                   </Badge>
                 </div>
 
@@ -476,7 +476,7 @@ export function CampTeamsTab({ campId }: { campId: string }) {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-slate-500">Points</dt>
+                    <dt className="text-xs text-slate-500">Точки</dt>
                     <dd className="mt-1">{team.teamPoints}</dd>
                   </div>
                   <div>

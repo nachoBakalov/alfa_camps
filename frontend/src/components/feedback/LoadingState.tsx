@@ -2,7 +2,7 @@ type LoadingStateProps = {
   label?: string;
 };
 
-export function LoadingState({ label = 'Loading...' }: LoadingStateProps) {
+export function LoadingState({ label = 'Зареждане...' }: LoadingStateProps) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6" role="status" aria-live="polite">
       <div className="flex items-center gap-3 text-slate-700">

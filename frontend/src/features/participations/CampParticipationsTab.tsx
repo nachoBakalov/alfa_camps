@@ -434,7 +434,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                 <div className="mt-3 flex items-center gap-3">
                   <PlayerAvatar
                     src={newPlayerAvatarUrl.trim() || null}
-                    fullName={newPlayerFirstName.trim() || 'Player'}
+                    fullName={newPlayerFirstName.trim() || 'Играч'}
                   />
                   <button
                     type="button"
@@ -505,7 +505,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
               disabled={isSubmittingAddFlow || campTeamsQuery.data?.length === 0}
               className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmittingAddFlow ? 'Saving...' : 'Add Participant'}
+              {isSubmittingAddFlow ? 'Запазване...' : 'Add Participant'}
             </button>
           </div>
         </div>
@@ -568,34 +568,34 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
 
                   <dl className="grid grid-cols-2 gap-2 text-sm text-slate-700">
                     <div>
-                      <dt className="text-xs text-slate-500">Points</dt>
+                      <dt className="text-xs text-slate-500">Точки</dt>
                       <dd className="mt-1">{participation.points}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Kills</dt>
+                      <dt className="text-xs text-slate-500">Убийства</dt>
                       <dd className="mt-1">{participation.kills}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Knife Kills</dt>
+                      <dt className="text-xs text-slate-500">Убийства с нож</dt>
                       <dd className="mt-1">{participation.knifeKills}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Survivals</dt>
+                      <dt className="text-xs text-slate-500">Оцелявания</dt>
                       <dd className="mt-1">{participation.survivals}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Duel Wins</dt>
+                      <dt className="text-xs text-slate-500">Победи в двубой</dt>
                       <dd className="mt-1">{participation.duelWins}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Mass Battle Wins</dt>
+                      <dt className="text-xs text-slate-500">Победи в масова битка</dt>
                       <dd className="mt-1">{participation.massBattleWins}</dd>
                     </div>
                   </dl>
 
                   <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
                     <span className="font-medium text-slate-800">Current team: </span>
-                    {currentTeam?.state === 'loading' ? 'Loading...'
+                    {currentTeam?.state === 'loading' ? 'Зареждане...'
                       : currentTeam?.state === 'error' ? 'Unavailable'
                       : currentTeam?.teamId ? (teamNameById.get(currentTeam.teamId) ?? currentTeam.teamId)
                       : 'Unassigned'}

@@ -178,7 +178,7 @@ function RankCategoryForm({
     });
   }, [form, mode]);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Category' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Create Category' : 'Запази промените';
 
   return (
     <form
@@ -229,7 +229,7 @@ function RankCategoryForm({
           disabled={isSubmitting}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? 'Запазване...' : submitLabel}
         </button>
       </div>
     </form>
@@ -276,7 +276,7 @@ function RankDefinitionForm({
   const selectedCategoryCode = categories.find((category) => category.id === selectedCategoryId)?.code;
   const pickerCategory = toRankManifestCategory(selectedCategoryCode);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Definition' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Create Definition' : 'Запази промените';
 
   return (
     <form
@@ -322,7 +322,7 @@ function RankDefinitionForm({
       </div>
 
       <div>
-        <p className="mb-1 block text-sm font-medium text-slate-700">Current Icon</p>
+        <p className="mb-1 block text-sm font-medium text-slate-700">Текуща икона</p>
         <RankIconPreview iconUrl={form.watch('iconUrl')} />
       </div>
 
@@ -347,7 +347,7 @@ function RankDefinitionForm({
           }}
           className="mt-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
-          {showIconPicker ? 'Hide Icon Picker' : 'Choose Icon'}
+          {showIconPicker ? 'Скрий избор на икона' : 'Избери икона'}
         </button>
 
         {showIconPicker ? (
@@ -413,7 +413,7 @@ function RankDefinitionForm({
           disabled={isSubmitting}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? 'Запазване...' : submitLabel}
         </button>
       </div>
     </form>
@@ -616,7 +616,7 @@ export function RanksPage() {
         open={Boolean(categoryFormMode)}
         title={
           categoryFormMode?.kind === 'create'
-            ? 'Create Rank Category'
+            ? 'Създай категория ранг'
             : `Edit Category: ${categoryFormMode?.category.name ?? ''}`
         }
         onClose={() => {
@@ -646,7 +646,7 @@ export function RanksPage() {
         open={Boolean(definitionFormMode)}
         title={
           definitionFormMode?.kind === 'create'
-            ? 'Create Rank Definition'
+            ? 'Създай дефиниция на ранг'
             : `Edit Definition: ${definitionFormMode?.definition.name ?? 'Unnamed'}`
         }
         onClose={() => {
@@ -699,7 +699,7 @@ export function RanksPage() {
                 <div className="space-y-1">
                   <p className="text-xs uppercase tracking-wide text-slate-500">Code</p>
                   <p className="text-sm font-semibold text-slate-900">{category.code}</p>
-                  <p className="pt-1 text-xs uppercase tracking-wide text-slate-500">Name</p>
+                  <p className="pt-1 text-xs uppercase tracking-wide text-slate-500">Име</p>
                   <p className="text-sm text-slate-800">{category.name}</p>
                 </div>
 

@@ -103,7 +103,7 @@ function PlayerForm({
     });
   }, [form, mode]);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Player' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Създай играч' : 'Запази промените';
 
   return (
     <>
@@ -168,7 +168,7 @@ function PlayerForm({
             ) : null}
 
             <div className="mt-3 flex items-center gap-3">
-              <PlayerAvatar src={form.watch('avatarUrl') || null} fullName={form.watch('firstName') || 'Player'} />
+              <PlayerAvatar src={form.watch('avatarUrl') || null} fullName={form.watch('firstName') || 'Играч'} />
               <button
                 type="button"
                 onClick={() => {
@@ -204,7 +204,7 @@ function PlayerForm({
             disabled={isSubmitting}
             className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Saving...' : submitLabel}
+            {isSubmitting ? 'Запазване...' : submitLabel}
           </button>
         </div>
       </form>
@@ -336,7 +336,7 @@ export function PlayersPage() {
 
       <ModalDrawer
         open={Boolean(formMode)}
-        title={formMode?.kind === 'create' ? 'Create Player' : `Edit: ${formMode?.player.firstName ?? ''}`}
+        title={formMode?.kind === 'create' ? 'Създай играч' : `Edit: ${formMode?.player.firstName ?? ''}`}
         onClose={() => {
           setFormMode(null);
         }}
@@ -440,7 +440,7 @@ export function PlayersPage() {
                     <p className="text-sm text-slate-600">Nickname: {player.nickname || 'N/A'}</p>
                     <div>
                       <Badge tone={player.isActive ? 'success' : 'danger'}>
-                        {player.isActive ? 'Active' : 'Inactive'}
+                        {player.isActive ? 'Активен' : 'Неактивен'}
                       </Badge>
                     </div>
                     <div className="pt-1">

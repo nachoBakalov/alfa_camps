@@ -472,7 +472,7 @@ export function MassBattleResultsEditor({
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Kills</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">Убийства</label>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
@@ -506,7 +506,7 @@ export function MassBattleResultsEditor({
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Knife Kills</label>
+                        <label className="mb-1 block text-sm font-medium text-slate-700">Убийства с нож</label>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
@@ -570,7 +570,7 @@ export function MassBattleResultsEditor({
               disabled={isSavingResults || isApplyingScore}
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSavingResults ? 'Updating...' : 'Update Results'}
+              {isSavingResults ? 'Updating...' : 'Обнови резултати'}
             </button>
             <button
               type="button"
@@ -580,7 +580,7 @@ export function MassBattleResultsEditor({
               disabled={isSavingResults || isApplyingScore || currentBattleStatus !== 'COMPLETED'}
               className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isApplyingScore ? 'Applying...' : 'Apply Score'}
+              {isApplyingScore ? 'Прилагане...' : 'Приложи точки'}
             </button>
             <button
               type="button"
@@ -590,7 +590,7 @@ export function MassBattleResultsEditor({
               disabled={isSavingResults || isApplyingScore}
               className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSavingResults || isApplyingScore ? 'Processing...' : 'Apply Score + Complete Battle'}
+              {isSavingResults || isApplyingScore ? 'Processing...' : 'Приложи точки + приключи битката'}
             </button>
           </div>
         </div>

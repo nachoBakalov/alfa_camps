@@ -31,14 +31,14 @@ type CampDetailTab = {
 };
 
 const CAMP_DETAIL_TABS: CampDetailTab[] = [
-  { key: 'overview', label: 'Overview' },
+  { key: 'overview', label: 'Обобщение' },
   { key: 'teams', label: 'Teams' },
-  { key: 'participations', label: 'Participations' },
+  { key: 'participations', label: 'Участия' },
   { key: 'assignments', label: 'Assignments' },
-  { key: 'battles', label: 'Battles' },
-  { key: 'rankings', label: 'Rankings' },
-  { key: 'photos', label: 'Photos' },
-  { key: 'settings', label: 'Settings' },
+  { key: 'battles', label: 'Битки' },
+  { key: 'rankings', label: 'Класирания' },
+  { key: 'photos', label: 'Снимки' },
+  { key: 'settings', label: 'Настройки' },
 ];
 
 function getSafeTab(rawTab: string | null): CampDetailTabKey {
@@ -79,7 +79,7 @@ function CampMetadataSummary({ camp }: { camp: Camp }) {
     <SectionCard title="Camp summary" description="Basic camp metadata for quick context.">
       <dl className="grid grid-cols-1 gap-3 text-sm text-slate-700 sm:grid-cols-2">
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Status</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Статус</dt>
           <dd className="mt-1 font-medium text-slate-900">{camp.status}</dd>
         </div>
         <div>

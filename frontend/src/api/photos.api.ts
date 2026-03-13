@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost } from './client';
+import { apiDelete, apiGet, apiPost, apiPostFormData } from './client';
 
 export type Photo = {
   id: string;
@@ -17,8 +17,33 @@ export type PhotoInput = {
   imageUrl: string;
 };
 
+export type PhotoUploadInput = {
+  campId?: string;
+  teamId?: string;
+  playerId?: string;
+};
+
 export function createPhoto(payload: PhotoInput): Promise<Photo> {
   return apiPost<Photo, PhotoInput>('/photos', payload);
+}
+
+export function uploadPhoto(file: File, payload: PhotoUploadInput): Promise<Photo> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (payload.campId?.trim()) {
+    formData.append('campId', payload.campId.trim());
+  }
+
+  if (payload.teamId?.trim()) {
+    formData.append('teamId', payload.teamId.trim());
+  }
+
+  if (payload.playerId?.trim()) {
+    formData.append('playerId', payload.playerId.trim());
+  }
+
+  return apiPostFormData<Photo>('/photos/upload', formData);
 }
 
 export function deletePhoto(id: string): Promise<void> {

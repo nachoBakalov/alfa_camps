@@ -79,6 +79,49 @@ async function request<TResponse>(
   return (payload as TResponse) ?? ({} as TResponse);
 }
 
+async function requestFormData<TResponse>(
+  method: HttpMethod,
+  path: string,
+  body: FormData,
+  options: RequestOptions = {},
+): Promise<TResponse> {
+  const url = `${API_BASE_URL}${path}`;
+  const token = resolveToken(options.token);
+
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    ...options.headers,
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    method,
+    headers,
+    body,
+  });
+
+  const payload = await parseResponseBody(response);
+
+  if (!response.ok) {
+    const normalized = normalizeApiError(payload, {
+      statusCode: response.status,
+      path,
+      message: response.statusText,
+    });
+
+    throw new ApiClientError(normalized);
+  }
+
+  if (response.status === 204) {
+    return undefined as TResponse;
+  }
+
+  return (payload as TResponse) ?? ({} as TResponse);
+}
+
 export function apiGet<TResponse>(path: string, options?: RequestOptions): Promise<TResponse> {
   return request<TResponse>('GET', path, undefined, options);
 }
@@ -101,4 +144,12 @@ export function apiPatch<TResponse, TBody = unknown>(
 
 export function apiDelete<TResponse>(path: string, options?: RequestOptions): Promise<TResponse> {
   return request<TResponse>('DELETE', path, undefined, options);
+}
+
+export function apiPostFormData<TResponse>(
+  path: string,
+  body: FormData,
+  options?: RequestOptions,
+): Promise<TResponse> {
+  return requestFormData<TResponse>('POST', path, body, options);
 }

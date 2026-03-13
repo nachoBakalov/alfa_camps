@@ -172,7 +172,7 @@ function TeamStandingsList({ items }: { items: TeamStandingItem[] }) {
                 </p>
                 <p>
                   <span className="text-slate-500">Status: </span>
-                  <span className="font-semibold text-slate-900">{item.isActive ? 'Active' : 'Inactive'}</span>
+                  <span className="font-semibold text-slate-900">{item.isActive ? 'Активен' : 'Неактивен'}</span>
                 </p>
               </div>
             </div>

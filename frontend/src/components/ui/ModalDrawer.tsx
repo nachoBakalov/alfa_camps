@@ -32,7 +32,7 @@ export function ModalDrawer({ open, title, onClose, children }: ModalDrawerProps
     <div className="fixed inset-0 z-50">
       <button
         type="button"
-        aria-label="Close dialog"
+        aria-label="Затвори диалога"
         className="absolute inset-0 bg-slate-900/45"
         onClick={onClose}
       />
@@ -45,7 +45,7 @@ export function ModalDrawer({ open, title, onClose, children }: ModalDrawerProps
             onClick={onClose}
             className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Close
+            Затвори
           </button>
         </div>
         {children}

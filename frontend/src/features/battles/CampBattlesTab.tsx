@@ -124,7 +124,7 @@ function BattleForm({
     });
   }, [form, mode]);
 
-  const submitLabel = mode.kind === 'create' ? 'Create Battle' : 'Save Changes';
+  const submitLabel = mode.kind === 'create' ? 'Създай битка' : 'Запази промените';
 
   return (
     <form
@@ -265,7 +265,7 @@ function BattleForm({
           disabled={isSubmitting}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? 'Запазване...' : submitLabel}
         </button>
       </div>
     </form>
@@ -368,7 +368,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
 
       <ModalDrawer
         open={Boolean(formMode)}
-        title={formMode?.kind === 'create' ? 'Create Battle' : `Edit: ${formMode?.battle.title ?? ''}`}
+        title={formMode?.kind === 'create' ? 'Създай битка' : `Edit: ${formMode?.battle.title ?? ''}`}
         onClose={() => {
           setFormMode(null);
         }}
@@ -425,7 +425,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
 
                 <dl className="grid grid-cols-2 gap-2 text-sm text-slate-700">
                   <div>
-                    <dt className="text-xs text-slate-500">Type</dt>
+                    <dt className="text-xs text-slate-500">Тип</dt>
                     <dd className="mt-1">{battle.battleType}</dd>
                   </div>
                   <div>
@@ -437,7 +437,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
                     <dd className="mt-1">{battle.session || 'N/A'}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-slate-500">Winning Team</dt>
+                    <dt className="text-xs text-slate-500">Победил отбор</dt>
                     <dd className="mt-1">{battle.winningTeamId ? (teamNameById.get(battle.winningTeamId) ?? battle.winningTeamId) : 'N/A'}</dd>
                   </div>
                 </dl>

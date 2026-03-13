@@ -265,7 +265,7 @@ export function DuelSessionEditor({
               disabled={createMutation.isPending}
               className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {createMutation.isPending ? 'Saving...' : 'Create Duel'}
+              {createMutation.isPending ? 'Запазване...' : 'Създай двубой'}
             </button>
           </div>
         </form>

@@ -11,10 +11,10 @@ import { useCampsQuery } from '../../features/camps/use-camps-query';
 import { ApiClientError } from '../../lib/errors';
 
 const QUICK_ACTIONS = [
-  { label: 'Camp Types', to: '/admin/camp-types' },
-  { label: 'Team Templates', to: '/admin/team-templates' },
-  { label: 'Camps', to: '/admin/camps' },
-  { label: 'Players', to: '/admin/players' },
+  { label: 'Видове лагери', to: '/admin/camp-types' },
+  { label: 'Шаблони на отбори', to: '/admin/team-templates' },
+  { label: 'Лагери', to: '/admin/camps' },
+  { label: 'Играчи', to: '/admin/players' },
 ] as const;
 
 function formatDateRange(startDate: string, endDate: string): string {
@@ -45,7 +45,7 @@ function getCampErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return 'Unable to load camps right now.';
+  return 'Неуспешно зареждане на лагери в момента.';
 }
 
 function ActiveCampActions({ campId }: { campId: string }) {
@@ -113,13 +113,13 @@ export function AdminDashboardPage() {
   return (
     <div className="space-y-5 sm:space-y-6">
       <PageHeader
-        title="Admin Dashboard"
-        description="Use quick actions to navigate core setup areas and monitor basic camp progress."
-        actions={<Badge tone="neutral">Overview</Badge>}
+        title="Главно Табло"
+        description="Използвайте бързи действия за навигация в основните настройки и наблюдение на основния прогрес на лагерите."
+        actions={<Badge tone="neutral">Обобщение</Badge>}
       />
 
-      <SectionCard title="Active Camps" description="Current active camp visibility for quick operations.">
-        {campsQuery.isLoading ? <LoadingState label="Loading active camps..." /> : null}
+      <SectionCard title="Активни лагери" description="Текуща видимост на активните лагери за бързи операции.">
+        {campsQuery.isLoading ? <LoadingState label="Зареждане на активни лагери..." /> : null}
 
         {campsQuery.isError ? (
           <ErrorState
@@ -132,14 +132,14 @@ export function AdminDashboardPage() {
 
         {campsQuery.isSuccess && activeCamps.length === 0 ? (
           <EmptyState
-            title="No active camp"
-            description="Activate a camp from Camps to make it visible here."
+            title="Няма активни лагери"
+            description="Активирайте лагер от секцията Лагери, за да го направите видим тук."
             action={
               <Link
                 to="/admin/camps"
                 className="inline-flex rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                Open Camps
+                Отвори Лагери
               </Link>
             }
           />
@@ -153,7 +153,7 @@ export function AdminDashboardPage() {
 
         {campsQuery.isSuccess && activeCamps.length > 1 ? (
           <div className="space-y-3">
-            <p className="text-sm text-slate-600">Multiple active camps are currently running.</p>
+            <p className="text-sm text-slate-600">В момента има няколко активни лагера.</p>
             <div className="space-y-3">
               {activeCamps.map((camp) => (
                 <div key={camp.id} className="rounded-lg border border-slate-200 bg-white p-4">
@@ -166,17 +166,17 @@ export function AdminDashboardPage() {
       </SectionCard>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Camps" value={campsQuery.data?.length ?? 0} hint="From current camps data" />
-        <StatCard label="Players" value={0} hint="No data wired yet" />
-        <StatCard label="Battles" value={0} hint="No data wired yet" />
+        <StatCard label="Лагери" value={campsQuery.data?.length ?? 0} hint="От текущите данни за лагерите" />
+        <StatCard label="Играчите" value={0} hint="Все още няма данни" />
+        <StatCard label="Битки" value={0} hint="Все още няма данни" />
         <StatCard
-          label="Finished Camps"
+          label="Завършени лагери"
           value={(campsQuery.data ?? []).filter((camp) => camp.status === 'FINISHED').length}
-          hint="From current camps data"
+          hint="От текущите данни за лагерите"
         />
       </section>
 
-      <SectionCard title="Quick Actions" description="Jump to the main admin management areas.">
+      <SectionCard title="Бързи действия" description="Навигирайте до основните административни секции.">
         <div className="grid gap-2 sm:grid-cols-2">
           {QUICK_ACTIONS.map((action) => (
             <Link
@@ -190,7 +190,7 @@ export function AdminDashboardPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Next Dashboard Modules">
+      <SectionCard title="Следващи модули на таблото">
         <EmptyState
           title="Analytics widgets are not connected yet"
           description="Live counters and activity sections will be wired in a later task."

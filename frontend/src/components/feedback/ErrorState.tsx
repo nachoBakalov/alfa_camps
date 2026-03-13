@@ -6,9 +6,9 @@ type ErrorStateProps = {
 };
 
 export function ErrorState({
-  title = 'Something went wrong',
+  title = 'Възникна грешка',
   message,
-  retryLabel = 'Try again',
+  retryLabel = 'Опитай отново',
   onRetry,
 }: ErrorStateProps) {
   return (

@@ -1,4 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import * as fs from 'fs/promises';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
@@ -6,6 +7,13 @@ import { Camp } from '../camps/entities/camp.entity';
 import { Player } from '../players/entities/player.entity';
 import { Photo } from './entities/photo.entity';
 import { PhotosService } from './photos.service';
+import { UploadedImageFile } from './types/uploaded-image-file.type';
+
+jest.mock('fs/promises', () => ({
+  mkdir: jest.fn(async () => undefined),
+  writeFile: jest.fn(async () => undefined),
+  unlink: jest.fn(async () => undefined),
+}));
 
 type MockRepository = {
   create: jest.Mock;
@@ -30,6 +38,16 @@ describe('PhotosService', () => {
   let campTeamsRepository: MockRepository;
   let playersRepository: MockRepository;
 
+  function createUploadFile(overrides?: Partial<UploadedImageFile>): UploadedImageFile {
+    return {
+      originalname: 'photo.png',
+      mimetype: 'image/png',
+      size: 1024,
+      buffer: Buffer.from('image-bytes'),
+      ...overrides,
+    };
+  }
+
   beforeEach(async () => {
     photosRepository = createRepositoryMock();
     campsRepository = createRepositoryMock();
@@ -47,6 +65,10 @@ describe('PhotosService', () => {
     }).compile();
 
     service = module.get<PhotosService>(PhotosService);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('create success with camp', async () => {
@@ -182,5 +204,90 @@ describe('PhotosService', () => {
     photosRepository.findOne.mockResolvedValue(null);
 
     await expect(service.remove('missing')).rejects.toThrow(NotFoundException);
+  });
+
+  it('createFromUpload with missing target ids -> bad request', async () => {
+    await expect(
+      service.createFromUpload({} as never, createUploadFile(), 'user-1'),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('createFromUpload with invalid file type -> bad request', async () => {
+    campsRepository.findOne.mockResolvedValue({ id: 'camp-1' });
+
+    await expect(
+      service.createFromUpload(
+        { campId: 'camp-1' },
+        createUploadFile({ mimetype: 'application/pdf' }),
+        'user-1',
+      ),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('createFromUpload with missing target entities -> not found', async () => {
+    campsRepository.findOne.mockResolvedValue(null);
+
+    await expect(
+      service.createFromUpload({ campId: 'missing' }, createUploadFile(), 'user-1'),
+    ).rejects.toThrow(NotFoundException);
+  });
+
+  it('createFromUpload stores file and saves photo metadata (team folder preferred over camp)', async () => {
+    (fs.mkdir as jest.Mock).mockResolvedValue(undefined);
+    (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
+
+    campsRepository.findOne.mockResolvedValue({ id: 'camp-1' });
+    campTeamsRepository.findOne.mockResolvedValue({ id: 'team-1', campId: 'camp-1' });
+    photosRepository.create.mockImplementation((payload) => ({ id: 'photo-1', ...payload }));
+    photosRepository.save.mockImplementation(async (value) => value);
+
+    const result = await service.createFromUpload(
+      { campId: 'camp-1', teamId: 'team-1' },
+      createUploadFile({ originalname: 'battle.webp', mimetype: 'image/webp' }),
+      'user-1',
+    );
+
+    expect(fs.mkdir).toHaveBeenCalled();
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/uploads[\\/]teams[\\/]team-1[\\/].+/),
+      expect.any(Buffer),
+    );
+    expect(photosRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        campId: 'camp-1',
+        teamId: 'team-1',
+        uploadedBy: 'user-1',
+        imageUrl: expect.stringMatching(/^\/uploads\/teams\/team-1\/.+/),
+      }),
+    );
+    expect(result).toEqual(expect.objectContaining({ id: 'photo-1' }));
+  });
+
+  it('createFromUpload stores in player folder when playerId is provided', async () => {
+    (fs.mkdir as jest.Mock).mockResolvedValue(undefined);
+    (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
+
+    campsRepository.findOne.mockResolvedValue({ id: 'camp-1' });
+    campTeamsRepository.findOne.mockResolvedValue({ id: 'team-1', campId: 'camp-1' });
+    playersRepository.findOne.mockResolvedValue({ id: 'player-1' });
+    photosRepository.create.mockImplementation((payload) => ({ id: 'photo-2', ...payload }));
+    photosRepository.save.mockImplementation(async (value) => value);
+
+    await service.createFromUpload(
+      { campId: 'camp-1', teamId: 'team-1', playerId: 'player-1' },
+      createUploadFile({ originalname: 'avatar.jpg', mimetype: 'image/jpeg' }),
+      'user-2',
+    );
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringMatching(/uploads[\\/]players[\\/]player-1[\\/].+/),
+      expect.any(Buffer),
+    );
+    expect(photosRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        playerId: 'player-1',
+        imageUrl: expect.stringMatching(/^\/uploads\/players\/player-1\/.+/),
+      }),
+    );
   });
 });

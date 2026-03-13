@@ -1,30 +1,21 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+﻿import { useEffect, useMemo, useState } from 'react';
 import type { Camp } from '../../api/camps.api';
 import type { CampTeam } from '../../api/camp-teams.api';
 import type { Player } from '../../api/players.api';
-import type { PhotoInput } from '../../api/photos.api';
 import { SectionCard } from '../../components/cards/SectionCard';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
 import { PageHeader } from '../../components/layout/PageHeader';
-import { Badge } from '../../components/ui/Badge';
-import { ModalDrawer } from '../../components/ui/ModalDrawer';
 import { useCampTeamsByCampQuery } from '../../features/camp-teams/use-camp-teams-query';
+import { PhotoUploadForm, type PhotoUploadSubmitInput } from '../../features/photos/PhotoUploadForm';
 import { useCampsQuery } from '../../features/camps/use-camps-query';
-import { photoFormSchema, type PhotoFormValues } from '../../features/photos/photo-form.schema';
 import { usePhotoMutations } from '../../features/photos/use-photo-mutations';
 import { usePhotosQuery, type PhotoTargetType } from '../../features/photos/use-photos-query';
 import { usePlayersQuery } from '../../features/players/use-players-query';
 import { ApiClientError } from '../../lib/errors';
 
-type FormMode =
-  | {
-      kind: 'create';
-    }
-  | null;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || '';
 
 function getMutationErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiClientError) {
@@ -39,7 +30,7 @@ function getQueryErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return 'Unable to load photos right now.';
+  return 'Не успяхме да заредим снимките.';
 }
 
 function formatCreatedAt(createdAt: string): string {
@@ -49,7 +40,7 @@ function formatCreatedAt(createdAt: string): string {
     return createdAt;
   }
 
-  return parsed.toLocaleString();
+  return parsed.toLocaleString('bg-BG');
 }
 
 function getPlayerLabel(player: Player): string {
@@ -66,247 +57,27 @@ function getTeamLabel(team: CampTeam): string {
   return team.name;
 }
 
-function toCreatePayload(values: PhotoFormValues): PhotoInput {
-  const imageUrl = values.imageUrl.trim();
-
-  if (values.targetType === 'camp') {
-    return {
-      campId: values.campId?.trim(),
-      imageUrl,
-    };
+function resolvePhotoImageUrl(imageUrl: string): string {
+  if (/^https?:\/\//i.test(imageUrl)) {
+    return imageUrl;
   }
 
-  if (values.targetType === 'team') {
-    return {
-      teamId: values.teamId?.trim(),
-      imageUrl,
-    };
+  if (!imageUrl.startsWith('/')) {
+    return imageUrl;
   }
 
-  return {
-    playerId: values.playerId?.trim(),
-    imageUrl,
-  };
+  if (!API_BASE_URL) {
+    return imageUrl;
+  }
+
+  return `${API_BASE_URL}${imageUrl}`;
 }
 
-function PhotoCreateForm({
-  isSubmitting,
-  camps,
-  players,
-  selectedCampId,
-  teams,
-  isTeamsLoading,
-  onCancel,
-  onSubmit,
-}: {
-  isSubmitting: boolean;
-  camps: Camp[];
-  players: Player[];
-  selectedCampId: string;
-  teams: CampTeam[];
-  isTeamsLoading: boolean;
-  onCancel: () => void;
-  onSubmit: (values: PhotoFormValues) => Promise<void>;
-}) {
-  const form = useForm<PhotoFormValues>({
-    resolver: zodResolver(photoFormSchema),
-    defaultValues: {
-      targetType: 'camp',
-      campId: camps[0]?.id ?? '',
-      teamId: '',
-      playerId: players[0]?.id ?? '',
-      imageUrl: '',
-    },
-  });
-
-  const targetType = form.watch('targetType');
-
-  useEffect(() => {
-    if (targetType === 'camp' && !form.getValues('campId') && camps.length > 0) {
-      form.setValue('campId', camps[0].id, { shouldDirty: true, shouldValidate: true });
-    }
-
-    if (targetType === 'player' && !form.getValues('playerId') && players.length > 0) {
-      form.setValue('playerId', players[0].id, { shouldDirty: true, shouldValidate: true });
-    }
-  }, [camps, form, players, targetType]);
-
-  useEffect(() => {
-    if (targetType !== 'team') {
-      return;
-    }
-
-    if (!selectedCampId && camps.length > 0) {
-      form.setValue('campId', camps[0].id, { shouldDirty: true, shouldValidate: true });
-    }
-  }, [camps, form, selectedCampId, targetType]);
-
-  useEffect(() => {
-    if (targetType !== 'team') {
-      return;
-    }
-
-    const currentTeamId = form.getValues('teamId');
-    const hasCurrentInList = teams.some((team) => team.id === currentTeamId);
-
-    if (!hasCurrentInList) {
-      form.setValue('teamId', teams[0]?.id ?? '', { shouldDirty: true, shouldValidate: true });
-    }
-  }, [form, targetType, teams]);
-
-  return (
-    <form
-      className="space-y-4"
-      onSubmit={form.handleSubmit(async (values) => {
-        await onSubmit(values);
-      })}
-      noValidate
-    >
-      <div>
-        <label htmlFor="targetType" className="mb-1 block text-sm font-medium text-slate-700">
-          Target Type
-        </label>
-        <select
-          id="targetType"
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
-          {...form.register('targetType')}
-        >
-          <option value="camp">Camp</option>
-          <option value="team">Team</option>
-          <option value="player">Player</option>
-        </select>
-        {form.formState.errors.targetType ? (
-          <p className="mt-1 text-sm text-red-600">{form.formState.errors.targetType.message}</p>
-        ) : null}
-      </div>
-
-      {targetType === 'camp' ? (
-        <div>
-          <label htmlFor="campId" className="mb-1 block text-sm font-medium text-slate-700">
-            Camp
-          </label>
-          <select
-            id="campId"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
-            {...form.register('campId')}
-          >
-            <option value="">Select camp</option>
-            {camps.map((camp) => (
-              <option key={camp.id} value={camp.id}>
-                {getCampLabel(camp)}
-              </option>
-            ))}
-          </select>
-          {form.formState.errors.campId ? (
-            <p className="mt-1 text-sm text-red-600">{form.formState.errors.campId.message}</p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {targetType === 'team' ? (
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="teamCampId" className="mb-1 block text-sm font-medium text-slate-700">
-              Camp (for team selection)
-            </label>
-            <select
-              id="teamCampId"
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
-              {...form.register('campId')}
-            >
-              <option value="">Select camp</option>
-              {camps.map((camp) => (
-                <option key={camp.id} value={camp.id}>
-                  {getCampLabel(camp)}
-                </option>
-              ))}
-            </select>
-            {form.formState.errors.campId ? (
-              <p className="mt-1 text-sm text-red-600">{form.formState.errors.campId.message}</p>
-            ) : null}
-          </div>
-
-          <div>
-            <label htmlFor="teamId" className="mb-1 block text-sm font-medium text-slate-700">
-              Team
-            </label>
-            <select
-              id="teamId"
-              disabled={!selectedCampId || isTeamsLoading}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
-              {...form.register('teamId')}
-            >
-              <option value="">Select team</option>
-              {teams.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {getTeamLabel(team)}
-                </option>
-              ))}
-            </select>
-            {form.formState.errors.teamId ? (
-              <p className="mt-1 text-sm text-red-600">{form.formState.errors.teamId.message}</p>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {targetType === 'player' ? (
-        <div>
-          <label htmlFor="playerId" className="mb-1 block text-sm font-medium text-slate-700">
-            Player
-          </label>
-          <select
-            id="playerId"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
-            {...form.register('playerId')}
-          >
-            <option value="">Select player</option>
-            {players.map((player) => (
-              <option key={player.id} value={player.id}>
-                {getPlayerLabel(player)}
-              </option>
-            ))}
-          </select>
-          {form.formState.errors.playerId ? (
-            <p className="mt-1 text-sm text-red-600">{form.formState.errors.playerId.message}</p>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div>
-        <label htmlFor="imageUrl" className="mb-1 block text-sm font-medium text-slate-700">
-          Image URL
-        </label>
-        <input
-          id="imageUrl"
-          placeholder="https://..."
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
-          {...form.register('imageUrl')}
-        />
-        {form.formState.errors.imageUrl ? (
-          <p className="mt-1 text-sm text-red-600">{form.formState.errors.imageUrl.message}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? 'Saving...' : 'Create Photo Metadata'}
-        </button>
-      </div>
-    </form>
-  );
-}
+const TARGET_OPTIONS: Array<{ value: PhotoTargetType; label: string }> = [
+  { value: 'camp', label: 'Лагер' },
+  { value: 'team', label: 'Отбор' },
+  { value: 'player', label: 'Играч' },
+];
 
 export function PhotosPage() {
   const campsQuery = useCampsQuery();
@@ -315,33 +86,36 @@ export function PhotosPage() {
   const [selectedTargetType, setSelectedTargetType] = useState<PhotoTargetType>('camp');
   const [selectedTargetId, setSelectedTargetId] = useState<string>('');
   const [selectedCampIdForTeam, setSelectedCampIdForTeam] = useState<string>('');
-  const [formMode, setFormMode] = useState<FormMode>(null);
   const [feedback, setFeedback] = useState<{ kind: 'success' | 'error'; message: string } | null>(null);
 
   const teamsQuery = useCampTeamsByCampQuery(selectedCampIdForTeam || undefined);
   const photosQuery = usePhotosQuery(selectedTargetType, selectedTargetId || undefined);
-
-  const { createMutation, deleteMutation } = usePhotoMutations();
-  const isMutating = createMutation.isPending || deleteMutation.isPending;
+  const { deleteMutation, uploadManyMutation } = usePhotoMutations();
 
   const camps = campsQuery.data ?? [];
   const players = playersQuery.data ?? [];
   const teams = teamsQuery.data ?? [];
 
+  const isMutating = deleteMutation.isPending || uploadManyMutation.isPending;
+
   useEffect(() => {
     if (selectedTargetType === 'camp') {
       const firstCampId = camps[0]?.id ?? '';
+
       if (!selectedTargetId || !camps.some((camp) => camp.id === selectedTargetId)) {
         setSelectedTargetId(firstCampId);
       }
+
       return;
     }
 
     if (selectedTargetType === 'player') {
       const firstPlayerId = players[0]?.id ?? '';
+
       if (!selectedTargetId || !players.some((player) => player.id === selectedTargetId)) {
         setSelectedTargetId(firstPlayerId);
       }
+
       return;
     }
 
@@ -370,53 +144,67 @@ export function PhotosPage() {
 
     for (const photo of photosQuery.data ?? []) {
       if (photo.teamId) {
-        summaryMap.set(photo.id, `Team: ${teamMap.get(photo.teamId) ?? photo.teamId}`);
+        summaryMap.set(photo.id, `Отбор: ${teamMap.get(photo.teamId) ?? photo.teamId}`);
         continue;
       }
 
       if (photo.playerId) {
-        summaryMap.set(photo.id, `Player: ${playerMap.get(photo.playerId) ?? photo.playerId}`);
+        summaryMap.set(photo.id, `Играч: ${playerMap.get(photo.playerId) ?? photo.playerId}`);
         continue;
       }
 
       if (photo.campId) {
-        summaryMap.set(photo.id, `Camp: ${campMap.get(photo.campId) ?? photo.campId}`);
+        summaryMap.set(photo.id, `Лагер: ${campMap.get(photo.campId) ?? photo.campId}`);
         continue;
       }
 
-      summaryMap.set(photo.id, 'Unscoped');
+      summaryMap.set(photo.id, 'Без асоциация');
     }
 
     return summaryMap;
   }, [camps, photosQuery.data, players, teams]);
 
-  async function handleCreate(values: PhotoFormValues): Promise<void> {
+  async function handleUpload(input: PhotoUploadSubmitInput): Promise<void> {
     try {
-      const payload = toCreatePayload(values);
-      await createMutation.mutateAsync(payload);
-      setFeedback({ kind: 'success', message: 'Photo metadata created successfully.' });
-      setFormMode(null);
+      const result = await uploadManyMutation.mutateAsync({
+        files: input.files,
+        payload: input.payload,
+      });
 
-      if (payload.campId) {
-        setSelectedTargetType('camp');
-        setSelectedTargetId(payload.campId);
-      } else if (payload.teamId) {
-        setSelectedTargetType('team');
-        setSelectedTargetId(payload.teamId);
-      } else if (payload.playerId) {
-        setSelectedTargetType('player');
-        setSelectedTargetId(payload.playerId);
+      setSelectedTargetType(input.targetType);
+      setSelectedTargetId(input.targetId);
+
+      if (input.targetType === 'team' && input.payload.campId) {
+        setSelectedCampIdForTeam(input.payload.campId);
       }
+
+      if (result.failed.length === 0) {
+        setFeedback({ kind: 'success', message: `Успешно качени снимки: ${result.successCount}.` });
+        return;
+      }
+
+      if (result.successCount > 0) {
+        setFeedback({
+          kind: 'error',
+          message: `Качени: ${result.successCount}. Някои файлове не бяха качени: ${result.failed[0].fileName} (${result.failed[0].message})`,
+        });
+        return;
+      }
+
+      setFeedback({
+        kind: 'error',
+        message: `Качването не успя: ${result.failed[0].fileName} (${result.failed[0].message})`,
+      });
     } catch (error) {
       setFeedback({
         kind: 'error',
-        message: getMutationErrorMessage(error, 'Unable to create photo metadata.'),
+        message: getMutationErrorMessage(error, 'Неуспешно качване на снимките.'),
       });
     }
   }
 
   async function handleDelete(photoId: string): Promise<void> {
-    const shouldDelete = window.confirm('Delete this photo metadata record? This action cannot be undone.');
+    const shouldDelete = window.confirm('Сигурни ли сте, че искате да изтриете тази снимка?');
 
     if (!shouldDelete) {
       return;
@@ -424,11 +212,11 @@ export function PhotosPage() {
 
     try {
       await deleteMutation.mutateAsync(photoId);
-      setFeedback({ kind: 'success', message: 'Photo deleted successfully.' });
+      setFeedback({ kind: 'success', message: 'Снимката е изтрита.' });
     } catch (error) {
       setFeedback({
         kind: 'error',
-        message: getMutationErrorMessage(error, 'Unable to delete photo.'),
+        message: getMutationErrorMessage(error, 'Неуспешно изтриване на снимката.'),
       });
     }
   }
@@ -436,88 +224,70 @@ export function PhotosPage() {
   return (
     <div className="space-y-5 sm:space-y-6">
       <PageHeader
-        title="Photos / Gallery"
-        description="Create and manage photo metadata linked to camps, teams, or players."
-        actions={
-          <button
-            type="button"
-            onClick={() => {
-              setFeedback(null);
-              setFormMode({ kind: 'create' });
-            }}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            Add Photo Metadata
-          </button>
-        }
+        title="Снимки"
+        description="Качвай снимки, свързвай ги с лагер, отбор или играч и управлявай галерията от едно място."
       />
-
-      <div className="flex items-center gap-2">
-        <Badge tone="neutral">Metadata</Badge>
-        <Badge tone="success">CRUD</Badge>
-      </div>
 
       {feedback ? (
         <div
           className={
             feedback.kind === 'success'
-              ? 'rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800'
-              : 'rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'
+              ? 'rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800'
+              : 'rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'
           }
         >
           {feedback.message}
         </div>
       ) : null}
 
-      <ModalDrawer
-        open={Boolean(formMode)}
-        title="Create Photo Metadata"
-        onClose={() => {
-          setFormMode(null);
-        }}
+      <SectionCard
+        title="Качване на снимки"
+        description="Избери цел, добави снимки, прегледай оптимизацията и качи с един бутон."
       >
-        {formMode ? (
-          <PhotoCreateForm
-            isSubmitting={isMutating}
-            camps={camps}
-            players={players}
-            selectedCampId={selectedCampIdForTeam}
-            teams={teams}
-            isTeamsLoading={teamsQuery.isLoading}
-            onCancel={() => {
-              setFormMode(null);
-            }}
-            onSubmit={handleCreate}
-          />
-        ) : null}
-      </ModalDrawer>
+        <PhotoUploadForm
+          camps={camps}
+          players={players}
+          isUploading={uploadManyMutation.isPending}
+          onSubmit={handleUpload}
+        />
+      </SectionCard>
 
-      <SectionCard title="Browse Photos" description="Filter records by target and related entity.">
-        <div className="grid gap-4 sm:grid-cols-2">
+      <SectionCard
+        title="Галерия"
+        description="Преглеждай и изтривай снимките за избраната цел."
+      >
+        <div className="space-y-4">
           <div>
-            <label htmlFor="photosTargetType" className="mb-1 block text-sm font-medium text-slate-700">
-              Target Type
-            </label>
-            <select
-              id="photosTargetType"
-              value={selectedTargetType}
-              onChange={(event) => {
-                const next = event.target.value as PhotoTargetType;
-                setSelectedTargetType(next);
-                setSelectedTargetId('');
-              }}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
-            >
-              <option value="camp">Camp</option>
-              <option value="team">Team</option>
-              <option value="player">Player</option>
-            </select>
+            <p className="mb-2 text-sm font-medium text-slate-700">Филтър по цел</p>
+            <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-100 p-1">
+              {TARGET_OPTIONS.map((option) => {
+                const isActive = selectedTargetType === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTargetType(option.value);
+                      setSelectedTargetId('');
+                    }}
+                    className={
+                      isActive
+                        ? 'rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm'
+                        : 'rounded-lg px-3 py-2 text-sm font-medium text-slate-600'
+                    }
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {selectedTargetType === 'camp' ? (
             <div>
               <label htmlFor="photosCamp" className="mb-1 block text-sm font-medium text-slate-700">
-                Camp
+                Лагер
               </label>
               <select
                 id="photosCamp"
@@ -527,7 +297,7 @@ export function PhotosPage() {
                 }}
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
               >
-                <option value="">Select camp</option>
+                <option value="">Избери лагер</option>
                 {camps.map((camp) => (
                   <option key={camp.id} value={camp.id}>
                     {getCampLabel(camp)}
@@ -538,10 +308,10 @@ export function PhotosPage() {
           ) : null}
 
           {selectedTargetType === 'team' ? (
-            <>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="photosTeamCamp" className="mb-1 block text-sm font-medium text-slate-700">
-                  Camp
+                  Лагер
                 </label>
                 <select
                   id="photosTeamCamp"
@@ -552,7 +322,7 @@ export function PhotosPage() {
                   }}
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
                 >
-                  <option value="">Select camp</option>
+                  <option value="">Избери лагер</option>
                   {camps.map((camp) => (
                     <option key={camp.id} value={camp.id}>
                       {getCampLabel(camp)}
@@ -563,7 +333,7 @@ export function PhotosPage() {
 
               <div>
                 <label htmlFor="photosTeam" className="mb-1 block text-sm font-medium text-slate-700">
-                  Team
+                  Отбор
                 </label>
                 <select
                   id="photosTeam"
@@ -574,7 +344,7 @@ export function PhotosPage() {
                   }}
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <option value="">Select team</option>
+                  <option value="">Избери отбор</option>
                   {teams.map((team) => (
                     <option key={team.id} value={team.id}>
                       {getTeamLabel(team)}
@@ -582,13 +352,13 @@ export function PhotosPage() {
                   ))}
                 </select>
               </div>
-            </>
+            </div>
           ) : null}
 
           {selectedTargetType === 'player' ? (
             <div>
               <label htmlFor="photosPlayer" className="mb-1 block text-sm font-medium text-slate-700">
-                Player
+                Играч
               </label>
               <select
                 id="photosPlayer"
@@ -598,7 +368,7 @@ export function PhotosPage() {
                 }}
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
               >
-                <option value="">Select player</option>
+                <option value="">Избери играч</option>
                 {players.map((player) => (
                   <option key={player.id} value={player.id}>
                     {getPlayerLabel(player)}
@@ -609,9 +379,16 @@ export function PhotosPage() {
           ) : null}
         </div>
 
-        {photosQuery.isLoading ? <LoadingState label="Loading photos..." /> : null}
+        {!selectedTargetId ? (
+          <EmptyState
+            title="Избери цел"
+            description="За да заредим галерията, избери лагер, отбор или играч."
+          />
+        ) : null}
 
-        {photosQuery.isError ? (
+        {selectedTargetId && photosQuery.isLoading ? <LoadingState label="Зареждане на снимките..." /> : null}
+
+        {selectedTargetId && photosQuery.isError ? (
           <ErrorState
             message={getQueryErrorMessage(photosQuery.error)}
             onRetry={() => {
@@ -620,50 +397,45 @@ export function PhotosPage() {
           />
         ) : null}
 
-        {photosQuery.isSuccess && (photosQuery.data ?? []).length === 0 ? (
+        {selectedTargetId && photosQuery.isSuccess && (photosQuery.data ?? []).length === 0 ? (
           <EmptyState
-            title="No photo metadata"
-            description="No photo records found for the selected target."
+            title="Няма снимки"
+            description="Все още няма качени снимки за избраната цел."
           />
         ) : null}
 
-        {photosQuery.isSuccess && (photosQuery.data ?? []).length > 0 ? (
+        {selectedTargetId && photosQuery.isSuccess && (photosQuery.data ?? []).length > 0 ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {(photosQuery.data ?? []).map((photo) => (
-              <div key={photo.id} className="rounded-lg border border-slate-200 bg-white p-3">
+              <article key={photo.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <img
-                  src={photo.imageUrl}
-                  alt="Photo preview"
-                  className="h-40 w-full rounded-md border border-slate-200 object-cover"
+                  src={resolvePhotoImageUrl(photo.imageUrl)}
+                  alt="Снимка от галерията"
+                  className="h-44 w-full rounded-lg border border-slate-200 object-cover"
                   loading="lazy"
                 />
 
                 <div className="mt-3 space-y-1 text-sm text-slate-700">
-                  <p className="break-all">
-                    <span className="font-medium text-slate-900">Image:</span> {photo.imageUrl}
+                  <p>
+                    <span className="font-medium text-slate-900">Връзка:</span>{' '}
+                    {targetSummaryByPhotoId.get(photo.id) ?? 'Неизвестна'}
                   </p>
                   <p>
-                    <span className="font-medium text-slate-900">Association:</span>{' '}
-                    {targetSummaryByPhotoId.get(photo.id) ?? 'Unknown'}
-                  </p>
-                  <p>
-                    <span className="font-medium text-slate-900">Created:</span> {formatCreatedAt(photo.createdAt)}
+                    <span className="font-medium text-slate-900">Създадена:</span> {formatCreatedAt(photo.createdAt)}
                   </p>
                 </div>
 
-                <div className="mt-3 flex">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void handleDelete(photo.id);
-                    }}
-                    disabled={isMutating}
-                    className="w-full rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleDelete(photo.id);
+                  }}
+                  disabled={isMutating}
+                  className="mt-3 w-full rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Изтрий
+                </button>
+              </article>
             ))}
           </div>
         ) : null}

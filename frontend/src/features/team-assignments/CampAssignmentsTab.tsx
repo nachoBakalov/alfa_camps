@@ -364,7 +364,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
                   <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
                     <span className="font-medium text-slate-800">Current team: </span>
                     {currentTeamState?.state === 'loading'
-                      ? 'Loading...'
+                      ? 'Зареждане...'
                       : currentTeamState?.state === 'error'
                         ? 'Unavailable'
                         : currentTeamName || 'Unassigned'}
