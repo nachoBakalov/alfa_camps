@@ -283,6 +283,7 @@ Recommended V1 values:
 - KILLS_RANK
 - MASS_BATTLE_WINS_RANK
 - CHALLENGE_WINS_RANK
+- SURVIVALS_RANK
 
 ## 3.8 team_assignments
 
@@ -451,7 +452,7 @@ Indexes:
 
 ## 3.13 achievement_definitions
 
-Defines automatic achievements.
+Defines threshold-based achievements. Backend support remains available, but achievements are not a core active progression direction in the current product track.
 
 Fields:
 - id: uuid, primary key
@@ -512,7 +513,7 @@ Fields:
 
 Notes:
 - V1 primarily uses manual medals.
-- Automatic medals may be added later.
+- Medal type AUTO is future-facing unless explicit auto-award logic is implemented.
 
 Indexes:
 - unique(name)

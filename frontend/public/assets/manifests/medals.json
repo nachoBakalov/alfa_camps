@@ -1,0 +1,32 @@
+[
+  {
+    "id": "medal-comando",
+    "label": "Comando",
+    "url": "/assets/ranks/medals/comando.png",
+    "category": "medals"
+  },
+  {
+    "id": "medal-horeey",
+    "label": "Horeey",
+    "url": "/assets/ranks/medals/horeey.png",
+    "category": "medals"
+  },
+  {
+    "id": "medal-ironcrest",
+    "label": "Ironcrest",
+    "url": "/assets/ranks/medals/ironcrest.png",
+    "category": "medals"
+  },
+  {
+    "id": "medal-lionheart",
+    "label": "Lionheart",
+    "url": "/assets/ranks/medals/lionheart.png",
+    "category": "medals"
+  },
+  {
+    "id": "medal-survivor",
+    "label": "Survivor",
+    "url": "/assets/ranks/medals/survivor.png",
+    "category": "medals"
+  }
+]

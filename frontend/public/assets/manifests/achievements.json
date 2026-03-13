@@ -1,0 +1,50 @@
+[
+  {
+    "id": "achievement-kills-1",
+    "label": "Kills Milestone 1",
+    "url": "/assets/ranks/kills/1_kills.png",
+    "category": "kills"
+  },
+  {
+    "id": "achievement-kills-10",
+    "label": "Kills Milestone 10",
+    "url": "/assets/ranks/kills/10_kills.png",
+    "category": "kills"
+  },
+  {
+    "id": "achievement-survivals-1",
+    "label": "Survivals Milestone 1",
+    "url": "/assets/ranks/survive/1_survive.png",
+    "category": "survivals"
+  },
+  {
+    "id": "achievement-survivals-5",
+    "label": "Survivals Milestone 5",
+    "url": "/assets/ranks/survive/5_survive.png",
+    "category": "survivals"
+  },
+  {
+    "id": "achievement-duel-wins-1",
+    "label": "Duel Wins Milestone 1",
+    "url": "/assets/ranks/challenges/1_wins_challenges.png",
+    "category": "duel_wins"
+  },
+  {
+    "id": "achievement-duel-wins-5",
+    "label": "Duel Wins Milestone 5",
+    "url": "/assets/ranks/challenges/5_wins_challenges.png",
+    "category": "duel_wins"
+  },
+  {
+    "id": "achievement-points-1",
+    "label": "Points Milestone 1",
+    "url": "/assets/ranks/mass_battles/1_wins_mass_battles.png",
+    "category": "points"
+  },
+  {
+    "id": "achievement-points-5",
+    "label": "Points Milestone 5",
+    "url": "/assets/ranks/mass_battles/5_wins_mass_battles.png",
+    "category": "points"
+  }
+]

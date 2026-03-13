@@ -29,12 +29,18 @@ const rankCategorySeeds = [
     name: 'Challenge Wins Rank',
     iconBasePath: '/ranks/challenge-wins',
   },
+  {
+    code: 'SURVIVALS_RANK',
+    name: 'Survivals Rank',
+    iconBasePath: '/assets/ranks/survive',
+  },
 ] as const;
 
 const rankThresholdsByCategoryCode: Record<string, number[]> = {
   KILLS_RANK: [1, 5, 10, 15, 20, 25, 30, 35, 40],
   MASS_BATTLE_WINS_RANK: [1, 2, 3, 4, 5, 6, 7, 8, 9],
   CHALLENGE_WINS_RANK: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  SURVIVALS_RANK: [1, 2, 3, 4, 5, 6, 7, 8, 9],
 };
 
 const achievementThresholdsByType: Array<{
@@ -177,7 +183,10 @@ export async function seedProgression(dataSource: DataSource): Promise<SeedSumma
         threshold,
         rankOrder,
         name: `${categorySeed.name} ${threshold}`,
-        iconUrl: `${categorySeed.iconBasePath}/${threshold}.png`,
+        iconUrl:
+          categorySeed.code === 'SURVIVALS_RANK'
+            ? `${categorySeed.iconBasePath}/${threshold}_survive.png`
+            : `${categorySeed.iconBasePath}/${threshold}.png`,
       });
 
       await rankDefinitionsRepository.save(definition);

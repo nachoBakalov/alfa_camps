@@ -1,4 +1,5 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { MedalAutoAwardConditionType } from '../enums/medal-auto-award-condition-type.enum';
 import { MedalType } from '../enums/medal-type.enum';
 
 export class UpdateMedalDefinitionDto {
@@ -17,4 +18,13 @@ export class UpdateMedalDefinitionDto {
   @IsEnum(MedalType)
   @IsOptional()
   type?: MedalType;
+
+  @IsEnum(MedalAutoAwardConditionType)
+  @IsOptional()
+  conditionType?: MedalAutoAwardConditionType;
+
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  threshold?: number;
 }

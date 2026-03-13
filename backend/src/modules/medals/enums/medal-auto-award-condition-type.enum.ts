@@ -1,0 +1,7 @@
+export enum MedalAutoAwardConditionType {
+  KILLS = 'KILLS',
+  KNIFE_KILLS = 'KNIFE_KILLS',
+  SURVIVALS = 'SURVIVALS',
+  DUEL_WINS = 'DUEL_WINS',
+  MASS_BATTLE_WINS = 'MASS_BATTLE_WINS',
+}

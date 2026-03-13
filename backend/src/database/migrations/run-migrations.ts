@@ -39,6 +39,7 @@ import { CreateRanksTables1840000000000 } from './1840000000000-create-ranks-tab
 import { CreateAchievementsTables1850000000000 } from './1850000000000-create-achievements-tables';
 import { CreateMedalsTables1860000000000 } from './1860000000000-create-medals-tables';
 import { CreatePhotosTable1870000000000 } from './1870000000000-create-photos-table';
+import { AddMedalAutoAwardFields1880000000000 } from './1880000000000-add-medal-auto-award-fields';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -100,6 +101,7 @@ async function run(): Promise<void> {
       CreateAchievementsTables1850000000000,
       CreateMedalsTables1860000000000,
       CreatePhotosTable1870000000000,
+      AddMedalAutoAwardFields1880000000000,
     ],
     synchronize: false,
   });

@@ -7,9 +7,16 @@ type AssetPickerProps = {
   selectedUrl?: string;
   onSelect: (url: string) => void;
   title?: string;
+  filterCategory?: string;
 };
 
-export function AssetPicker({ manifest, selectedUrl, onSelect, title = 'Choose Asset' }: AssetPickerProps) {
+export function AssetPicker({
+  manifest,
+  selectedUrl,
+  onSelect,
+  title = 'Choose Asset',
+  filterCategory,
+}: AssetPickerProps) {
   const [assets, setAssets] = useState<AssetManifestItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +51,11 @@ export function AssetPicker({ manifest, selectedUrl, onSelect, title = 'Choose A
     };
   }, [manifest]);
 
+  const normalizedFilter = filterCategory?.trim().toLowerCase() ?? '';
+  const visibleAssets = normalizedFilter
+    ? assets.filter((asset) => (asset.category ?? '').trim().toLowerCase() === normalizedFilter)
+    : assets;
+
   return (
     <section className="space-y-2">
       <p className="text-sm font-medium text-slate-700">{title}</p>
@@ -52,13 +64,13 @@ export function AssetPicker({ manifest, selectedUrl, onSelect, title = 'Choose A
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      {!isLoading && !error && assets.length === 0 ? (
+      {!isLoading && !error && visibleAssets.length === 0 ? (
         <p className="text-sm text-slate-500">No assets found in manifest.</p>
       ) : null}
 
-      {!isLoading && !error && assets.length > 0 ? (
+      {!isLoading && !error && visibleAssets.length > 0 ? (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {assets.map((asset) => {
+          {visibleAssets.map((asset) => {
             const isSelected = selectedUrl === asset.url;
 
             return (

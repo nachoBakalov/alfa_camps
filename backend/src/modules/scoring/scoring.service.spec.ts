@@ -11,6 +11,7 @@ import { CampParticipation } from '../camp-participations/entities/camp-particip
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Duel } from '../duels/entities/duel.entity';
 import { AchievementsService } from '../achievements/achievements.service';
+import { MedalsService } from '../medals/medals.service';
 import { RanksService } from '../ranks/ranks.service';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
 import { BattleParticipationScoreLedger } from './entities/battle-participation-score-ledger.entity';
@@ -39,6 +40,10 @@ const createAchievementsServiceMock = () => ({
   unlockParticipationAchievements: jest.fn(),
 });
 
+const createMedalsServiceMock = () => ({
+  unlockParticipationAutoMedals: jest.fn(),
+});
+
 describe('ScoringService', () => {
   let service: ScoringService;
   let battlesRepository: MockRepository;
@@ -48,6 +53,7 @@ describe('ScoringService', () => {
   let duelsRepository: MockRepository;
   let ranksService: ReturnType<typeof createRanksServiceMock>;
   let achievementsService: ReturnType<typeof createAchievementsServiceMock>;
+  let medalsService: ReturnType<typeof createMedalsServiceMock>;
   let participationLedgerRepository: MockRepository;
   let teamLedgerRepository: MockRepository;
 
@@ -213,8 +219,10 @@ describe('ScoringService', () => {
     duelsRepository = createRepositoryMock();
     ranksService = createRanksServiceMock();
     achievementsService = createAchievementsServiceMock();
+    medalsService = createMedalsServiceMock();
     ranksService.recomputeParticipationRanks.mockResolvedValue(undefined);
     achievementsService.unlockParticipationAchievements.mockResolvedValue(undefined);
+    medalsService.unlockParticipationAutoMedals.mockResolvedValue(undefined);
     participationLedgerRepository = createRepositoryMock();
     teamLedgerRepository = createRepositoryMock();
 
@@ -231,6 +239,7 @@ describe('ScoringService', () => {
         { provide: getRepositoryToken(Duel), useValue: duelsRepository },
         { provide: RanksService, useValue: ranksService },
         { provide: AchievementsService, useValue: achievementsService },
+        { provide: MedalsService, useValue: medalsService },
         {
           provide: getRepositoryToken(BattleParticipationScoreLedger),
           useValue: participationLedgerRepository,
@@ -332,6 +341,9 @@ describe('ScoringService', () => {
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledTimes(2);
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledWith('p1');
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledWith('p2');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledTimes(2);
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledWith('p1');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledWith('p2');
   });
 
   it('apply twice with same preview -> second apply makes zero net effect', async () => {
@@ -348,6 +360,7 @@ describe('ScoringService', () => {
     expect(transactionState.participationStats).toEqual(afterFirstApply);
     expect(ranksService.recomputeParticipationRanks).toHaveBeenCalledTimes(2);
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledTimes(2);
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledTimes(2);
   });
 
   it('apply does not invoke progression hooks when scoring transaction fails', async () => {
@@ -359,9 +372,10 @@ describe('ScoringService', () => {
       }),
     };
 
-    await expect(service.applyBattleScore(massBattleId)).rejects.toThrow('transaction failed');
+    await expect(service.applyBattleScore(massBattleId)).rejects.toThrow('Unable to apply battle score right now');
     expect(ranksService.recomputeParticipationRanks).not.toHaveBeenCalled();
     expect(achievementsService.unlockParticipationAchievements).not.toHaveBeenCalled();
+    expect(medalsService.unlockParticipationAutoMedals).not.toHaveBeenCalled();
   });
 
   it('apply after changing preview data -> only net difference is applied', async () => {
@@ -453,6 +467,7 @@ describe('ScoringService finalizeCampScore', () => {
   let duelsRepository: MockRepository;
   let ranksService: ReturnType<typeof createRanksServiceMock>;
   let achievementsService: ReturnType<typeof createAchievementsServiceMock>;
+  let medalsService: ReturnType<typeof createMedalsServiceMock>;
 
   const campId = 'camp-1';
 
@@ -552,8 +567,10 @@ describe('ScoringService finalizeCampScore', () => {
     duelsRepository = createRepositoryMock();
     ranksService = createRanksServiceMock();
     achievementsService = createAchievementsServiceMock();
+    medalsService = createMedalsServiceMock();
     ranksService.recomputeParticipationRanks.mockResolvedValue(undefined);
     achievementsService.unlockParticipationAchievements.mockResolvedValue(undefined);
+    medalsService.unlockParticipationAutoMedals.mockResolvedValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -565,6 +582,7 @@ describe('ScoringService finalizeCampScore', () => {
         { provide: getRepositoryToken(Duel), useValue: duelsRepository },
         { provide: RanksService, useValue: ranksService },
         { provide: AchievementsService, useValue: achievementsService },
+        { provide: MedalsService, useValue: medalsService },
       ],
     }).compile();
 
@@ -735,6 +753,12 @@ describe('ScoringService finalizeCampScore', () => {
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledWith('p3');
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledWith('p4');
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledWith('p5');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledTimes(5);
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledWith('p1');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledWith('p2');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledWith('p3');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledWith('p4');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledWith('p5');
     expect(ranksService.recomputeParticipationRanks).not.toHaveBeenCalled();
   });
 
@@ -780,6 +804,9 @@ describe('ScoringService finalizeCampScore', () => {
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenCalledTimes(2);
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenNthCalledWith(1, 'p1');
     expect(achievementsService.unlockParticipationAchievements).toHaveBeenNthCalledWith(2, 'p1');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenCalledTimes(2);
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenNthCalledWith(1, 'p1');
+    expect(medalsService.unlockParticipationAutoMedals).toHaveBeenNthCalledWith(2, 'p1');
     expect(ranksService.recomputeParticipationRanks).not.toHaveBeenCalled();
   });
 
@@ -828,6 +855,7 @@ describe('ScoringService finalizeCampScore', () => {
 
     await expect(service.finalizeCampScore(campId)).rejects.toThrow('finalize failed');
     expect(achievementsService.unlockParticipationAchievements).not.toHaveBeenCalled();
+    expect(medalsService.unlockParticipationAutoMedals).not.toHaveBeenCalled();
     expect(ranksService.recomputeParticipationRanks).not.toHaveBeenCalled();
   });
 });

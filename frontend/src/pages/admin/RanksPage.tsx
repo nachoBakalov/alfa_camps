@@ -13,6 +13,7 @@ import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { AssetPicker } from '../../components/ui/AssetPicker';
 import { Badge } from '../../components/ui/Badge';
 import { ModalDrawer } from '../../components/ui/ModalDrawer';
 import { rankCategoryFormSchema, type RankCategoryFormValues } from '../../features/ranks/rank-category-form.schema';
@@ -66,6 +67,63 @@ function getQueryErrorMessage(error: unknown): string {
   }
 
   return 'Unable to load rank data right now.';
+}
+
+function RankIconPreview({ iconUrl }: { iconUrl?: string | null }) {
+  if (!iconUrl) {
+    return <p className="text-xs text-slate-500">No icon selected</p>;
+  }
+
+  return (
+    <img
+      src={iconUrl}
+      alt="Rank icon preview"
+      className="h-12 w-12 rounded-md border border-slate-200 object-cover"
+      loading="lazy"
+    />
+  );
+}
+
+function toRankManifestCategory(categoryCode?: string): string | undefined {
+  if (!categoryCode) {
+    return undefined;
+  }
+
+  const normalized = categoryCode.trim().toUpperCase();
+
+  if (normalized === 'KILLS_RANK') {
+    return 'kills';
+  }
+
+  if (normalized === 'MASS_BATTLE_WINS_RANK') {
+    return 'mass_battles';
+  }
+
+  if (normalized === 'CHALLENGE_WINS_RANK') {
+    return 'challenges';
+  }
+
+  if (normalized === 'SURVIVALS_RANK') {
+    return 'survive';
+  }
+
+  if (normalized.includes('KILL')) {
+    return 'kills';
+  }
+
+  if (normalized.includes('MASS_BATTLE')) {
+    return 'mass_battles';
+  }
+
+  if (normalized.includes('CHALLENGE') || normalized.includes('DUEL')) {
+    return 'challenges';
+  }
+
+  if (normalized.includes('SURVIV')) {
+    return 'survive';
+  }
+
+  return undefined;
 }
 
 function toCategoryPayload(values: RankCategoryFormValues): RankCategoryInput {
@@ -191,6 +249,8 @@ function RankDefinitionForm({
   onCancel: () => void;
   onSubmit: (values: RankDefinitionFormValues) => Promise<void>;
 }) {
+  const [showIconPicker, setShowIconPicker] = useState(false);
+
   const form = useForm<RankDefinitionFormValues>({
     resolver: zodResolver(rankDefinitionFormSchema),
     defaultValues: {
@@ -211,6 +271,10 @@ function RankDefinitionForm({
       rankOrder: mode.kind === 'create' ? '0' : String(mode.definition.rankOrder),
     });
   }, [form, mode]);
+
+  const selectedCategoryId = form.watch('categoryId');
+  const selectedCategoryCode = categories.find((category) => category.id === selectedCategoryId)?.code;
+  const pickerCategory = toRankManifestCategory(selectedCategoryCode);
 
   const submitLabel = mode.kind === 'create' ? 'Create Definition' : 'Save Changes';
 
@@ -258,6 +322,11 @@ function RankDefinitionForm({
       </div>
 
       <div>
+        <p className="mb-1 block text-sm font-medium text-slate-700">Current Icon</p>
+        <RankIconPreview iconUrl={form.watch('iconUrl')} />
+      </div>
+
+      <div>
         <label htmlFor="definitionIconUrl" className="mb-1 block text-sm font-medium text-slate-700">
           Icon URL
         </label>
@@ -269,6 +338,30 @@ function RankDefinitionForm({
         />
         {form.formState.errors.iconUrl ? (
           <p className="mt-1 text-sm text-red-600">{form.formState.errors.iconUrl.message}</p>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowIconPicker((current) => !current);
+          }}
+          className="mt-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          {showIconPicker ? 'Hide Icon Picker' : 'Choose Icon'}
+        </button>
+
+        {showIconPicker ? (
+          <div className="mt-3">
+            <AssetPicker
+              manifest="ranks"
+              title="Choose Rank Icon"
+              filterCategory={pickerCategory}
+              selectedUrl={form.watch('iconUrl') ?? ''}
+              onSelect={(url) => {
+                form.setValue('iconUrl', url, { shouldValidate: true, shouldDirty: true });
+              }}
+            />
+          </div>
         ) : null}
       </div>
 
@@ -699,9 +792,12 @@ export function RanksPage() {
                               {definition.name || 'Not set'}
                             </p>
                             <p className="break-all">
-                              <span className="font-medium text-slate-900">Icon URL:</span>{' '}
-                              {definition.iconUrl || 'Not set'}
+                              <span className="font-medium text-slate-900">Icon:</span>
                             </p>
+                            <div className="flex items-center gap-3 rounded-md border border-slate-200 p-2">
+                              <RankIconPreview iconUrl={definition.iconUrl} />
+                              <p className="break-all text-xs text-slate-500">{definition.iconUrl || 'Not set'}</p>
+                            </div>
                             <p>
                               <span className="font-medium text-slate-900">Threshold:</span>{' '}
                               {definition.threshold}

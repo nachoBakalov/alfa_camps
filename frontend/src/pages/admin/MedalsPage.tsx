@@ -61,6 +61,21 @@ function getQueryErrorMessage(error: unknown): string {
   return 'Unable to load medal definitions right now.';
 }
 
+function MedalIconPreview({ iconUrl }: { iconUrl?: string | null }) {
+  if (!iconUrl) {
+    return <p className="text-xs text-slate-500">No icon selected</p>;
+  }
+
+  return (
+    <img
+      src={iconUrl}
+      alt="Medal icon preview"
+      className="h-12 w-12 rounded-md border border-slate-200 object-cover"
+      loading="lazy"
+    />
+  );
+}
+
 function toCreatePayload(values: MedalDefinitionFormValues): MedalDefinitionInput {
   return {
     name: values.name.trim(),
@@ -90,6 +105,8 @@ function MedalDefinitionForm({
   onCancel: () => void;
   onSubmit: (values: MedalDefinitionFormValues) => Promise<void>;
 }) {
+  const [showIconPicker, setShowIconPicker] = useState(false);
+
   const form = useForm<MedalDefinitionFormValues>({
     resolver: zodResolver(medalDefinitionFormSchema),
     defaultValues: {
@@ -149,6 +166,11 @@ function MedalDefinitionForm({
       </div>
 
       <div>
+        <p className="mb-1 block text-sm font-medium text-slate-700">Current Icon</p>
+        <MedalIconPreview iconUrl={form.watch('iconUrl')} />
+      </div>
+
+      <div>
         <label htmlFor="medalIconUrl" className="mb-1 block text-sm font-medium text-slate-700">
           Icon URL
         </label>
@@ -162,16 +184,28 @@ function MedalDefinitionForm({
           <p className="mt-1 text-sm text-red-600">{form.formState.errors.iconUrl.message}</p>
         ) : null}
 
-        <div className="mt-3">
-          <AssetPicker
-            manifest="ranks"
-            title="Or choose from rank-style icons"
-            selectedUrl={form.watch('iconUrl') ?? ''}
-            onSelect={(url) => {
-              form.setValue('iconUrl', url, { shouldValidate: true, shouldDirty: true });
-            }}
-          />
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setShowIconPicker((current) => !current);
+          }}
+          className="mt-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          {showIconPicker ? 'Hide Icon Picker' : 'Choose Icon'}
+        </button>
+
+        {showIconPicker ? (
+          <div className="mt-3">
+            <AssetPicker
+              manifest="medals"
+              title="Choose Medal Icon"
+              selectedUrl={form.watch('iconUrl') ?? ''}
+              onSelect={(url) => {
+                form.setValue('iconUrl', url, { shouldValidate: true, shouldDirty: true });
+              }}
+            />
+          </div>
+        ) : null}
       </div>
 
       <div>
@@ -369,8 +403,12 @@ export function MedalsPage() {
                     <span className="font-medium text-slate-900">Description:</span> {medal.description || 'Not set'}
                   </p>
                   <p className="break-all">
-                    <span className="font-medium text-slate-900">Icon URL:</span> {medal.iconUrl || 'Not set'}
+                    <span className="font-medium text-slate-900">Icon:</span>
                   </p>
+                  <div className="flex items-center gap-3 rounded-md border border-slate-200 p-2">
+                    <MedalIconPreview iconUrl={medal.iconUrl} />
+                    <p className="break-all text-xs text-slate-500">{medal.iconUrl || 'Not set'}</p>
+                  </div>
                   <p>
                     <span className="font-medium text-slate-900">Type:</span> {getTypeLabel(medal.type)}
                   </p>

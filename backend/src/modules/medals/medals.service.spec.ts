@@ -5,6 +5,7 @@ import { QueryFailedError } from 'typeorm';
 import { CampParticipation } from '../camp-participations/entities/camp-participation.entity';
 import { MedalDefinition } from './entities/medal-definition.entity';
 import { PlayerMedal } from './entities/player-medal.entity';
+import { MedalAutoAwardConditionType } from './enums/medal-auto-award-condition-type.enum';
 import { MedalType } from './enums/medal-type.enum';
 import { MedalsService } from './medals.service';
 
@@ -44,6 +45,8 @@ describe('MedalsService', () => {
     description: null,
     iconUrl: null,
     type: MedalType.MANUAL,
+    conditionType: null,
+    threshold: null,
     playerMedals: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -209,6 +212,107 @@ describe('MedalsService', () => {
     await expect(
       service.awardMedal({ participationId: 'p1', medalId: 'm1' }),
     ).rejects.toThrow(new ConflictException('This medal is already awarded to this participation'));
+  });
+
+  it.each([
+    {
+      label: 'KILLS',
+      conditionType: MedalAutoAwardConditionType.KILLS,
+      participationOverrides: { kills: 5 },
+      threshold: 5,
+    },
+    {
+      label: 'KNIFE_KILLS',
+      conditionType: MedalAutoAwardConditionType.KNIFE_KILLS,
+      participationOverrides: { knifeKills: 3 },
+      threshold: 3,
+    },
+    {
+      label: 'SURVIVALS',
+      conditionType: MedalAutoAwardConditionType.SURVIVALS,
+      participationOverrides: { survivals: 4 },
+      threshold: 4,
+    },
+    {
+      label: 'DUEL_WINS',
+      conditionType: MedalAutoAwardConditionType.DUEL_WINS,
+      participationOverrides: { duelWins: 2 },
+      threshold: 2,
+    },
+    {
+      label: 'MASS_BATTLE_WINS',
+      conditionType: MedalAutoAwardConditionType.MASS_BATTLE_WINS,
+      participationOverrides: { massBattleWins: 6 },
+      threshold: 6,
+    },
+  ])('unlock auto medals for $label', async ({ conditionType, participationOverrides, threshold }) => {
+    const autoDefinition: MedalDefinition = {
+      ...definition,
+      id: 'auto-1',
+      type: MedalType.AUTO,
+      conditionType,
+      threshold,
+    };
+
+    participationsRepository.findOne.mockResolvedValue({ ...participation, ...participationOverrides });
+    definitionsRepository.find.mockResolvedValue([autoDefinition]);
+    playerMedalsRepository.find.mockResolvedValue([]);
+    playerMedalsRepository.create.mockImplementation((payload) => payload);
+    playerMedalsRepository.save.mockImplementation(async (payload) => payload);
+
+    await service.unlockParticipationAutoMedals('p1');
+
+    expect(playerMedalsRepository.save).toHaveBeenCalledTimes(1);
+    expect(playerMedalsRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ participationId: 'p1', medalId: 'auto-1' }),
+    );
+  });
+
+  it('unlock auto medals is idempotent and does not duplicate awards on second run', async () => {
+    const autoDefinition: MedalDefinition = {
+      ...definition,
+      id: 'auto-1',
+      type: MedalType.AUTO,
+      conditionType: MedalAutoAwardConditionType.KILLS,
+      threshold: 2,
+    };
+
+    participationsRepository.findOne.mockResolvedValue({ ...participation, kills: 3 });
+    definitionsRepository.find.mockResolvedValue([autoDefinition]);
+    playerMedalsRepository.find
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 'pm-existing',
+          participationId: 'p1',
+          participation: {} as never,
+          medalId: 'auto-1',
+          medal: {} as never,
+          awardedBy: null,
+          awardedByUser: null,
+          note: null,
+          awardedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
+    playerMedalsRepository.create.mockImplementation((payload) => payload);
+    playerMedalsRepository.save.mockImplementation(async (payload) => payload);
+
+    await service.unlockParticipationAutoMedals('p1');
+    await service.unlockParticipationAutoMedals('p1');
+
+    expect(playerMedalsRepository.save).toHaveBeenCalledTimes(1);
+  });
+
+  it('unlock auto medals ignores manual medal definitions', async () => {
+    participationsRepository.findOne.mockResolvedValue({ ...participation, kills: 100 });
+    definitionsRepository.find.mockResolvedValue([]);
+    playerMedalsRepository.find.mockResolvedValue([]);
+
+    await service.unlockParticipationAutoMedals('p1');
+
+    expect(playerMedalsRepository.save).not.toHaveBeenCalled();
   });
 
   it('findMedalsByParticipation', async () => {

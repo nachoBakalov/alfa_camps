@@ -17,6 +17,7 @@ import { CampParticipation } from '../camp-participations/entities/camp-particip
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Duel } from '../duels/entities/duel.entity';
 import { AchievementsService } from '../achievements/achievements.service';
+import { MedalsService } from '../medals/medals.service';
 import { RanksService } from '../ranks/ranks.service';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
 import { FinalizeCampScoreResultDto } from './dto/finalize-camp-score-result.dto';
@@ -45,6 +46,7 @@ export class ScoringService {
     private readonly campParticipationsRepository: Repository<CampParticipation>,
     private readonly ranksService: RanksService,
     private readonly achievementsService: AchievementsService,
+    private readonly medalsService: MedalsService,
   ) {}
 
   async previewBattleScore(battleId: string): Promise<BattleScorePreviewDto> {
@@ -201,6 +203,7 @@ export class ScoringService {
       for (const participationId of affectedParticipationIds) {
         await this.ranksService.recomputeParticipationRanks(participationId);
         await this.achievementsService.unlockParticipationAchievements(participationId);
+        await this.medalsService.unlockParticipationAutoMedals(participationId);
       }
 
       return {
@@ -369,6 +372,7 @@ export class ScoringService {
 
     for (const participation of campParticipations) {
       await this.achievementsService.unlockParticipationAchievements(participation.id);
+      await this.medalsService.unlockParticipationAutoMedals(participation.id);
     }
 
     return result;

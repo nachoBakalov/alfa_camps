@@ -233,6 +233,7 @@ V1 categories:
 - KILLS_RANK (thresholds: 1, 5, 10, 15, 20, 25, 30, 35, 40)
 - MASS_BATTLE_WINS_RANK (thresholds: 1, 2, 3, 4, 5, 6, 7, 8, 9)
 - CHALLENGE_WINS_RANK (thresholds: 1, 2, 3, 4, 5, 6, 7, 8, 9)
+- SURVIVALS_RANK (thresholds: 1, 2, 3, 4, 5, 6, 7, 8, 9)
 
 Ranks are defined in `rank_definitions` and grouped by `rank_categories`.
 
@@ -244,7 +245,7 @@ Current category rank per participation is stored in `player_ranks`.
 
 # 13. Achievements
 
-Achievements are automatically unlocked when thresholds are met.
+Achievements remain supported in backend, but are not treated as a core active progression direction in the current product track.
 
 Examples:
 
@@ -271,6 +272,8 @@ Two types:
 - AUTO
 
 Version 1 uses primarily manual medals.
+
+AUTO medals are future-facing unless explicit auto-award rules exist.
 
 Medals are stored in:
 player_medals

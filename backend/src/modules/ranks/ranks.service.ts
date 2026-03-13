@@ -255,6 +255,10 @@ export class RanksService {
       return participation.duelWins;
     }
 
+    if (categoryCode === 'SURVIVALS_RANK') {
+      return participation.survivals;
+    }
+
     return null;
   }
 

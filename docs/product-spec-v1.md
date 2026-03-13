@@ -342,7 +342,7 @@ Final Camp Ranking
 Progression in V1 is split into three distinct systems:
 
 - Rank: current level per category for a camp participation.
-- Achievement: automatically unlocked milestone when a condition threshold is reached.
+- Achievement: threshold-based milestone support remains available in backend, but it is not treated as a core active progression direction in the current product track.
 - Medal: special recognition badge, manual or automatic.
 
 15. Rank System
@@ -391,6 +391,18 @@ V1 rank categories:
    - 8
    - 9
 
+4. SURVIVALS_RANK
+   thresholds:
+   - 1
+   - 2
+   - 3
+   - 4
+   - 5
+   - 6
+   - 7
+   - 8
+   - 9
+
 Important rules:
 - A player can hold one current rank per category.
 - Rank progress is camp-scoped.
@@ -428,6 +440,8 @@ Achievements се отключват автоматично.
 17. Medals
 
 Medal е специална награда.
+
+Тип `AUTO` е future-facing и не трябва да се счита за напълно автоматичен без изрична auto-award rule логика.
 
 Medal definition съдържа:
 

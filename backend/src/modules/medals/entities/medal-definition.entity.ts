@@ -8,11 +8,13 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { PlayerMedal } from './player-medal.entity';
+import { MedalAutoAwardConditionType } from '../enums/medal-auto-award-condition-type.enum';
 import { MedalType } from '../enums/medal-type.enum';
 
 @Entity({ name: 'medal_definitions' })
 @Index('UQ_medal_definitions_name', ['name'], { unique: true })
 @Index('IDX_medal_definitions_type', ['type'])
+@Index('IDX_medal_definitions_condition_type', ['conditionType'])
 export class MedalDefinition {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -32,6 +34,18 @@ export class MedalDefinition {
     enumName: 'medal_type',
   })
   type!: MedalType;
+
+  @Column({
+    type: 'enum',
+    enum: MedalAutoAwardConditionType,
+    enumName: 'medal_auto_award_condition_type',
+    name: 'condition_type',
+    nullable: true,
+  })
+  conditionType!: MedalAutoAwardConditionType | null;
+
+  @Column({ type: 'integer', nullable: true })
+  threshold!: number | null;
 
   @OneToMany(() => PlayerMedal, (playerMedal) => playerMedal.medal)
   playerMedals!: PlayerMedal[];

@@ -10,6 +10,8 @@ import { AwardMedalDto } from './dto/award-medal.dto';
 import { CreateMedalDefinitionDto } from './dto/create-medal-definition.dto';
 import { UpdateMedalDefinitionDto } from './dto/update-medal-definition.dto';
 import { MedalDefinition } from './entities/medal-definition.entity';
+import { MedalAutoAwardConditionType } from './enums/medal-auto-award-condition-type.enum';
+import { MedalType } from './enums/medal-type.enum';
 import { PlayerMedal } from './entities/player-medal.entity';
 
 @Injectable()
@@ -28,6 +30,8 @@ export class MedalsService {
       ...createMedalDefinitionDto,
       description: createMedalDefinitionDto.description ?? null,
       iconUrl: createMedalDefinitionDto.iconUrl ?? null,
+      conditionType: createMedalDefinitionDto.conditionType ?? null,
+      threshold: createMedalDefinitionDto.threshold ?? null,
     });
 
     try {
@@ -71,6 +75,14 @@ export class MedalsService {
         updateMedalDefinitionDto.iconUrl !== undefined
           ? updateMedalDefinitionDto.iconUrl
           : definition.iconUrl,
+      conditionType:
+        updateMedalDefinitionDto.conditionType !== undefined
+          ? updateMedalDefinitionDto.conditionType
+          : definition.conditionType,
+      threshold:
+        updateMedalDefinitionDto.threshold !== undefined
+          ? updateMedalDefinitionDto.threshold
+          : definition.threshold,
     });
 
     try {
@@ -123,6 +135,51 @@ export class MedalsService {
     return this.playerMedalsRepository.save(playerMedal);
   }
 
+  async unlockParticipationAutoMedals(participationId: string): Promise<void> {
+    const participation = await this.findParticipationOrThrow(participationId);
+
+    const autoDefinitions = await this.medalDefinitionsRepository.find({
+      where: { type: MedalType.AUTO },
+      order: { createdAt: 'ASC' },
+    });
+
+    if (autoDefinitions.length === 0) {
+      return;
+    }
+
+    const existingAwards = await this.playerMedalsRepository.find({
+      where: { participationId },
+    });
+    const awardedMedalIds = new Set(existingAwards.map((award) => award.medalId));
+
+    for (const definition of autoDefinitions) {
+      if (definition.conditionType === null || definition.threshold === null) {
+        continue;
+      }
+
+      const statValue = this.getStatValueForConditionType(participation, definition.conditionType);
+
+      if (statValue < definition.threshold) {
+        continue;
+      }
+
+      if (awardedMedalIds.has(definition.id)) {
+        continue;
+      }
+
+      const playerMedal = this.playerMedalsRepository.create({
+        participationId,
+        medalId: definition.id,
+        awardedBy: null,
+        note: null,
+        awardedAt: new Date(),
+      });
+
+      await this.playerMedalsRepository.save(playerMedal);
+      awardedMedalIds.add(definition.id);
+    }
+  }
+
   async removeAward(playerMedalId: string): Promise<void> {
     const playerMedal = await this.playerMedalsRepository.findOne({ where: { id: playerMedalId } });
 
@@ -145,6 +202,29 @@ export class MedalsService {
     }
 
     return participation;
+  }
+
+  private getStatValueForConditionType(
+    participation: CampParticipation,
+    conditionType: MedalAutoAwardConditionType,
+  ): number {
+    if (conditionType === MedalAutoAwardConditionType.KILLS) {
+      return participation.kills;
+    }
+
+    if (conditionType === MedalAutoAwardConditionType.KNIFE_KILLS) {
+      return participation.knifeKills;
+    }
+
+    if (conditionType === MedalAutoAwardConditionType.SURVIVALS) {
+      return participation.survivals;
+    }
+
+    if (conditionType === MedalAutoAwardConditionType.DUEL_WINS) {
+      return participation.duelWins;
+    }
+
+    return participation.massBattleWins;
   }
 
   private handleDefinitionUniqueError(error: unknown): void {
