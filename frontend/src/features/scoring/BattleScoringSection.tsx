@@ -10,7 +10,7 @@ import { useApplyBattleScoreMutation, useBattleScorePreviewQuery } from './use-s
 
 function getPlayerDisplayName(player: Player | undefined): string {
   if (!player) {
-    return 'Unknown player';
+    return 'Неизвестен играч';
   }
 
   const fullName = `${player.firstName} ${player.lastName ?? ''}`.trim();
@@ -67,7 +67,7 @@ export function BattleScoringSection({
         return;
       }
 
-      setFeedback({ kind: 'error', message: 'Unable to apply score right now.' });
+      setFeedback({ kind: 'error', message: 'Неуспешно прилагане на точки в момента.' });
     }
   }
 
@@ -90,11 +90,11 @@ export function BattleScoringSection({
         </div>
       ) : null}
 
-      {previewQuery.isLoading ? <LoadingState label="Loading score preview..." /> : null}
+      {previewQuery.isLoading ? <LoadingState label="Зареждане на прегледа на точки..." /> : null}
 
       {previewQuery.isError ? (
         <ErrorState
-          message="Unable to load score preview right now."
+          message="Неуспешно зареждане на прегледа на точки."
           onRetry={() => {
             void previewQuery.refetch();
           }}
@@ -105,15 +105,15 @@ export function BattleScoringSection({
         <div className="space-y-3">
           {previewQuery.data.participationDeltas.length === 0 && previewQuery.data.teamDeltas.length === 0 ? (
             <EmptyState
-              title="No score deltas yet"
-              description="Complete battle data first, then preview and apply score changes."
+              title="Все още няма промени в точките"
+              description="Попълни резултатите в битката, след това прегледай и приложи точките."
             />
           ) : (
             <>
               <div className="space-y-2 rounded-md border border-slate-200 p-3">
-                <h4 className="text-sm font-semibold text-slate-900">Participation Deltas</h4>
+                <h4 className="text-sm font-semibold text-slate-900">Промени по участници</h4>
                 {previewQuery.data.participationDeltas.length === 0 ? (
-                  <p className="text-sm text-slate-600">No participation deltas.</p>
+                  <p className="text-sm text-slate-600">Няма промени по участници.</p>
                 ) : (
                   <div className="space-y-2">
                     {previewQuery.data.participationDeltas.map((delta) => {
@@ -122,13 +122,13 @@ export function BattleScoringSection({
                       return (
                         <div key={delta.participationId} className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">
                           <p className="font-medium text-slate-900">{getPlayerDisplayName(player)}</p>
-                          <p className="text-xs text-slate-600">Participation ID: {delta.participationId}</p>
-                          <p>Kills: {delta.killsDelta >= 0 ? '+' : ''}{delta.killsDelta}</p>
-                          <p>Knife Kills: {delta.knifeKillsDelta >= 0 ? '+' : ''}{delta.knifeKillsDelta}</p>
-                          <p>Survivals: {delta.survivalsDelta >= 0 ? '+' : ''}{delta.survivalsDelta}</p>
-                          <p>Duel Wins: {delta.duelWinsDelta >= 0 ? '+' : ''}{delta.duelWinsDelta}</p>
-                          <p>Mass Battle Wins: {delta.massBattleWinsDelta >= 0 ? '+' : ''}{delta.massBattleWinsDelta}</p>
-                          <p className="font-medium">Points: {delta.pointsDelta >= 0 ? '+' : ''}{delta.pointsDelta}</p>
+                          <p className="text-xs text-slate-600">ID участие: {delta.participationId}</p>
+                          <p>Убийства: {delta.killsDelta >= 0 ? '+' : ''}{delta.killsDelta}</p>
+                          <p>Убийства с нож: {delta.knifeKillsDelta >= 0 ? '+' : ''}{delta.knifeKillsDelta}</p>
+                          <p>Оцелявания: {delta.survivalsDelta >= 0 ? '+' : ''}{delta.survivalsDelta}</p>
+                          <p>Победи в дуел: {delta.duelWinsDelta >= 0 ? '+' : ''}{delta.duelWinsDelta}</p>
+                          <p>Победи в масова битка: {delta.massBattleWinsDelta >= 0 ? '+' : ''}{delta.massBattleWinsDelta}</p>
+                          <p className="font-medium">Точки: {delta.pointsDelta >= 0 ? '+' : ''}{delta.pointsDelta}</p>
                         </div>
                       );
                     })}
@@ -137,9 +137,9 @@ export function BattleScoringSection({
               </div>
 
               <div className="space-y-2 rounded-md border border-slate-200 p-3">
-                <h4 className="text-sm font-semibold text-slate-900">Team Deltas</h4>
+                <h4 className="text-sm font-semibold text-slate-900">Промени по отбори</h4>
                 {previewQuery.data.teamDeltas.length === 0 ? (
-                  <p className="text-sm text-slate-600">No team deltas.</p>
+                  <p className="text-sm text-slate-600">Няма промени по отбори.</p>
                 ) : (
                   <ul className="space-y-1 text-sm text-slate-700">
                     {previewQuery.data.teamDeltas.map((delta) => (

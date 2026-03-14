@@ -26,13 +26,13 @@ function formatDate(dateValue: string): string {
 function getBattleErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.statusCode === 404) {
-      return 'Battle was not found.';
+      return 'Битката не беше намерена.';
     }
 
     return error.message;
   }
 
-  return 'Unable to load battle details right now.';
+  return 'Неуспешно зареждане на детайлите за битката.';
 }
 
 export function BattleDetailPage() {
@@ -46,16 +46,16 @@ export function BattleDetailPage() {
   if (!battleId) {
     return (
       <div className="space-y-5 sm:space-y-6">
-        <PageHeader title="Battle detail" description="Battle identifier is required." />
+        <PageHeader title="Детайли за битката" description="Нужен е идентификатор на битка." />
         <EmptyState
-          title="Missing battle identifier"
-          description="Please open this page from a battle card link."
+          title="Липсва идентификатор на битка"
+          description="Отвори тази страница от карта за битка."
           action={
             <Link
               to="/admin"
               className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             >
-              Back to admin
+              Назад към таблото
             </Link>
           }
         />
@@ -66,8 +66,8 @@ export function BattleDetailPage() {
   return (
     <div className="space-y-5 sm:space-y-6">
       <PageHeader
-        title="Battle detail"
-        description="Minimal battle detail screen for direct navigation from camp battles tab."
+        title="Детайли за битката"
+        description="Работен екран за управление на резултати и точки в текущата битка."
         actions={
           <Link
             to={backToCampPath}
@@ -78,7 +78,7 @@ export function BattleDetailPage() {
         }
       />
 
-      {battleQuery.isLoading ? <LoadingState label="Loading battle details..." /> : null}
+      {battleQuery.isLoading ? <LoadingState label="Зареждане на детайлите за битката..." /> : null}
 
       {battleQuery.isError ? (
         <ErrorState
@@ -90,7 +90,7 @@ export function BattleDetailPage() {
       ) : null}
 
       {battleQuery.isSuccess && !battleQuery.data ? (
-        <EmptyState title="Battle data is unavailable" description="No details returned for this battle." />
+        <EmptyState title="Няма данни за битката" description="Не бяха върнати детайли за тази битка." />
       ) : null}
 
       {battleQuery.isSuccess && battleQuery.data ? (
@@ -105,12 +105,12 @@ export function BattleDetailPage() {
                   <dd className="mt-1">{battleQuery.data.battleType}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Date</dt>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Дата</dt>
                   <dd className="mt-1">{formatDate(battleQuery.data.battleDate)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Session</dt>
-                  <dd className="mt-1">{battleQuery.data.session || 'N/A'}</dd>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Сесия</dt>
+                  <dd className="mt-1">{battleQuery.data.session || 'Няма'}</dd>
                 </div>
                 <div>
                   <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Статус</dt>
@@ -122,18 +122,18 @@ export function BattleDetailPage() {
                     {battleQuery.data.winningTeamId
                       ? campTeamsQuery.data?.find((team) => team.id === battleQuery.data.winningTeamId)?.name ||
                         battleQuery.data.winningTeamId
-                      : 'N/A'}
+                      : 'Няма'}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Battle ID</dt>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">ID на битка</dt>
                   <dd className="mt-1 break-all text-xs">{battleQuery.data.id}</dd>
                 </div>
               </dl>
 
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Notes</p>
-                <p className="mt-1 text-sm text-slate-700">{battleQuery.data.notes || 'No notes added.'}</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Бележки</p>
+                <p className="mt-1 text-sm text-slate-700">{battleQuery.data.notes || 'Няма добавени бележки.'}</p>
               </div>
             </div>
           </SectionCard>
@@ -141,12 +141,12 @@ export function BattleDetailPage() {
           {battleQuery.data.battleType === 'MASS_BATTLE' ? (
             <SectionCard title="Резултати" description="Резултати от масова битка.">
               {campTeamsQuery.isLoading || participationsQuery.isLoading || playersQuery.isLoading ? (
-                <LoadingState label="Loading result editor data..." />
+                <LoadingState label="Зареждане на данни за редактора на резултати..." />
               ) : null}
 
               {campTeamsQuery.isError || participationsQuery.isError || playersQuery.isError ? (
                 <ErrorState
-                  message="Unable to load data for mass battle results editor."
+                  message="Неуспешно зареждане на данни за редактора на масова битка."
                   onRetry={() => {
                     void campTeamsQuery.refetch();
                     void participationsQuery.refetch();
@@ -180,12 +180,12 @@ export function BattleDetailPage() {
           {battleQuery.data.battleType === 'DUEL_SESSION' ? (
             <SectionCard title="Сесия с дуели" description="Редактор за сесия с дуели.">
               {participationsQuery.isLoading || playersQuery.isLoading ? (
-                <LoadingState label="Loading duel editor data..." />
+                <LoadingState label="Зареждане на данни за редактора на дуели..." />
               ) : null}
 
               {participationsQuery.isError || playersQuery.isError ? (
                 <ErrorState
-                  message="Unable to load data for duel editor."
+                  message="Неуспешно зареждане на данни за редактора на дуели."
                   onRetry={() => {
                     void participationsQuery.refetch();
                     void playersQuery.refetch();
@@ -209,7 +209,7 @@ export function BattleDetailPage() {
           ) : null}
 
           {battleQuery.data.battleType !== 'MASS_BATTLE' && battleQuery.data.battleType !== 'DUEL_SESSION' ? (
-            <SectionCard title="Scoring" description="Score preview and apply score area.">
+            <SectionCard title="Точки" description="Преглед и прилагане на точки за текущата битка.">
               <BattleScoringSection
                 battleId={battleQuery.data.id}
                 campId={battleQuery.data.campId}

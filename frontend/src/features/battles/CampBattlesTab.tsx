@@ -136,7 +136,7 @@ function BattleForm({
     >
       <div>
         <label htmlFor="title" className="mb-1 block text-sm font-medium text-slate-700">
-          Title
+          Заглавие
         </label>
         <input
           id="title"
@@ -151,7 +151,7 @@ function BattleForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="battleType" className="mb-1 block text-sm font-medium text-slate-700">
-            Battle Type
+            Тип битка
           </label>
           <select
             id="battleType"
@@ -168,7 +168,7 @@ function BattleForm({
 
         <div>
           <label htmlFor="battleDate" className="mb-1 block text-sm font-medium text-slate-700">
-            Battle Date
+            Дата на битката
           </label>
           <input
             id="battleDate"
@@ -185,14 +185,14 @@ function BattleForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="session" className="mb-1 block text-sm font-medium text-slate-700">
-            Session
+            Сесия
           </label>
           <select
             id="session"
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
             {...form.register('session')}
           >
-            <option value="">No session</option>
+            <option value="">Без сесия</option>
             {battleSessionOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -222,7 +222,7 @@ function BattleForm({
 
       <div>
         <label htmlFor="notes" className="mb-1 block text-sm font-medium text-slate-700">
-          Notes
+          Бележки
         </label>
         <textarea
           id="notes"
@@ -235,14 +235,14 @@ function BattleForm({
       {mode.kind === 'edit' ? (
         <div>
           <label htmlFor="status" className="mb-1 block text-sm font-medium text-slate-700">
-            Status
+            Статус
           </label>
           <select
             id="status"
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
             {...form.register('status')}
           >
-            <option value="">Keep current</option>
+            <option value="">Запази текущия</option>
             {battleStatusOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -295,10 +295,10 @@ export function CampBattlesTab({ campId }: { campId: string }) {
   async function handleCreate(values: BattleFormValues): Promise<void> {
     try {
       await createMutation.mutateAsync(toCreatePayload(values, campId));
-      setFeedback({ kind: 'success', message: 'Battle created successfully.' });
+      setFeedback({ kind: 'success', message: 'Битката е създадена успешно.' });
       setFormMode(null);
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to create battle.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно създаване на битка.') });
     }
   }
 
@@ -306,15 +306,15 @@ export function CampBattlesTab({ campId }: { campId: string }) {
     try {
       const payload = toUpdatePayload(values, formMode as Exclude<FormMode, null>);
       await updateMutation.mutateAsync({ id, payload });
-      setFeedback({ kind: 'success', message: 'Battle updated successfully.' });
+      setFeedback({ kind: 'success', message: 'Битката е обновена успешно.' });
       setFormMode(null);
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to update battle.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно обновяване на битка.') });
     }
   }
 
   async function handleDelete(id: string): Promise<void> {
-    const shouldDelete = window.confirm('Delete this battle? This action cannot be undone.');
+    const shouldDelete = window.confirm('Сигурни ли сте, че искате да изтриете тази битка? Това действие е необратимо.');
 
     if (!shouldDelete) {
       return;
@@ -322,13 +322,13 @@ export function CampBattlesTab({ campId }: { campId: string }) {
 
     try {
       await deleteMutation.mutateAsync(id);
-      setFeedback({ kind: 'success', message: 'Battle deleted successfully.' });
+      setFeedback({ kind: 'success', message: 'Битката е изтрита успешно.' });
 
       if (formMode?.kind === 'edit' && formMode.battle.id === id) {
         setFormMode(null);
       }
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to delete battle.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно изтриване на битка.') });
     }
   }
 
@@ -337,8 +337,8 @@ export function CampBattlesTab({ campId }: { campId: string }) {
       <SectionCard>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Battles</h3>
-            <p className="text-sm text-slate-600">Manage battles for this camp and open battle details.</p>
+            <h3 className="text-base font-semibold text-slate-900">Битки</h3>
+            <p className="text-sm text-slate-600">Управлявай битките в лагера и отваряй детайли за всяка битка.</p>
           </div>
 
           <button
@@ -393,11 +393,11 @@ export function CampBattlesTab({ campId }: { campId: string }) {
         ) : null}
       </ModalDrawer>
 
-      {battlesQuery.isLoading ? <LoadingState label="Loading battles..." /> : null}
+      {battlesQuery.isLoading ? <LoadingState label="Зареждане на битките..." /> : null}
 
       {battlesQuery.isError ? (
         <ErrorState
-          message="Unable to load battles right now."
+          message="Неуспешно зареждане на битките в момента."
           onRetry={() => {
             void battlesQuery.refetch();
           }}
@@ -405,7 +405,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
       ) : null}
 
       {battlesQuery.isSuccess && battlesQuery.data.length === 0 ? (
-        <EmptyState title="No battles yet" description="Create your first battle for this camp." />
+        <EmptyState title="Все още няма битки" description="Създай първата битка за този лагер." />
       ) : null}
 
       {battlesQuery.isSuccess && battlesQuery.data.length > 0 ? (
@@ -429,16 +429,16 @@ export function CampBattlesTab({ campId }: { campId: string }) {
                     <dd className="mt-1">{battle.battleType}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-slate-500">Date</dt>
+                    <dt className="text-xs text-slate-500">Дата</dt>
                     <dd className="mt-1">{formatDate(battle.battleDate)}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-slate-500">Session</dt>
-                    <dd className="mt-1">{battle.session || 'N/A'}</dd>
+                    <dt className="text-xs text-slate-500">Сесия</dt>
+                    <dd className="mt-1">{battle.session || 'Няма'}</dd>
                   </div>
                   <div>
                     <dt className="text-xs text-slate-500">Победил отбор</dt>
-                    <dd className="mt-1">{battle.winningTeamId ? (teamNameById.get(battle.winningTeamId) ?? battle.winningTeamId) : 'N/A'}</dd>
+                    <dd className="mt-1">{battle.winningTeamId ? (teamNameById.get(battle.winningTeamId) ?? battle.winningTeamId) : 'Няма'}</dd>
                   </div>
                 </dl>
 

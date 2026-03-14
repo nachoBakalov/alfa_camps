@@ -13,6 +13,7 @@ import { PlayersPage } from '../pages/admin/PlayersPage';
 import { PhotosPage } from '../pages/admin/PhotosPage';
 import { RanksPage } from '../pages/admin/RanksPage';
 import { TeamTemplatesPage } from '../pages/admin/TeamTemplatesPage';
+import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { CampPublicPage } from '../pages/public/CampPublicPage';
 import { PlayerProfilePage } from '../pages/public/PlayerProfilePage';
@@ -76,6 +77,10 @@ export const router = createBrowserRouter([
           {
             path: 'photos',
             element: <PhotosPage />,
+          },
+          {
+            path: 'users',
+            element: <AdminUsersPage />,
           },
           {
             path: '*',

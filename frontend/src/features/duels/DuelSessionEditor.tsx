@@ -19,7 +19,7 @@ import { useDuelsByBattleQuery } from './use-duels-query';
 
 function getPlayerDisplayName(player: Player | undefined): string {
   if (!player) {
-    return 'Unknown player';
+    return 'Неизвестен играч';
   }
 
   const fullName = `${player.firstName} ${player.lastName ?? ''}`.trim();
@@ -90,7 +90,7 @@ export function DuelSessionEditor({
 
   async function handleCreate(values: DuelFormValues): Promise<void> {
     if (values.playerAParticipationId === values.playerBParticipationId) {
-      setFeedback({ kind: 'error', message: 'Player A and Player B must be different.' });
+      setFeedback({ kind: 'error', message: 'Играч A и Играч B трябва да са различни.' });
       return;
     }
 
@@ -102,7 +102,7 @@ export function DuelSessionEditor({
         winnerParticipationId: values.winnerParticipationId?.trim() || undefined,
       });
 
-      setFeedback({ kind: 'success', message: 'Duel created successfully.' });
+      setFeedback({ kind: 'success', message: 'Дуелът е създаден успешно.' });
       setIsAddOpen(false);
       form.reset({
         playerAParticipationId: '',
@@ -110,7 +110,7 @@ export function DuelSessionEditor({
         winnerParticipationId: '',
       });
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to create duel.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно създаване на дуел.') });
     }
   }
 
@@ -121,7 +121,7 @@ export function DuelSessionEditor({
     playerBParticipationId: string,
   ): Promise<void> {
     if (winnerParticipationId !== playerAParticipationId && winnerParticipationId !== playerBParticipationId) {
-      setFeedback({ kind: 'error', message: 'Winner must be either Player A or Player B.' });
+      setFeedback({ kind: 'error', message: 'Победителят трябва да е Играч A или Играч B.' });
       return;
     }
 
@@ -130,14 +130,14 @@ export function DuelSessionEditor({
         id: duelId,
         payload: { winnerParticipationId },
       });
-      setFeedback({ kind: 'success', message: 'Duel winner updated successfully.' });
+      setFeedback({ kind: 'success', message: 'Победителят в дуела е обновен успешно.' });
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to update duel winner.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно обновяване на победителя.') });
     }
   }
 
   async function handleDelete(id: string): Promise<void> {
-    const shouldDelete = window.confirm('Delete this duel? This action cannot be undone.');
+    const shouldDelete = window.confirm('Сигурни ли сте, че искате да изтриете този дуел? Това действие е необратимо.');
 
     if (!shouldDelete) {
       return;
@@ -145,9 +145,9 @@ export function DuelSessionEditor({
 
     try {
       await deleteMutation.mutateAsync(id);
-      setFeedback({ kind: 'success', message: 'Duel removed successfully.' });
+      setFeedback({ kind: 'success', message: 'Дуелът е изтрит успешно.' });
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to remove duel.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно изтриване на дуел.') });
     }
   }
 
@@ -155,9 +155,9 @@ export function DuelSessionEditor({
     try {
       await duelsQuery.refetch();
       await onRefreshBattle();
-      setFeedback({ kind: 'success', message: 'Duel session data refreshed successfully.' });
+      setFeedback({ kind: 'success', message: 'Данните за сесията с дуели са обновени успешно.' });
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to refresh duel session data.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно обновяване на данните за дуелите.') });
     }
   }
 
@@ -165,7 +165,7 @@ export function DuelSessionEditor({
     if (currentBattleStatus !== 'COMPLETED') {
       setFeedback({
         kind: 'error',
-        message: 'Score can be applied only for COMPLETED battles. Use "Apply Score + Complete Battle" first.',
+        message: 'Точки могат да се прилагат само за битки със статус COMPLETED. Първо използвай "Приложи точки + приключи битката".',
       });
       return;
     }
@@ -176,7 +176,7 @@ export function DuelSessionEditor({
       await onRefreshBattle();
       setFeedback({ kind: 'success', message: result.message });
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to apply score right now.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно прилагане на точки в момента.') });
     }
   }
 
@@ -191,11 +191,11 @@ export function DuelSessionEditor({
       const result = await applyScoreMutation.mutateAsync();
       await duelsQuery.refetch();
       await onRefreshBattle();
-      setFeedback({ kind: 'success', message: `Battle completed. ${result.message}` });
+      setFeedback({ kind: 'success', message: `Битката е приключена. ${result.message}` });
 
       navigate(`/admin/camps/${campId}`);
     } catch (error) {
-      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to complete and apply score right now.') });
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Неуспешно приключване и прилагане на точки в момента.') });
     }
   }
 
@@ -209,7 +209,7 @@ export function DuelSessionEditor({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-base font-semibold text-slate-900">Сесия с дуели</h3>
-            <p className="text-sm text-slate-600">Create duels and manage winners for this duel session.</p>
+            <p className="text-sm text-slate-600">Създавай дуели и управлявай победителите за тази сесия.</p>
           </div>
 
           <button
@@ -253,14 +253,14 @@ export function DuelSessionEditor({
         >
           <div>
             <label htmlFor="playerA" className="mb-1 block text-sm font-medium text-slate-700">
-              Player A
+              Играч A
             </label>
             <select
               id="playerA"
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
               {...form.register('playerAParticipationId')}
             >
-              <option value="">Select participation</option>
+              <option value="">Избери участие</option>
               {participationLabelOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.label}
@@ -274,14 +274,14 @@ export function DuelSessionEditor({
 
           <div>
             <label htmlFor="playerB" className="mb-1 block text-sm font-medium text-slate-700">
-              Player B
+              Играч B
             </label>
             <select
               id="playerB"
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
               {...form.register('playerBParticipationId')}
             >
-              <option value="">Select participation</option>
+              <option value="">Избери участие</option>
               {participationLabelOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.label}
@@ -341,11 +341,11 @@ export function DuelSessionEditor({
         </form>
       </ModalDrawer>
 
-      {duelsQuery.isLoading ? <LoadingState label="Loading duels..." /> : null}
+      {duelsQuery.isLoading ? <LoadingState label="Зареждане на дуелите..." /> : null}
 
       {duelsQuery.isError ? (
         <ErrorState
-          message="Unable to load duels right now."
+          message="Неуспешно зареждане на дуелите в момента."
           onRetry={() => {
             void duelsQuery.refetch();
           }}
@@ -353,7 +353,7 @@ export function DuelSessionEditor({
       ) : null}
 
       {duelsQuery.isSuccess && duelsQuery.data.length === 0 ? (
-        <EmptyState title="No duels yet" description="Create the first duel for this session." />
+        <EmptyState title="Все още няма дуели" description="Създай първия дуел за тази сесия." />
       ) : null}
 
       {duelsQuery.isSuccess && duelsQuery.data.length > 0 ? (
@@ -367,15 +367,15 @@ export function DuelSessionEditor({
               <SectionCard key={duel.id}>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-slate-600">Duel ID: {duel.id}</p>
+                    <p className="text-sm text-slate-600">ID дуел: {duel.id}</p>
                   </div>
 
                   <div className="space-y-1 text-sm text-slate-700">
                     <p>
-                      <span className="font-medium text-slate-800">Player A:</span> {playerA?.label || duel.playerAParticipationId}
+                      <span className="font-medium text-slate-800">Играч A:</span> {playerA?.label || duel.playerAParticipationId}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-800">Player B:</span> {playerB?.label || duel.playerBParticipationId}
+                      <span className="font-medium text-slate-800">Играч B:</span> {playerB?.label || duel.playerBParticipationId}
                     </p>
                     <p>
                       <span className="font-medium text-slate-800">Победител:</span> {winner?.label || 'Не е избран'}
@@ -405,9 +405,9 @@ export function DuelSessionEditor({
                       }}
                       className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
                     >
-                      <option value="">Keep current</option>
-                      <option value={duel.playerAParticipationId}>{playerA?.label || 'Player A'}</option>
-                      <option value={duel.playerBParticipationId}>{playerB?.label || 'Player B'}</option>
+                      <option value="">Запази текущия</option>
+                      <option value={duel.playerAParticipationId}>{playerA?.label || 'Играч A'}</option>
+                      <option value={duel.playerBParticipationId}>{playerB?.label || 'Играч B'}</option>
                     </select>
                   </div>
 

@@ -23,7 +23,7 @@ import {
 
 function getPlayerDisplayName(player: Player | undefined): string {
   if (!player) {
-    return 'Unknown player';
+    return 'Неизвестен играч';
   }
 
   const fullName = `${player.firstName} ${player.lastName ?? ''}`.trim();
@@ -188,7 +188,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
     }
 
     if (!selectedTeamId) {
-      setFeedback({ kind: 'error', message: 'Please select a team.' });
+      setFeedback({ kind: 'error', message: 'Избери отбор.' });
       return;
     }
 
@@ -200,7 +200,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
         note: note.trim() || undefined,
       });
 
-      setFeedback({ kind: 'success', message: 'Team assignment created successfully.' });
+      setFeedback({ kind: 'success', message: 'Разпределението към отбор е създадено успешно.' });
       setAssignModalParticipationId(null);
       setExpandedParticipationIds((current) =>
         current.includes(assignModalParticipationId) ? current : [...current, assignModalParticipationId],
@@ -208,7 +208,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
     } catch (error) {
       setFeedback({
         kind: 'error',
-        message: getMutationErrorMessage(error, 'Unable to create team assignment.'),
+        message: getMutationErrorMessage(error, 'Неуспешно създаване на разпределение към отбор.'),
       });
     }
   }
@@ -220,8 +220,8 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
     <div className="space-y-4">
       <SectionCard>
         <div className="space-y-1">
-          <h3 className="text-base font-semibold text-slate-900">Team Assignments</h3>
-          <p className="text-sm text-slate-600">Assign teams per participation and inspect assignment history.</p>
+          <h3 className="text-base font-semibold text-slate-900">Разпределения по отбори</h3>
+          <p className="text-sm text-slate-600">Разпределяй участниците по отбори и преглеждай историята.</p>
         </div>
       </SectionCard>
 
@@ -239,7 +239,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
 
       <ModalDrawer
         open={Boolean(assignModalParticipationId)}
-        title="Assign Team"
+        title="Разпредели към отбор"
         onClose={() => {
           setAssignModalParticipationId(null);
         }}
@@ -247,7 +247,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
         <div className="space-y-4">
           <div>
             <label htmlFor="teamId" className="mb-1 block text-sm font-medium text-slate-700">
-              Team
+              Отбор
             </label>
             <select
               id="teamId"
@@ -257,7 +257,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
               }}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
             >
-              <option value="">Select team</option>
+              <option value="">Избери отбор</option>
               {(campTeamsQuery.data ?? []).map((team) => (
                 <option key={team.id} value={team.id}>
                   {team.name}
@@ -268,7 +268,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
 
           <div>
             <label htmlFor="assignedAt" className="mb-1 block text-sm font-medium text-slate-700">
-              Assigned At
+              Разпределен на
             </label>
             <input
               id="assignedAt"
@@ -283,7 +283,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
 
           <div>
             <label htmlFor="assignmentNote" className="mb-1 block text-sm font-medium text-slate-700">
-              Note (optional)
+              Бележка (по избор)
             </label>
             <textarea
               id="assignmentNote"
@@ -304,7 +304,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
               }}
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
-              Cancel
+              Отказ
             </button>
             <button
               type="button"
@@ -314,17 +314,17 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
               disabled={createMutation.isPending}
               className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {createMutation.isPending ? 'Assigning...' : 'Assign Team'}
+              {createMutation.isPending ? 'Разпределяне...' : 'Разпредели'}
             </button>
           </div>
         </div>
       </ModalDrawer>
 
-      {isBaseLoading ? <LoadingState label="Loading assignment data..." /> : null}
+      {isBaseLoading ? <LoadingState label="Зареждане на данни за разпределения..." /> : null}
 
       {isBaseError ? (
         <ErrorState
-          message="Unable to load assignment data right now."
+          message="Неуспешно зареждане на данни за разпределения."
           onRetry={() => {
             void participationsQuery.refetch();
             void playersQuery.refetch();
@@ -335,8 +335,8 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
 
       {!isBaseLoading && !isBaseError && (participationsQuery.data ?? []).length === 0 ? (
         <EmptyState
-          title="No participations available"
-          description="Create participations first to manage team assignments."
+          title="Няма налични участия"
+          description="Първо създай участия, за да управляваш разпределенията по отбори."
         />
       ) : null}
 
@@ -356,18 +356,18 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h4 className="text-base font-semibold text-slate-900">{getPlayerDisplayName(player)}</h4>
-                      <p className="text-xs text-slate-600">Participation ID: {participation.id}</p>
+                      <p className="text-xs text-slate-600">ID участие: {participation.id}</p>
                     </div>
-                    <Badge tone="neutral">Participant</Badge>
+                    <Badge tone="neutral">Участник</Badge>
                   </div>
 
                   <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                    <span className="font-medium text-slate-800">Current team: </span>
+                    <span className="font-medium text-slate-800">Текущ отбор: </span>
                     {currentTeamState?.state === 'loading'
                       ? 'Зареждане...'
                       : currentTeamState?.state === 'error'
-                        ? 'Unavailable'
-                        : currentTeamName || 'Unassigned'}
+                        ? 'Няма данни'
+                        : currentTeamName || 'Неразпределен'}
                   </div>
 
                   <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -378,7 +378,7 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
                       }}
                       className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                     >
-                      {isExpanded ? 'Hide History' : 'Open History'}
+                      {isExpanded ? 'Скрий история' : 'Покажи история'}
                     </button>
                     <button
                       type="button"
@@ -387,24 +387,24 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
                       }}
                       className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
                     >
-                      Assign New Team
+                      Ново разпределение
                     </button>
                   </div>
 
                   {isExpanded ? (
                     <div className="rounded-md border border-slate-200 p-3">
-                      <p className="text-sm font-medium text-slate-800">Assignment History</p>
+                      <p className="text-sm font-medium text-slate-800">История на разпределенията</p>
 
                       {historyState?.state === 'loading' ? (
-                        <p className="mt-2 text-sm text-slate-600">Loading history...</p>
+                        <p className="mt-2 text-sm text-slate-600">Зареждане на историята...</p>
                       ) : null}
 
                       {historyState?.state === 'error' ? (
-                        <p className="mt-2 text-sm text-red-700">Unable to load assignment history.</p>
+                        <p className="mt-2 text-sm text-red-700">Неуспешно зареждане на историята на разпределенията.</p>
                       ) : null}
 
                       {historyState?.state === 'ready' && historyState.items.length === 0 ? (
-                        <p className="mt-2 text-sm text-slate-600">No assignments yet.</p>
+                        <p className="mt-2 text-sm text-slate-600">Все още няма разпределения.</p>
                       ) : null}
 
                       {historyState?.state === 'ready' && historyState.items.length > 0 ? (
@@ -415,10 +415,10 @@ export function CampAssignmentsTab({ campId }: { campId: string }) {
                             return (
                               <div key={item.id} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
                                 <p className="font-medium text-slate-900">{team?.name ?? item.teamId}</p>
-                                <p className="text-xs text-slate-600">Assigned At: {formatDateTime(item.assignedAt)}</p>
-                                <p className="text-xs text-slate-600">Assigned By: {item.assignedBy || 'System/Unknown'}</p>
-                                <p className="text-xs text-slate-600">Note: {item.note || 'No note'}</p>
-                                <p className="text-xs text-slate-600">Team Color: {team?.color || 'Not set'}</p>
+                                <p className="text-xs text-slate-600">Разпределен на: {formatDateTime(item.assignedAt)}</p>
+                                <p className="text-xs text-slate-600">Разпределен от: {item.assignedBy || 'Система/Неизвестен'}</p>
+                                <p className="text-xs text-slate-600">Бележка: {item.note || 'Няма'}</p>
+                                <p className="text-xs text-slate-600">Цвят на отбора: {team?.color || 'Не е зададен'}</p>
                               </div>
                             );
                           })}

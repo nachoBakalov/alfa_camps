@@ -16,7 +16,7 @@ import type { BattleStatus } from '../../api/battles.api';
 
 function getPlayerDisplayName(player: Player | undefined): string {
   if (!player) {
-    return 'Unknown player';
+    return 'Неизвестен играч';
   }
 
   const fullName = `${player.firstName} ${player.lastName ?? ''}`.trim();
@@ -199,11 +199,11 @@ export function MassBattleResultsEditor({
       const knifeKills = parseNonNegativeInt(draft.knifeKills);
 
       if (!teamId) {
-        throw new Error(`Please select a result team for ${getPlayerDisplayName(playersById.get(participation.playerId))}.`);
+        throw new Error(`Избери отбор за резултата на ${getPlayerDisplayName(playersById.get(participation.playerId))}.`);
       }
 
       if (knifeKills > kills) {
-        throw new Error(`Knife kills cannot be greater than kills for ${getPlayerDisplayName(playersById.get(participation.playerId))}.`);
+        throw new Error(`Убийствата с нож не могат да са повече от общите убийства за ${getPlayerDisplayName(playersById.get(participation.playerId))}.`);
       }
 
       const existing = resultByParticipationId.get(participation.id);
@@ -236,7 +236,7 @@ export function MassBattleResultsEditor({
       await winningTeamMutation.mutateAsync({ winningTeamId: selectedWinningTeamId || undefined });
       await saveAllResults();
       await resultsQuery.refetch();
-      setFeedback({ kind: 'success', message: 'Battle results updated successfully.' });
+      setFeedback({ kind: 'success', message: 'Резултатите от битката са обновени успешно.' });
     } catch (error) {
       if (error instanceof ApiClientError) {
         setFeedback({ kind: 'error', message: getApiErrorMessage(error) });
@@ -248,7 +248,7 @@ export function MassBattleResultsEditor({
         return;
       }
 
-      setFeedback({ kind: 'error', message: 'Unable to update results right now.' });
+      setFeedback({ kind: 'error', message: 'Неуспешно обновяване на резултатите в момента.' });
     }
   }
 
@@ -256,7 +256,7 @@ export function MassBattleResultsEditor({
     if (currentBattleStatus !== 'COMPLETED') {
       setFeedback({
         kind: 'error',
-        message: 'Score can be applied only for COMPLETED battles. Use "Apply Score + Complete Battle" first.',
+        message: 'Точки могат да се прилагат само за битки със статус COMPLETED. Първо използвай "Приложи точки и приключи".',
       });
       return;
     }
@@ -278,7 +278,7 @@ export function MassBattleResultsEditor({
         return;
       }
 
-      setFeedback({ kind: 'error', message: 'Unable to apply score right now.' });
+      setFeedback({ kind: 'error', message: 'Неуспешно прилагане на точки в момента.' });
     }
   }
 
@@ -293,7 +293,7 @@ export function MassBattleResultsEditor({
       const result = await applyScoreMutation.mutateAsync();
       await resultsQuery.refetch();
       await onRefreshBattle();
-      setFeedback({ kind: 'success', message: `Battle completed. ${result.message}` });
+      setFeedback({ kind: 'success', message: `Битката е приключена. ${result.message}` });
     } catch (error) {
       if (error instanceof ApiClientError) {
         setFeedback({ kind: 'error', message: getApiErrorMessage(error) });
@@ -305,7 +305,7 @@ export function MassBattleResultsEditor({
         return;
       }
 
-      setFeedback({ kind: 'error', message: 'Unable to complete and apply score right now.' });
+      setFeedback({ kind: 'error', message: 'Неуспешно приключване и прилагане на точки в момента.' });
     }
   }
 
@@ -367,7 +367,7 @@ export function MassBattleResultsEditor({
 
           <div>
             <p className="mb-2 text-sm font-medium text-slate-700">Филтър по отбор</p>
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            <div className="-mx-1 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1">
               <button
                 type="button"
                 onClick={() => {
@@ -379,7 +379,7 @@ export function MassBattleResultsEditor({
                     : 'inline-flex h-12 min-w-[3rem] items-center justify-center rounded-full border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50'
                 }
               >
-                All
+                Общи
               </button>
 
               {campTeams.map((team) => {
@@ -398,7 +398,7 @@ export function MassBattleResultsEditor({
                         : 'relative inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50'
                     }
                     style={{ boxShadow: team.color ? `inset 0 0 0 2px ${team.color}` : undefined }}
-                    aria-label={`Filter by ${team.name}`}
+                    aria-label={`Филтър по ${team.name}`}
                     title={team.name}
                   >
                     {team.logoUrl ? (
@@ -426,11 +426,11 @@ export function MassBattleResultsEditor({
         </div>
       ) : null}
 
-      {isLoading ? <LoadingState label="Loading player results..." /> : null}
+      {isLoading ? <LoadingState label="Зареждане на резултатите на участниците..." /> : null}
 
       {isError ? (
         <ErrorState
-          message="Unable to load battle player results right now."
+          message="Неуспешно зареждане на резултатите на участниците в момента."
           onRetry={() => {
             void resultsQuery.refetch();
           }}
@@ -439,15 +439,15 @@ export function MassBattleResultsEditor({
 
       {!isLoading && !isError && participations.length === 0 ? (
         <EmptyState
-          title="No participations available"
-          description="Add participations for this camp before entering mass battle results."
+          title="Няма налични участия"
+          description="Добави участия за този лагер, преди да въвеждаш резултати от масова битка."
         />
       ) : null}
 
       {!isLoading && !isError && participations.length > 0 ? (
         <section className="space-y-3 pb-32">
           {filteredParticipations.length === 0 ? (
-            <EmptyState title="No participants match filters" description="Try another team filter or search term." />
+            <EmptyState title="Няма участници по този филтър" description="Пробвай друг отбор или различно търсене." />
           ) : (
             filteredParticipations.map((participation) => {
               const player = playersById.get(participation.playerId);
@@ -455,18 +455,18 @@ export function MassBattleResultsEditor({
               const participationTeamId = getParticipationTeamId(participation.id);
               const participationTeamName = participationTeamId
                 ? campTeams.find((team) => team.id === participationTeamId)?.name ?? participationTeamId
-                : 'Unassigned';
+                : 'Неразпределен';
 
               return (
                 <article key={participation.id} className="rounded-xl border border-slate-200 bg-white p-3">
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-base font-semibold text-slate-900">{getPlayerDisplayName(player)}</h4>
-                      <p className="text-xs text-slate-600">Participation ID: {participation.id}</p>
+                      <p className="text-xs text-slate-600">ID участие: {participation.id}</p>
                     </div>
 
                     <p className="text-sm text-slate-700">
-                      <span className="font-medium text-slate-800">Team: </span>
+                      <span className="font-medium text-slate-800">Отбор: </span>
                       {participationTeamName}
                     </p>
 
@@ -480,7 +480,7 @@ export function MassBattleResultsEditor({
                               adjustKills(participation.id, -1);
                             }}
                             className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 bg-white text-lg font-semibold text-slate-700 hover:bg-slate-50"
-                            aria-label="Decrease kills"
+                            aria-label="Намали убийствата"
                           >
                             -
                           </button>
@@ -498,7 +498,7 @@ export function MassBattleResultsEditor({
                               adjustKills(participation.id, 1);
                             }}
                             className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 bg-white text-lg font-semibold text-slate-700 hover:bg-slate-50"
-                            aria-label="Increase kills"
+                            aria-label="Увеличи убийствата"
                           >
                             +
                           </button>
@@ -514,7 +514,7 @@ export function MassBattleResultsEditor({
                               adjustKnifeKills(participation.id, -1);
                             }}
                             className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 bg-white text-lg font-semibold text-slate-700 hover:bg-slate-50"
-                            aria-label="Decrease knife kills"
+                            aria-label="Намали убийствата с нож"
                           >
                             -
                           </button>
@@ -532,7 +532,7 @@ export function MassBattleResultsEditor({
                               adjustKnifeKills(participation.id, 1);
                             }}
                             className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 bg-white text-lg font-semibold text-slate-700 hover:bg-slate-50"
-                            aria-label="Increase knife kills"
+                            aria-label="Увеличи убийствата с нож"
                           >
                             +
                           </button>

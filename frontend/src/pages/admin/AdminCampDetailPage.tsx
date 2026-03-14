@@ -66,13 +66,13 @@ function formatDate(dateValue: string): string {
 function getCampErrorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.statusCode === 404) {
-      return 'Camp was not found.';
+      return 'Лагерът не беше намерен.';
     }
 
     return error.message;
   }
 
-  return 'Unable to load camp details right now.';
+  return 'Неуспешно зареждане на детайлите за лагера.';
 }
 
 function CampMetadataSummary({ camp }: { camp: Camp }) {
@@ -84,23 +84,23 @@ function CampMetadataSummary({ camp }: { camp: Camp }) {
           <dd className="mt-1 font-medium text-slate-900">{camp.status}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Year</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Година</dt>
           <dd className="mt-1 font-medium text-slate-900">{camp.year}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Start Date</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Начална дата</dt>
           <dd className="mt-1">{formatDate(camp.startDate)}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">End Date</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Крайна дата</dt>
           <dd className="mt-1">{formatDate(camp.endDate)}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Location</dt>
-          <dd className="mt-1">{camp.location || 'Not specified'}</dd>
+          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Локация</dt>
+          <dd className="mt-1">{camp.location || 'Не е посочена'}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Camp Type ID</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Тип лагер (ID)</dt>
           <dd className="mt-1 break-all">{camp.campTypeId}</dd>
         </div>
       </dl>
@@ -117,7 +117,7 @@ function CampTabNavigation({
 }) {
   return (
     <SectionCard>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Camp detail sections">
+      <div className="-mx-1 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Camp detail sections">
         {CAMP_DETAIL_TABS.map((tab) => {
           const isActive = tab.key === activeTab;
 
@@ -143,13 +143,12 @@ function CampTabNavigation({
 }
 
 function CampTabPlaceholder({ tab }: { tab: CampDetailTabKey }) {
-  const tabLabel = CAMP_DETAIL_TABS.find((item) => item.key === tab)?.label ?? 'Section';
+  const tabLabel = CAMP_DETAIL_TABS.find((item) => item.key === tab)?.label ?? 'Секция';
 
   return (
-    <SectionCard title={tabLabel} description="This section is intentionally minimal in Phase 3.">
+    <SectionCard title={tabLabel} description="Тази секция е оставена минимална в текущата фаза.">
       <p className="text-sm text-slate-600">
-        Placeholder content for {tabLabel.toLowerCase()}. Full functionality will be implemented in the next
-        frontend tasks.
+        Временна секция за {tabLabel.toLowerCase()}. Пълната функционалност ще бъде добавена в следващите задачи.
       </p>
     </SectionCard>
   );
@@ -193,7 +192,7 @@ export function AdminCampDetailPage() {
 
   async function handleFinalizeCampScore() {
     const shouldFinalize = window.confirm(
-      'Finalize camp score now? This action applies final position bonuses and marks camp as finished.',
+      'Да приключим ли класирането на лагера? Това действие прилага финалните бонуси и маркира лагера като приключен.',
     );
 
     if (!shouldFinalize) {
@@ -210,7 +209,7 @@ export function AdminCampDetailPage() {
         return;
       }
 
-      setFeedback({ kind: 'error', message: 'Unable to finalize camp score right now.' });
+      setFeedback({ kind: 'error', message: 'Неуспешно приключване на класирането в момента.' });
     }
   }
 
@@ -219,8 +218,8 @@ export function AdminCampDetailPage() {
       <div className="space-y-5 sm:space-y-6">
         <PageHeader title="Детайли за лагера" description="Нужен е идентификатор на лагер." />
         <EmptyState
-          title="Missing camp identifier"
-          description="Please open this page from the camps list using a valid camp link."
+          title="Липсва идентификатор на лагер"
+          description="Отвори тази страница от списъка с лагери чрез валиден линк."
           action={
             <Link
               to="/admin/camps"
@@ -238,7 +237,7 @@ export function AdminCampDetailPage() {
     <div className="space-y-5 sm:space-y-6">
       <PageHeader
         title="Детайли за лагера"
-        description="Detail shell with internal navigation for camp management modules."
+        description="Основен екран с вътрешна навигация за модулите на лагера."
         actions={
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button
@@ -249,7 +248,7 @@ export function AdminCampDetailPage() {
               disabled={finalizeCampMutation.isPending || !campQuery.data}
               className="inline-flex rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {finalizeCampMutation.isPending ? 'Finalizing...' : 'Finalize Score'}
+              {finalizeCampMutation.isPending ? 'Приключване...' : 'Приключи класирането'}
             </button>
             <Link
               to="/admin/camps"
@@ -273,7 +272,7 @@ export function AdminCampDetailPage() {
         </div>
       ) : null}
 
-      {campQuery.isLoading ? <LoadingState label="Loading camp details..." /> : null}
+      {campQuery.isLoading ? <LoadingState label="Зареждане на детайлите за лагера..." /> : null}
 
       {campQuery.isError ? (
         <ErrorState
@@ -286,8 +285,8 @@ export function AdminCampDetailPage() {
 
       {campQuery.isSuccess && !campQuery.data ? (
         <EmptyState
-          title="Camp data is unavailable"
-          description="Camp details could not be loaded for this identifier."
+          title="Няма данни за лагера"
+          description="Не успяхме да заредим данни за този идентификатор."
         />
       ) : null}
 
@@ -297,7 +296,7 @@ export function AdminCampDetailPage() {
             <div className="space-y-1">
               <h2 className="text-xl font-semibold text-slate-900">{campQuery.data.title}</h2>
               <p className="text-sm text-slate-600">
-                Camp ID: <span className="font-mono text-xs text-slate-500">{campQuery.data.id}</span>
+                ID на лагер: <span className="font-mono text-xs text-slate-500">{campQuery.data.id}</span>
               </p>
             </div>
           </SectionCard>

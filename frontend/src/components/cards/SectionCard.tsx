@@ -8,7 +8,7 @@ type SectionCardProps = {
 
 export function SectionCard({ title, description, children }: SectionCardProps) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="flex flex-wrap rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       {title ? (
         <header className="mb-4">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>

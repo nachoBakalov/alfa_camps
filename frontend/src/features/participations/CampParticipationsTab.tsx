@@ -21,7 +21,7 @@ type AddParticipantMode = 'existing' | 'new';
 
 function getPlayerDisplayName(player: Player | undefined): string {
   if (!player) {
-    return 'Unknown player';
+    return 'Неизвестен играч';
   }
 
   const fullName = `${player.firstName} ${player.lastName ?? ''}`.trim();
@@ -63,6 +63,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
   const [newPlayerAvatarUrl, setNewPlayerAvatarUrl] = useState('');
   const [newPlayerIsActive, setNewPlayerIsActive] = useState(true);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const [participantSearch, setParticipantSearch] = useState('');
   const [feedback, setFeedback] = useState<{ kind: 'success' | 'error'; message: string } | null>(null);
 
   const participationsQuery = useParticipationsByCampQuery(campId);
@@ -161,27 +162,27 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
 
   async function handleSubmitAddParticipant() {
     if (!selectedTeamId) {
-      setFeedback({ kind: 'error', message: 'Please select an initial team.' });
+      setFeedback({ kind: 'error', message: 'Избери начален отбор.' });
       return;
     }
 
     if (addMode === 'existing') {
       if (!selectedPlayerId) {
-        setFeedback({ kind: 'error', message: 'Please select a player first.' });
+        setFeedback({ kind: 'error', message: 'Първо избери играч.' });
         return;
       }
 
       if (participatingPlayerIds.has(selectedPlayerId)) {
         setFeedback({
           kind: 'error',
-          message: 'This player already has participation in the selected camp.',
+          message: 'Този играч вече участва в избрания лагер.',
         });
         return;
       }
 
       try {
         await handleCreateParticipationWithTeam(selectedPlayerId, selectedTeamId);
-        setFeedback({ kind: 'success', message: 'Participant added and initial team assigned.' });
+        setFeedback({ kind: 'success', message: 'Участникът е добавен и началният отбор е зададен.' });
         resetAddFlowState();
         setIsAddModalOpen(false);
       } catch (error) {
@@ -190,7 +191,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
           return;
         }
 
-        setFeedback({ kind: 'error', message: 'Unable to add participant right now.' });
+        setFeedback({ kind: 'error', message: 'Неуспешно добавяне на участник в момента.' });
       }
 
       return;
@@ -202,7 +203,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
     const avatarUrl = newPlayerAvatarUrl.trim();
 
     if (!firstName) {
-      setFeedback({ kind: 'error', message: 'First name is required.' });
+      setFeedback({ kind: 'error', message: 'Името е задължително.' });
       return;
     }
 
@@ -217,7 +218,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
 
       await handleCreateParticipationWithTeam(createdPlayer.id, selectedTeamId);
 
-      setFeedback({ kind: 'success', message: 'Player created, added to camp, and team assigned.' });
+      setFeedback({ kind: 'success', message: 'Играчът е създаден, добавен в лагера и разпределен в отбор.' });
       resetAddFlowState();
       setIsAddModalOpen(false);
     } catch (error) {
@@ -226,7 +227,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
         return;
       }
 
-      setFeedback({ kind: 'error', message: 'Unable to create participant right now.' });
+      setFeedback({ kind: 'error', message: 'Неуспешно създаване на участник в момента.' });
     }
   }
 
@@ -237,13 +238,35 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
   const isSubmittingAddFlow =
     createMutation.isPending || createPlayerMutation.isPending || createTeamAssignmentMutation.isPending;
 
+  const normalizedParticipantSearch = participantSearch.trim().toLocaleLowerCase();
+
+  const filteredParticipations = useMemo(() => {
+    const participations = participationsQuery.data ?? [];
+    if (!normalizedParticipantSearch) {
+      return participations;
+    }
+
+    return participations.filter((participation) => {
+      const player = playersById.get(participation.playerId);
+      const firstName = player?.firstName?.toLocaleLowerCase() ?? '';
+      const lastName = player?.lastName?.toLocaleLowerCase() ?? '';
+      const nickname = player?.nickname?.toLocaleLowerCase() ?? '';
+
+      return (
+        firstName.includes(normalizedParticipantSearch)
+        || lastName.includes(normalizedParticipantSearch)
+        || nickname.includes(normalizedParticipantSearch)
+      );
+    });
+  }, [participationsQuery.data, playersById, normalizedParticipantSearch]);
+
   return (
     <div className="space-y-4">
       <SectionCard>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Camp Participations</h3>
-            <p className="text-sm text-slate-600">View participants and add players with initial team assignment.</p>
+            <h3 className="text-base font-semibold text-slate-900">Участници в лагера</h3>
+            <p className="text-sm text-slate-600">Прегледай участниците и добавяй играчи с начален отбор.</p>
           </div>
 
           <button
@@ -254,7 +277,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
             }}
             className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            Add Participant
+            Добави участник
           </button>
         </div>
       </SectionCard>
@@ -273,7 +296,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
 
       <ModalDrawer
         open={isAddModalOpen}
-        title="Add Participant"
+        title="Добави участник"
         onClose={() => {
           setIsAddModalOpen(false);
           resetAddFlowState();
@@ -292,7 +315,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   : 'rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50'
               }
             >
-              Add Existing Player
+              Добави съществуващ играч
             </button>
             <button
               type="button"
@@ -305,7 +328,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   : 'rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50'
               }
             >
-              Create New Player
+              Създай нов играч
             </button>
           </div>
 
@@ -313,7 +336,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
             <>
               <div>
                 <label htmlFor="playerSearch" className="mb-1 block text-sm font-medium text-slate-700">
-                  Search player
+                  Търси играч
                 </label>
                 <input
                   id="playerSearch"
@@ -321,16 +344,16 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   onChange={(event) => {
                     setPlayerSearch(event.target.value);
                   }}
-                  placeholder="Type a name or nickname"
+                  placeholder="Въведи име или прякор"
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
                 />
               </div>
 
-              {searchablePlayersQuery.isLoading ? <LoadingState label="Searching players..." /> : null}
+              {searchablePlayersQuery.isLoading ? <LoadingState label="Търсене на играчи..." /> : null}
 
               {searchablePlayersQuery.isError ? (
                 <ErrorState
-                  message="Unable to search players right now."
+                  message="Неуспешно търсене на играчи в момента."
                   onRetry={() => {
                     void searchablePlayersQuery.refetch();
                   }}
@@ -341,8 +364,8 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                 <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                   {selectablePlayers.length === 0 ? (
                     <EmptyState
-                      title="No available players"
-                      description="All matching players are already participating in this camp."
+                      title="Няма налични играчи"
+                      description="Всички намерени играчи вече участват в този лагер."
                     />
                   ) : (
                     selectablePlayers.map((player) => {
@@ -374,7 +397,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
             <div className="space-y-4">
               <div>
                 <label htmlFor="newPlayerFirstName" className="mb-1 block text-sm font-medium text-slate-700">
-                  First Name
+                  Име
                 </label>
                 <input
                   id="newPlayerFirstName"
@@ -382,14 +405,14 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   onChange={(event) => {
                     setNewPlayerFirstName(event.target.value);
                   }}
-                  placeholder="First name"
+                  placeholder="Въведи име"
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
                 />
               </div>
 
               <div>
                 <label htmlFor="newPlayerLastName" className="mb-1 block text-sm font-medium text-slate-700">
-                  Last Name
+                  Фамилия
                 </label>
                 <input
                   id="newPlayerLastName"
@@ -397,14 +420,14 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   onChange={(event) => {
                     setNewPlayerLastName(event.target.value);
                   }}
-                  placeholder="Last name"
+                  placeholder="Въведи фамилия"
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
                 />
               </div>
 
               <div>
                 <label htmlFor="newPlayerNickname" className="mb-1 block text-sm font-medium text-slate-700">
-                  Nickname
+                  Прякор
                 </label>
                 <input
                   id="newPlayerNickname"
@@ -412,14 +435,14 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   onChange={(event) => {
                     setNewPlayerNickname(event.target.value);
                   }}
-                  placeholder="Nickname"
+                  placeholder="Въведи прякор"
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
                 />
               </div>
 
               <div>
                 <label htmlFor="newPlayerAvatarUrl" className="mb-1 block text-sm font-medium text-slate-700">
-                  Avatar URL
+                  URL на аватар
                 </label>
                 <input
                   id="newPlayerAvatarUrl"
@@ -443,7 +466,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                     }}
                     className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    Choose Avatar
+                    Избери аватар
                   </button>
                 </div>
               </div>
@@ -457,14 +480,14 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   }}
                   className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
                 />
-                Active
+                Активен
               </label>
             </div>
           )}
 
           <div>
             <label htmlFor="initialTeamId" className="mb-1 block text-sm font-medium text-slate-700">
-              Initial Team
+              Начален отбор
             </label>
             <select
               id="initialTeamId"
@@ -474,7 +497,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
               }}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
             >
-              <option value="">Select team</option>
+              <option value="">Избери отбор</option>
               {(campTeamsQuery.data ?? []).map((team) => (
                 <option key={team.id} value={team.id}>
                   {team.name}
@@ -482,7 +505,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
               ))}
             </select>
             {campTeamsQuery.isSuccess && (campTeamsQuery.data ?? []).length === 0 ? (
-              <p className="mt-1 text-sm text-red-600">Create a camp team first before adding participants.</p>
+              <p className="mt-1 text-sm text-red-600">Първо създай отбор в лагера, преди да добавяш участници.</p>
             ) : null}
           </div>
 
@@ -495,7 +518,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
               }}
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
-              Cancel
+              Отказ
             </button>
             <button
               type="button"
@@ -505,7 +528,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
               disabled={isSubmittingAddFlow || campTeamsQuery.data?.length === 0}
               className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmittingAddFlow ? 'Запазване...' : 'Add Participant'}
+              {isSubmittingAddFlow ? 'Запазване...' : 'Добави участник'}
             </button>
           </div>
         </div>
@@ -513,7 +536,7 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
 
       <ModalDrawer
         open={avatarPickerOpen}
-        title="Choose Avatar"
+        title="Избери аватар"
         onClose={() => {
           setAvatarPickerOpen(false);
         }}
@@ -526,16 +549,16 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
               setNewPlayerAvatarUrl(url);
               setAvatarPickerOpen(false);
             }}
-            title="Select one avatar"
+            title="Избери аватар"
           />
         </div>
       </ModalDrawer>
 
-      {participationsQuery.isLoading ? <LoadingState label="Loading participations..." /> : null}
+      {participationsQuery.isLoading ? <LoadingState label="Зареждане на участниците..." /> : null}
 
       {participationsQuery.isError ? (
         <ErrorState
-          message="Unable to load participations right now."
+          message="Неуспешно зареждане на участниците в момента."
           onRetry={() => {
             void participationsQuery.refetch();
           }}
@@ -544,14 +567,40 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
 
       {participationsQuery.isSuccess && participationsQuery.data.length === 0 ? (
         <EmptyState
-          title="No participations yet"
-          description="Add an existing player to create the first participation."
+          title="Все още няма участници"
+          description="Добави играч, за да създадеш първото участие."
         />
       ) : null}
 
       {participationsQuery.isSuccess && participationsQuery.data.length > 0 ? (
+        <SectionCard>
+          <div className="space-y-1">
+            <label htmlFor="participantSearch" className="block text-sm font-medium text-slate-700">
+              Търсене
+            </label>
+            <input
+              id="participantSearch"
+              value={participantSearch}
+              onChange={(event) => {
+                setParticipantSearch(event.target.value);
+              }}
+              placeholder="Име, фамилия или прякор"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
+            />
+          </div>
+        </SectionCard>
+      ) : null}
+
+      {participationsQuery.isSuccess && participationsQuery.data.length > 0 && filteredParticipations.length === 0 ? (
+        <EmptyState
+          title="Няма намерени участници"
+          description="Промени текста за търсене и опитай отново."
+        />
+      ) : null}
+
+      {participationsQuery.isSuccess && participationsQuery.data.length > 0 && filteredParticipations.length > 0 ? (
         <section className="grid gap-3 sm:grid-cols-2">
-          {participationsQuery.data.map((participation) => {
+          {filteredParticipations.map((participation) => {
             const player = playersById.get(participation.playerId);
             const currentTeam = currentAssignmentByParticipationId.get(participation.id);
 
@@ -561,9 +610,9 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h4 className="text-base font-semibold text-slate-900">{getPlayerDisplayName(player)}</h4>
-                      <p className="text-xs text-slate-600">Player ID: {participation.playerId}</p>
+                      <p className="text-xs text-slate-600">ID на играч: {participation.playerId}</p>
                     </div>
-                    <Badge tone="neutral">Participation</Badge>
+                    <Badge tone="neutral">Участие</Badge>
                   </div>
 
                   <dl className="grid grid-cols-2 gap-2 text-sm text-slate-700">
@@ -594,11 +643,11 @@ export function CampParticipationsTab({ campId }: { campId: string }) {
                   </dl>
 
                   <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                    <span className="font-medium text-slate-800">Current team: </span>
+                    <span className="font-medium text-slate-800">Текущ отбор: </span>
                     {currentTeam?.state === 'loading' ? 'Зареждане...'
-                      : currentTeam?.state === 'error' ? 'Unavailable'
+                      : currentTeam?.state === 'error' ? 'Няма данни'
                       : currentTeam?.teamId ? (teamNameById.get(currentTeam.teamId) ?? currentTeam.teamId)
-                      : 'Unassigned'}
+                      : 'Неразпределен'}
                   </div>
                 </div>
               </SectionCard>

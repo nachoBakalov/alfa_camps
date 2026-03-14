@@ -127,7 +127,7 @@ function PlayerRankingList({
   getStatValue: (item: PlayerRankingItem) => number;
 }) {
   if (items.length === 0) {
-    return <EmptyState title="No ranking rows yet" description="Ranking will appear after score data is available." />;
+    return <EmptyState title="Все още няма редове в класирането" description="Класирането ще се появи след натрупване на резултати." />;
   }
 
   return (
@@ -174,7 +174,7 @@ function PlayerRankingList({
 
 function TeamStandingsList({ items }: { items: TeamStandingItem[] }) {
   if (items.length === 0) {
-    return <EmptyState title="No team standings yet" description="Standings will appear after teams and scores are available." />;
+    return <EmptyState title="Все още няма класиране на отборите" description="Класирането ще се появи след наличие на отбори и резултати." />;
   }
 
   return (
@@ -190,15 +190,15 @@ function TeamStandingsList({ items }: { items: TeamStandingItem[] }) {
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-700">
                 <p>
-                  <span className="text-slate-500">Team Points: </span>
+                  <span className="text-slate-500">Точки отбор: </span>
                   <span className="font-semibold text-slate-900">{item.teamPoints}</span>
                 </p>
                 <p>
-                  <span className="text-slate-500">Final Position: </span>
-                  <span className="font-semibold text-slate-900">{item.finalPosition ?? 'N/A'}</span>
+                  <span className="text-slate-500">Крайна позиция: </span>
+                  <span className="font-semibold text-slate-900">{item.finalPosition ?? 'Няма'}</span>
                 </p>
                 <p>
-                  <span className="text-slate-500">Status: </span>
+                  <span className="text-slate-500">Статус: </span>
                   <span className="font-semibold text-slate-900">{item.isActive ? 'Активен' : 'Неактивен'}</span>
                 </p>
               </div>
@@ -284,10 +284,10 @@ export function CampRankingsTab({ campId }: { campId: string }) {
         <div className="space-y-3">
           <div>
             <h3 className="text-base font-semibold text-slate-900">Класиране</h3>
-            <p className="text-sm text-slate-600">Track player and team standings for the selected camp.</p>
+            <p className="text-sm text-slate-600">Проследявай класирането на играчи и отбори за избрания лагер.</p>
           </div>
 
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Rankings tabs">
+          <div className="-mx-1 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Раздели за класиране">
             {RANKING_TABS.map((tab) => {
               const isActive = tab.key === activeTab;
 
@@ -316,7 +316,7 @@ export function CampRankingsTab({ campId }: { campId: string }) {
           {isPlayerRankingTab ? (
             <div>
               <p className="mb-2 text-sm font-medium text-slate-700">Отбор</p>
-              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Филтър по отбор">
+              <div className="-mx-1 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Филтър по отбор">
                 <button
                   type="button"
                   role="tab"
@@ -363,11 +363,11 @@ export function CampRankingsTab({ campId }: { campId: string }) {
         </div>
       </SectionCard>
 
-      {activeQuery.isLoading ? <LoadingState label="Loading rankings..." /> : null}
+      {activeQuery.isLoading ? <LoadingState label="Зареждане на класирането..." /> : null}
 
       {activeQuery.isError ? (
         <ErrorState
-          message="Unable to load rankings right now."
+          message="Неуспешно зареждане на класирането в момента."
           onRetry={() => {
             void activeQuery.refetch();
           }}
