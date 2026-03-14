@@ -12,6 +12,7 @@ import { CampParticipationsTab } from '../../features/participations/CampPartici
 import { CampAssignmentsTab } from '../../features/team-assignments/CampAssignmentsTab';
 import { CampBattlesTab } from '../../features/battles/CampBattlesTab';
 import { CampRankingsTab } from '../../features/rankings/CampRankingsTab';
+import { CampPhotosTab } from '../../features/photos/CampPhotosTab';
 import { useFinalizeCampScoreMutation } from '../../features/scoring/use-scoring';
 import { ApiClientError } from '../../lib/errors';
 
@@ -32,11 +33,11 @@ type CampDetailTab = {
 
 const CAMP_DETAIL_TABS: CampDetailTab[] = [
   { key: 'overview', label: 'Обобщение' },
-  { key: 'teams', label: 'Teams' },
-  { key: 'participations', label: 'Участия' },
-  { key: 'assignments', label: 'Assignments' },
+  { key: 'teams', label: 'Отбори' },
+  { key: 'participations', label: 'Участници' },
+  { key: 'assignments', label: 'Разпределения' },
   { key: 'battles', label: 'Битки' },
-  { key: 'rankings', label: 'Класирания' },
+  { key: 'rankings', label: 'Класиране' },
   { key: 'photos', label: 'Снимки' },
   { key: 'settings', label: 'Настройки' },
 ];
@@ -76,7 +77,7 @@ function getCampErrorMessage(error: unknown): string {
 
 function CampMetadataSummary({ camp }: { camp: Camp }) {
   return (
-    <SectionCard title="Camp summary" description="Basic camp metadata for quick context.">
+    <SectionCard title="Обобщение на лагера" description="Основна информация за лагера.">
       <dl className="grid grid-cols-1 gap-3 text-sm text-slate-700 sm:grid-cols-2">
         <div>
           <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Статус</dt>
@@ -175,6 +176,10 @@ function CampTabContent({ tab, campId }: { tab: CampDetailTabKey; campId: string
     return <CampRankingsTab campId={campId} />;
   }
 
+  if (tab === 'photos') {
+    return <CampPhotosTab campId={campId} />;
+  }
+
   return <CampTabPlaceholder tab={tab} />;
 }
 
@@ -212,7 +217,7 @@ export function AdminCampDetailPage() {
   if (!campId) {
     return (
       <div className="space-y-5 sm:space-y-6">
-        <PageHeader title="Camp detail" description="Camp identifier is required." />
+        <PageHeader title="Детайли за лагера" description="Нужен е идентификатор на лагер." />
         <EmptyState
           title="Missing camp identifier"
           description="Please open this page from the camps list using a valid camp link."
@@ -221,7 +226,7 @@ export function AdminCampDetailPage() {
               to="/admin/camps"
               className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             >
-              Back to camps
+              Назад към лагерите
             </Link>
           }
         />
@@ -232,7 +237,7 @@ export function AdminCampDetailPage() {
   return (
     <div className="space-y-5 sm:space-y-6">
       <PageHeader
-        title="Camp detail"
+        title="Детайли за лагера"
         description="Detail shell with internal navigation for camp management modules."
         actions={
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -250,7 +255,7 @@ export function AdminCampDetailPage() {
               to="/admin/camps"
               className="inline-flex rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
-              Back to camps
+              Назад към лагерите
             </Link>
           </div>
         }

@@ -203,14 +203,14 @@ function BattleForm({
 
         <div>
           <label htmlFor="winningTeamId" className="mb-1 block text-sm font-medium text-slate-700">
-            Winning Team
+            Победил отбор
           </label>
           <select
             id="winningTeamId"
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
             {...form.register('winningTeamId')}
           >
-            <option value="">No winning team</option>
+            <option value="">Няма победител</option>
             {teamOptions.map((team) => (
               <option key={team.id} value={team.id}>
                 {team.name}
@@ -258,7 +258,7 @@ function BattleForm({
           onClick={onCancel}
           className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
-          Cancel
+          Отказ
         </button>
         <button
           type="submit"
@@ -349,7 +349,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
             }}
             className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            Add Battle
+            Добави битка
           </button>
         </div>
       </SectionCard>
@@ -368,7 +368,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
 
       <ModalDrawer
         open={Boolean(formMode)}
-        title={formMode?.kind === 'create' ? 'Създай битка' : `Edit: ${formMode?.battle.title ?? ''}`}
+        title={formMode?.kind === 'create' ? 'Създай битка' : `Редактирай: ${formMode?.battle.title ?? ''}`}
         onClose={() => {
           setFormMode(null);
         }}
@@ -447,7 +447,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
                     to={`/admin/battles/${battle.id}`}
                     className="rounded-md border border-slate-300 bg-white px-3 py-2 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    Open Detail
+                    Отвори детайли
                   </Link>
                   <button
                     type="button"
@@ -457,7 +457,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
                     }}
                     className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    Edit
+                    Редактирай
                   </button>
                   <button
                     type="button"
@@ -467,7 +467,7 @@ export function CampBattlesTab({ campId }: { campId: string }) {
                     disabled={deleteMutation.isPending}
                     className="rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Delete
+                    Изтрий
                   </button>
                 </div>
               </div>

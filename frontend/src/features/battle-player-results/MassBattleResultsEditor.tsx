@@ -333,7 +333,7 @@ export function MassBattleResultsEditor({
 
   return (
     <div className="space-y-4">
-      <SectionCard title="Winning Team" description="Select the winning team for this mass battle.">
+      <SectionCard title="Победил отбор" description="Избери победилия отбор за тази масова битка.">
         <div className="space-y-3">
           <select
             value={selectedWinningTeamId}
@@ -342,7 +342,7 @@ export function MassBattleResultsEditor({
             }}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2 sm:max-w-sm"
           >
-            <option value="">No winning team</option>
+            <option value="">Няма победител</option>
             {campTeams.map((team) => (
               <option key={team.id} value={team.id}>
                 {team.name}
@@ -352,7 +352,7 @@ export function MassBattleResultsEditor({
 
           <div>
             <label htmlFor="participantSearch" className="mb-1 block text-sm font-medium text-slate-700">
-              Search participants
+              Търси участници
             </label>
             <input
               id="participantSearch"
@@ -360,13 +360,13 @@ export function MassBattleResultsEditor({
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
-              placeholder="Search by player name"
+              placeholder="Търси по име на играч"
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2 sm:max-w-sm"
             />
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-slate-700">Team filter</p>
+            <p className="mb-2 text-sm font-medium text-slate-700">Филтър по отбор</p>
             <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
               <button
                 type="button"
@@ -549,7 +549,7 @@ export function MassBattleResultsEditor({
                         }}
                         className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
                       />
-                      Survived
+                      Оцелял
                     </label>
                   </div>
                 </article>
@@ -570,7 +570,7 @@ export function MassBattleResultsEditor({
               disabled={isSavingResults || isApplyingScore}
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSavingResults ? 'Updating...' : 'Обнови резултати'}
+              {isSavingResults ? 'Обновяване...' : 'Обнови резултат'}
             </button>
             <button
               type="button"
@@ -590,7 +590,7 @@ export function MassBattleResultsEditor({
               disabled={isSavingResults || isApplyingScore}
               className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSavingResults || isApplyingScore ? 'Processing...' : 'Приложи точки + приключи битката'}
+              {isSavingResults || isApplyingScore ? 'Обработка...' : 'Приложи точки и приключи'}
             </button>
           </div>
         </div>

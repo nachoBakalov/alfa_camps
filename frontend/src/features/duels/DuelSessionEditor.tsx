@@ -1,6 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import type { BattleStatus } from '../../api/battles.api';
 import type { CampParticipation } from '../../api/participations.api';
 import type { Player } from '../../api/players.api';
 import { SectionCard } from '../../components/cards/SectionCard';
@@ -9,6 +11,8 @@ import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
 import { ModalDrawer } from '../../components/ui/ModalDrawer';
 import { ApiClientError } from '../../lib/errors';
+import { useBattleMutations } from '../battles/use-battle-mutations';
+import { useApplyBattleScoreMutation } from '../scoring/use-scoring';
 import { duelFormSchema, type DuelFormValues } from './duel-form.schema';
 import { useDuelMutations } from './use-duel-mutations';
 import { useDuelsByBattleQuery } from './use-duels-query';
@@ -32,17 +36,31 @@ function getMutationErrorMessage(error: unknown, fallback: string): string {
 
 export function DuelSessionEditor({
   battleId,
+  campId,
+  battleStatus,
   participations,
   players,
+  onRefreshBattle,
 }: {
   battleId: string;
+  campId: string;
+  battleStatus: BattleStatus;
   participations: CampParticipation[];
   players: Player[];
+  onRefreshBattle: () => Promise<void>;
 }) {
+  const navigate = useNavigate();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [currentBattleStatus, setCurrentBattleStatus] = useState<BattleStatus>(battleStatus);
   const [feedback, setFeedback] = useState<{ kind: 'success' | 'error'; message: string } | null>(null);
   const duelsQuery = useDuelsByBattleQuery(battleId);
   const { createMutation, updateMutation, deleteMutation } = useDuelMutations(battleId);
+  const { updateMutation: updateBattleMutation } = useBattleMutations(campId);
+  const applyScoreMutation = useApplyBattleScoreMutation({ battleId, campId });
+
+  useEffect(() => {
+    setCurrentBattleStatus(battleStatus);
+  }, [battleStatus]);
 
   const playersById = useMemo(() => {
     const map = new Map<string, Player>();
@@ -133,12 +151,64 @@ export function DuelSessionEditor({
     }
   }
 
+  async function handleSaveDuels(): Promise<void> {
+    try {
+      await duelsQuery.refetch();
+      await onRefreshBattle();
+      setFeedback({ kind: 'success', message: 'Duel session data refreshed successfully.' });
+    } catch (error) {
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to refresh duel session data.') });
+    }
+  }
+
+  async function handleApplyScore(): Promise<void> {
+    if (currentBattleStatus !== 'COMPLETED') {
+      setFeedback({
+        kind: 'error',
+        message: 'Score can be applied only for COMPLETED battles. Use "Apply Score + Complete Battle" first.',
+      });
+      return;
+    }
+
+    try {
+      const result = await applyScoreMutation.mutateAsync();
+      await duelsQuery.refetch();
+      await onRefreshBattle();
+      setFeedback({ kind: 'success', message: result.message });
+    } catch (error) {
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to apply score right now.') });
+    }
+  }
+
+  async function handleApplyScoreAndCompleteBattle(): Promise<void> {
+    try {
+      await updateBattleMutation.mutateAsync({
+        id: battleId,
+        payload: { status: 'COMPLETED' },
+      });
+      setCurrentBattleStatus('COMPLETED');
+
+      const result = await applyScoreMutation.mutateAsync();
+      await duelsQuery.refetch();
+      await onRefreshBattle();
+      setFeedback({ kind: 'success', message: `Battle completed. ${result.message}` });
+
+      navigate(`/admin/camps/${campId}`);
+    } catch (error) {
+      setFeedback({ kind: 'error', message: getMutationErrorMessage(error, 'Unable to complete and apply score right now.') });
+    }
+  }
+
+  const isApplyingScore = applyScoreMutation.isPending;
+  const isUpdatingBattle = updateBattleMutation.isPending;
+  const isActionPending = isApplyingScore || isUpdatingBattle || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+
   return (
     <div className="space-y-4">
       <SectionCard>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Duels</h3>
+            <h3 className="text-base font-semibold text-slate-900">Сесия с дуели</h3>
             <p className="text-sm text-slate-600">Create duels and manage winners for this duel session.</p>
           </div>
 
@@ -150,7 +220,7 @@ export function DuelSessionEditor({
             }}
             className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            Add Duel
+            Създай дуел
           </button>
         </div>
       </SectionCard>
@@ -169,7 +239,7 @@ export function DuelSessionEditor({
 
       <ModalDrawer
         open={isAddOpen}
-        title="Create Duel"
+        title="Създай дуел"
         onClose={() => {
           setIsAddOpen(false);
         }}
@@ -225,14 +295,14 @@ export function DuelSessionEditor({
 
           <div>
             <label htmlFor="winner" className="mb-1 block text-sm font-medium text-slate-700">
-              Winner (optional)
+              Победител
             </label>
             <select
               id="winner"
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
               {...form.register('winnerParticipationId')}
             >
-              <option value="">No winner yet</option>
+              <option value="">Избери победител</option>
               {participationLabelOptions
                 .filter((option) => {
                   const playerA = form.watch('playerAParticipationId');
@@ -258,7 +328,7 @@ export function DuelSessionEditor({
               }}
               className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
-              Cancel
+              Отказ
             </button>
             <button
               type="submit"
@@ -308,13 +378,13 @@ export function DuelSessionEditor({
                       <span className="font-medium text-slate-800">Player B:</span> {playerB?.label || duel.playerBParticipationId}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-800">Winner:</span> {winner?.label || 'Not set'}
+                      <span className="font-medium text-slate-800">Победител:</span> {winner?.label || 'Не е избран'}
                     </p>
                   </div>
 
                   <div>
                     <label htmlFor={`winner-${duel.id}`} className="mb-1 block text-sm font-medium text-slate-700">
-                      Set winner
+                      Избери победител
                     </label>
                     <select
                       id={`winner-${duel.id}`}
@@ -350,7 +420,7 @@ export function DuelSessionEditor({
                       disabled={deleteMutation.isPending}
                       className="rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Remove Duel
+                      Изтрий дуел
                     </button>
                   </div>
                 </div>
@@ -358,6 +428,43 @@ export function DuelSessionEditor({
             );
           })}
         </section>
+      ) : null}
+
+      {!duelsQuery.isLoading && !duelsQuery.isError ? (
+        <div className="sticky bottom-0 z-20 -mx-4 border-t border-slate-200 bg-white/95 p-4 backdrop-blur sm:-mx-6 sm:p-6">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <button
+              type="button"
+              onClick={() => {
+                void handleSaveDuels();
+              }}
+              disabled={isActionPending}
+              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isActionPending ? 'Обновяване...' : 'Обнови двубои'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void handleApplyScore();
+              }}
+              disabled={isActionPending || currentBattleStatus !== 'COMPLETED'}
+              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isApplyingScore ? 'Прилагане...' : 'Приложи точки'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void handleApplyScoreAndCompleteBattle();
+              }}
+              disabled={isActionPending}
+              className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isActionPending ? 'Обработка...' : 'Приложи точки + приключи битката'}
+            </button>
+          </div>
+        </div>
       ) : null}
     </div>
   );

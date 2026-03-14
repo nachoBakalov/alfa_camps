@@ -13,6 +13,7 @@ import { LoadingState } from '../../components/feedback/LoadingState';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { SectionCard } from '../../components/cards/SectionCard';
 import { playerFormSchema, type PlayerFormValues } from '../../features/players/player-form.schema';
+import { ScopedPhotosSection } from '../../features/photos/ScopedPhotosSection';
 import { usePlayerMutations } from '../../features/players/use-player-mutations';
 import { usePlayersQuery } from '../../features/players/use-players-query';
 import { ApiClientError } from '../../lib/errors';
@@ -236,6 +237,7 @@ export function PlayersPage() {
   const [draftSearch, setDraftSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
   const [formMode, setFormMode] = useState<FormMode>(null);
+  const [photosPlayer, setPhotosPlayer] = useState<Player | null>(null);
   const [feedback, setFeedback] = useState<{ kind: 'success' | 'error'; message: string } | null>(
     null,
   );
@@ -360,6 +362,25 @@ export function PlayersPage() {
         ) : null}
       </ModalDrawer>
 
+      <ModalDrawer
+        open={Boolean(photosPlayer)}
+        title={photosPlayer ? `Снимки: ${photosPlayer.firstName} ${photosPlayer.lastName ?? ''}`.trim() : 'Снимки'}
+        onClose={() => {
+          setPhotosPlayer(null);
+        }}
+      >
+        {photosPlayer ? (
+          <ScopedPhotosSection
+            scopeType="player"
+            scopeId={photosPlayer.id}
+            title="Качване на снимки"
+            description="Добави снимки към този играч. Изображенията се оптимизират автоматично преди качване."
+            galleryTitle="Галерия на играча"
+            galleryDescription="Всички качени снимки за избрания играч."
+          />
+        ) : null}
+      </ModalDrawer>
+
       <SectionCard title="Search" description="Use q search to filter players.">
         <form className="flex flex-col gap-2 sm:flex-row" onSubmit={handleSearchSubmit}>
           <input
@@ -452,6 +473,15 @@ export function PlayersPage() {
                       </Link>
                     </div>
                     <div className="flex flex-col gap-2 pt-1 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhotosPlayer(player);
+                        }}
+                        className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        Снимки
+                      </button>
                       <button
                         type="button"
                         onClick={() => {

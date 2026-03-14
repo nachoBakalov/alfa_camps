@@ -41,6 +41,7 @@ export function BattleDetailPage() {
   const campTeamsQuery = useCampTeamsByCampQuery(battleQuery.data?.campId);
   const participationsQuery = useParticipationsByCampQuery(battleQuery.data?.campId);
   const playersQuery = usePlayersQuery();
+  const backToCampPath = battleQuery.data?.campId ? `/admin/camps/${battleQuery.data.campId}` : '/admin/camps';
 
   if (!battleId) {
     return (
@@ -69,10 +70,10 @@ export function BattleDetailPage() {
         description="Minimal battle detail screen for direct navigation from camp battles tab."
         actions={
           <Link
-            to="/admin/camps"
+            to={backToCampPath}
             className="inline-flex rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Back to camps
+            Назад към лагера
           </Link>
         }
       />
@@ -138,7 +139,7 @@ export function BattleDetailPage() {
           </SectionCard>
 
           {battleQuery.data.battleType === 'MASS_BATTLE' ? (
-            <SectionCard title="Results" description="Mass battle results editor.">
+            <SectionCard title="Резултати" description="Резултати от масова битка.">
               {campTeamsQuery.isLoading || participationsQuery.isLoading || playersQuery.isLoading ? (
                 <LoadingState label="Loading result editor data..." />
               ) : null}
@@ -177,7 +178,7 @@ export function BattleDetailPage() {
           ) : null}
 
           {battleQuery.data.battleType === 'DUEL_SESSION' ? (
-            <SectionCard title="Duels" description="Duel session editor.">
+            <SectionCard title="Сесия с дуели" description="Редактор за сесия с дуели.">
               {participationsQuery.isLoading || playersQuery.isLoading ? (
                 <LoadingState label="Loading duel editor data..." />
               ) : null}
@@ -195,14 +196,19 @@ export function BattleDetailPage() {
               {participationsQuery.isSuccess && playersQuery.isSuccess ? (
                 <DuelSessionEditor
                   battleId={battleQuery.data.id}
+                  campId={battleQuery.data.campId}
+                  battleStatus={battleQuery.data.status}
                   participations={participationsQuery.data}
                   players={playersQuery.data}
+                  onRefreshBattle={async () => {
+                    await battleQuery.refetch();
+                  }}
                 />
               ) : null}
             </SectionCard>
           ) : null}
 
-          {battleQuery.data.battleType !== 'MASS_BATTLE' ? (
+          {battleQuery.data.battleType !== 'MASS_BATTLE' && battleQuery.data.battleType !== 'DUEL_SESSION' ? (
             <SectionCard title="Scoring" description="Score preview and apply score area.">
               <BattleScoringSection
                 battleId={battleQuery.data.id}

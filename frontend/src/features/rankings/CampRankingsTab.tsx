@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useQueries } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import type { PlayerRankingItem, TeamStandingItem } from '../../api/rankings.api';
+import { getCurrentTeamAssignmentByParticipation } from '../../api/team-assignments.api';
 import { SectionCard } from '../../components/cards/SectionCard';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
 import { Badge } from '../../components/ui/Badge';
+import { useCampTeamsByCampQuery } from '../camp-teams/use-camp-teams-query';
 import {
   useCampKillsRankingQuery,
   useCampPointsRankingQuery,
@@ -15,10 +18,10 @@ import {
 type RankingTabKey = 'points' | 'kills' | 'survivals' | 'teams';
 
 const RANKING_TABS: Array<{ key: RankingTabKey; label: string }> = [
-  { key: 'points', label: 'Points' },
-  { key: 'kills', label: 'Kills' },
-  { key: 'survivals', label: 'Survivals' },
-  { key: 'teams', label: 'Teams' },
+  { key: 'points', label: 'Точки' },
+  { key: 'kills', label: 'Убийства' },
+  { key: 'survivals', label: 'Оцеляване' },
+  { key: 'teams', label: 'Отбори' },
 ];
 
 function getPlayerDisplayName(item: PlayerRankingItem): string {
@@ -90,6 +93,30 @@ function TeamLogo({ item }: { item: TeamStandingItem }) {
   );
 }
 
+function TeamScopeLogo({
+  name,
+  color,
+  logoUrl,
+}: {
+  name: string;
+  color?: string | null;
+  logoUrl?: string | null;
+}) {
+  if (logoUrl) {
+    return <img src={logoUrl} alt={name} className="h-9 w-9 rounded-full object-cover" loading="lazy" />;
+  }
+
+  return (
+    <span
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold text-slate-700"
+      style={{ backgroundColor: color || '#f1f5f9' }}
+      aria-hidden="true"
+    >
+      {name.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
 function PlayerRankingList({
   items,
   statLabel,
@@ -124,15 +151,15 @@ function PlayerRankingList({
                     <span className="font-semibold text-slate-900">{getStatValue(item)}</span>
                   </p>
                   <p>
-                    <span className="text-slate-500">Points: </span>
+                    <span className="text-slate-500">Точки: </span>
                     <span className="font-semibold text-slate-900">{item.points}</span>
                   </p>
                   <p>
-                    <span className="text-slate-500">Kills: </span>
+                    <span className="text-slate-500">Убийства: </span>
                     <span className="font-semibold text-slate-900">{item.kills}</span>
                   </p>
                   <p>
-                    <span className="text-slate-500">Survivals: </span>
+                    <span className="text-slate-500">Оцеляване: </span>
                     <span className="font-semibold text-slate-900">{item.survivals}</span>
                   </p>
                 </div>
@@ -185,11 +212,13 @@ function TeamStandingsList({ items }: { items: TeamStandingItem[] }) {
 
 export function CampRankingsTab({ campId }: { campId: string }) {
   const [activeTab, setActiveTab] = useState<RankingTabKey>('points');
+  const [selectedTeamScope, setSelectedTeamScope] = useState<string>('all');
 
   const pointsQuery = useCampPointsRankingQuery(campId, undefined, activeTab === 'points');
   const killsQuery = useCampKillsRankingQuery(campId, undefined, activeTab === 'kills');
   const survivalsQuery = useCampSurvivalsRankingQuery(campId, undefined, activeTab === 'survivals');
   const teamsQuery = useCampTeamStandingsQuery(campId, activeTab === 'teams');
+  const campTeamsQuery = useCampTeamsByCampQuery(campId);
 
   const activeQuery =
     activeTab === 'points'
@@ -200,12 +229,61 @@ export function CampRankingsTab({ campId }: { campId: string }) {
           ? survivalsQuery
           : teamsQuery;
 
+  const activePlayerItems = useMemo(() => {
+    if (activeTab === 'points') {
+      return pointsQuery.data ?? [];
+    }
+
+    if (activeTab === 'kills') {
+      return killsQuery.data ?? [];
+    }
+
+    if (activeTab === 'survivals') {
+      return survivalsQuery.data ?? [];
+    }
+
+    return [];
+  }, [activeTab, killsQuery.data, pointsQuery.data, survivalsQuery.data]);
+
+  const isPlayerRankingTab = activeTab === 'points' || activeTab === 'kills' || activeTab === 'survivals';
+
+  const currentTeamQueries = useQueries({
+    queries: activePlayerItems.map((item) => ({
+      queryKey: ['team-assignments', 'current', item.participationId],
+      queryFn: () => getCurrentTeamAssignmentByParticipation(item.participationId),
+      enabled: isPlayerRankingTab && selectedTeamScope !== 'all' && activePlayerItems.length > 0,
+    })),
+  });
+
+  const currentTeamByParticipationId = useMemo(() => {
+    const map = new Map<string, string | null>();
+
+    activePlayerItems.forEach((item, index) => {
+      const query = currentTeamQueries[index];
+      map.set(item.participationId, query?.data?.teamId ?? null);
+    });
+
+    return map;
+  }, [activePlayerItems, currentTeamQueries]);
+
+  const filteredPlayerItems = useMemo(() => {
+    if (selectedTeamScope === 'all') {
+      return activePlayerItems;
+    }
+
+    return activePlayerItems.filter((item) => currentTeamByParticipationId.get(item.participationId) === selectedTeamScope);
+  }, [activePlayerItems, currentTeamByParticipationId, selectedTeamScope]);
+
+  const isFilteringByTeam = isPlayerRankingTab && selectedTeamScope !== 'all';
+  const isTeamFilterLoading = isFilteringByTeam && currentTeamQueries.some((query) => query.isLoading);
+  const isTeamFilterError = isFilteringByTeam && currentTeamQueries.some((query) => query.isError);
+
   return (
     <div className="space-y-4">
       <SectionCard>
         <div className="space-y-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Camp Rankings</h3>
+            <h3 className="text-base font-semibold text-slate-900">Класиране</h3>
             <p className="text-sm text-slate-600">Track player and team standings for the selected camp.</p>
           </div>
 
@@ -221,6 +299,7 @@ export function CampRankingsTab({ campId }: { campId: string }) {
                   aria-selected={isActive}
                   onClick={() => {
                     setActiveTab(tab.key);
+                    setSelectedTeamScope('all');
                   }}
                   className={
                     isActive
@@ -233,6 +312,54 @@ export function CampRankingsTab({ campId }: { campId: string }) {
               );
             })}
           </div>
+
+          {isPlayerRankingTab ? (
+            <div>
+              <p className="mb-2 text-sm font-medium text-slate-700">Отбор</p>
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Филтър по отбор">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedTeamScope === 'all'}
+                  onClick={() => {
+                    setSelectedTeamScope('all');
+                  }}
+                  className={
+                    selectedTeamScope === 'all'
+                      ? 'whitespace-nowrap rounded-full border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white'
+                      : 'whitespace-nowrap rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50'
+                  }
+                >
+                  Общи
+                </button>
+
+                {(campTeamsQuery.data ?? []).map((team) => {
+                  const isSelected = selectedTeamScope === team.id;
+
+                  return (
+                    <button
+                      key={team.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isSelected}
+                      onClick={() => {
+                        setSelectedTeamScope(team.id);
+                      }}
+                      className={
+                        isSelected
+                          ? 'inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full border-2 border-slate-900 bg-white px-1'
+                          : 'inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full border border-slate-300 bg-white px-1 hover:bg-slate-50'
+                      }
+                      title={team.name}
+                      aria-label={team.name}
+                    >
+                      <TeamScopeLogo name={team.name} color={team.color} logoUrl={team.logoUrl} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
       </SectionCard>
 
@@ -247,15 +374,28 @@ export function CampRankingsTab({ campId }: { campId: string }) {
         />
       ) : null}
 
-      {activeQuery.isSuccess ? (
+      {isTeamFilterLoading ? <LoadingState label="Зареждане на филтъра по отбор..." /> : null}
+
+      {isTeamFilterError ? (
+        <ErrorState
+          message="Неуспешно зареждане на текущите отбори за филтъра."
+          onRetry={() => {
+            currentTeamQueries.forEach((query) => {
+              void query.refetch();
+            });
+          }}
+        />
+      ) : null}
+
+      {activeQuery.isSuccess && !isTeamFilterLoading && !isTeamFilterError ? (
         activeTab === 'points' ? (
-          <PlayerRankingList items={pointsQuery.data ?? []} statLabel="Points" getStatValue={(item) => item.points} />
+          <PlayerRankingList items={filteredPlayerItems} statLabel="Точки" getStatValue={(item) => item.points} />
         ) : activeTab === 'kills' ? (
-          <PlayerRankingList items={killsQuery.data ?? []} statLabel="Kills" getStatValue={(item) => item.kills} />
+          <PlayerRankingList items={filteredPlayerItems} statLabel="Убийства" getStatValue={(item) => item.kills} />
         ) : activeTab === 'survivals' ? (
           <PlayerRankingList
-            items={survivalsQuery.data ?? []}
-            statLabel="Survivals"
+            items={filteredPlayerItems}
+            statLabel="Оцеляване"
             getStatValue={(item) => item.survivals}
           />
         ) : (

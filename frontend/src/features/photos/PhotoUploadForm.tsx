@@ -27,6 +27,12 @@ export type PhotoUploadSubmitInput = {
   targetId: string;
 };
 
+type FixedTarget = {
+  targetType: PhotoTargetType;
+  targetId: string;
+  payload?: PhotoUploadInput;
+};
+
 const TARGET_OPTIONS: Array<{ value: PhotoTargetType; label: string }> = [
   { value: 'camp', label: 'Лагер' },
   { value: 'team', label: 'Отбор' },
@@ -98,23 +104,35 @@ function toUploadPayload(values: PhotoUploadFormValues): {
 }
 
 export function PhotoUploadForm({
-  camps,
-  players,
+  camps = [],
+  players = [],
   isUploading,
   onSubmit,
+  fixedTarget,
 }: {
-  camps: Camp[];
-  players: Player[];
+  camps?: Camp[];
+  players?: Player[];
   isUploading: boolean;
   onSubmit: (input: PhotoUploadSubmitInput) => Promise<void>;
+  fixedTarget?: FixedTarget;
 }) {
+  const isFixedTarget = Boolean(fixedTarget?.targetId);
+  const fixedTargetType = fixedTarget?.targetType;
+  const fixedTargetId = fixedTarget?.targetId ?? '';
+  const fixedTargetPayload = fixedTarget?.payload;
+
   const form = useForm<PhotoUploadFormValues>({
     resolver: zodResolver(photoUploadFormSchema),
     defaultValues: {
-      targetType: 'camp',
-      campId: camps[0]?.id ?? '',
+      targetType: fixedTargetType ?? 'camp',
+      campId:
+        fixedTargetType === 'camp'
+          ? fixedTargetId
+          : fixedTargetType === 'team'
+            ? fixedTargetPayload?.campId ?? ''
+            : camps[0]?.id ?? '',
       teamId: '',
-      playerId: players[0]?.id ?? '',
+      playerId: fixedTargetType === 'player' ? fixedTargetId : players[0]?.id ?? '',
     },
   });
 
@@ -126,9 +144,15 @@ export function PhotoUploadForm({
   const uploadsRef = useRef<PreparedUpload[]>([]);
 
   const targetType = form.watch('targetType');
-  const selectedCampId = form.watch('campId') ?? '';
+  const selectedCampId = isFixedTarget
+    ? fixedTargetType === 'camp'
+      ? fixedTargetId
+      : ''
+    : form.watch('campId') ?? '';
 
-  const teamsQuery = useCampTeamsByCampQuery(selectedCampId || undefined);
+  const teamsQuery = useCampTeamsByCampQuery(
+    !isFixedTarget && selectedCampId ? selectedCampId : undefined,
+  );
   const teams = teamsQuery.data ?? [];
 
   useEffect(() => {
@@ -144,6 +168,29 @@ export function PhotoUploadForm({
   }, []);
 
   useEffect(() => {
+    if (!isFixedTarget || !fixedTargetType) {
+      return;
+    }
+
+    form.setValue('targetType', fixedTargetType, { shouldValidate: true });
+    form.setValue(
+      'campId',
+      fixedTargetType === 'camp'
+        ? fixedTargetId
+        : fixedTargetType === 'team'
+          ? fixedTargetPayload?.campId ?? ''
+          : '',
+      { shouldValidate: true },
+    );
+    form.setValue('teamId', fixedTargetType === 'team' ? fixedTargetId : '', { shouldValidate: true });
+    form.setValue('playerId', fixedTargetType === 'player' ? fixedTargetId : '', { shouldValidate: true });
+  }, [fixedTargetId, fixedTargetPayload?.campId, fixedTargetType, form, isFixedTarget]);
+
+  useEffect(() => {
+    if (isFixedTarget) {
+      return;
+    }
+
     if (targetType === 'camp' && !form.getValues('campId') && camps.length > 0) {
       form.setValue('campId', camps[0].id, { shouldDirty: true, shouldValidate: true });
     }
@@ -151,9 +198,13 @@ export function PhotoUploadForm({
     if (targetType === 'player' && !form.getValues('playerId') && players.length > 0) {
       form.setValue('playerId', players[0].id, { shouldDirty: true, shouldValidate: true });
     }
-  }, [camps, form, players, targetType]);
+  }, [camps, form, isFixedTarget, players, targetType]);
 
   useEffect(() => {
+    if (isFixedTarget) {
+      return;
+    }
+
     if (targetType !== 'team') {
       return;
     }
@@ -161,9 +212,13 @@ export function PhotoUploadForm({
     if (!form.getValues('campId') && camps.length > 0) {
       form.setValue('campId', camps[0].id, { shouldDirty: true, shouldValidate: true });
     }
-  }, [camps, form, targetType]);
+  }, [camps, form, isFixedTarget, targetType]);
 
   useEffect(() => {
+    if (isFixedTarget) {
+      return;
+    }
+
     if (targetType !== 'team') {
       return;
     }
@@ -174,7 +229,7 @@ export function PhotoUploadForm({
     if (!hasCurrentInList) {
       form.setValue('teamId', teams[0]?.id ?? '', { shouldDirty: true, shouldValidate: true });
     }
-  }, [form, targetType, teams]);
+  }, [form, isFixedTarget, targetType, teams]);
 
   const canSubmit = useMemo(() => {
     return preparedUploads.length > 0 && !isUploading && !isOptimizing;
@@ -261,45 +316,64 @@ export function PhotoUploadForm({
         }
 
         const mapped = toUploadPayload(values);
+        const payload = isFixedTarget && fixedTargetType
+          ? {
+              payload:
+                fixedTargetPayload ??
+                (fixedTargetType === 'camp'
+                  ? { campId: fixedTargetId }
+                  : fixedTargetType === 'team'
+                    ? { teamId: fixedTargetId }
+                    : { playerId: fixedTargetId }),
+              targetType: fixedTargetType,
+              targetId: fixedTargetId,
+            }
+          : mapped;
 
         await onSubmit({
           files: preparedUploads.map((upload) => upload.uploadFile),
-          payload: mapped.payload,
-          targetType: mapped.targetType,
-          targetId: mapped.targetId,
+          payload: payload.payload,
+          targetType: payload.targetType,
+          targetId: payload.targetId,
         });
 
         clearUploads();
       })}
       noValidate
     >
-      <div>
-        <p className="mb-2 text-sm font-medium text-slate-700">Къде да се свържат снимките?</p>
-        <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-100 p-1">
-          {TARGET_OPTIONS.map((option) => {
-            const isActive = targetType === option.value;
+      {!isFixedTarget ? (
+        <div>
+          <p className="mb-2 text-sm font-medium text-slate-700">Къде да се свържат снимките?</p>
+          <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-100 p-1">
+            {TARGET_OPTIONS.map((option) => {
+              const isActive = targetType === option.value;
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => {
-                  form.setValue('targetType', option.value, { shouldDirty: true, shouldValidate: true });
-                }}
-                className={
-                  isActive
-                    ? 'rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm'
-                    : 'rounded-lg px-3 py-2 text-sm font-medium text-slate-600'
-                }
-              >
-                {option.label}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    form.setValue('targetType', option.value, { shouldDirty: true, shouldValidate: true });
+                  }}
+                  className={
+                    isActive
+                      ? 'rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm'
+                      : 'rounded-lg px-3 py-2 text-sm font-medium text-slate-600'
+                  }
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-800">
+          Снимките ще бъдат свързани автоматично с текущия контекст.
+        </div>
+      )}
 
-      {targetType === 'camp' ? (
+      {!isFixedTarget && targetType === 'camp' ? (
         <div>
           <label htmlFor="uploadCampId" className="mb-1 block text-sm font-medium text-slate-700">
             Лагер
@@ -322,7 +396,7 @@ export function PhotoUploadForm({
         </div>
       ) : null}
 
-      {targetType === 'team' ? (
+      {!isFixedTarget && targetType === 'team' ? (
         <div className="space-y-4">
           <div>
             <label htmlFor="uploadTeamCampId" className="mb-1 block text-sm font-medium text-slate-700">
@@ -369,7 +443,7 @@ export function PhotoUploadForm({
         </div>
       ) : null}
 
-      {targetType === 'player' ? (
+      {!isFixedTarget && targetType === 'player' ? (
         <div>
           <label htmlFor="uploadPlayerId" className="mb-1 block text-sm font-medium text-slate-700">
             Играч
@@ -393,7 +467,7 @@ export function PhotoUploadForm({
       ) : null}
 
       <div>
-        <p className="mb-2 text-sm font-medium text-slate-700">Снимки за качване</p>
+        <p className="mb-2 text-sm font-medium text-slate-700">Качи снимки</p>
 
         <input
           ref={fileInputRef}
@@ -436,7 +510,8 @@ export function PhotoUploadForm({
               : 'w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-5 text-left hover:bg-slate-100'
           }
         >
-          <p className="text-sm font-semibold text-slate-900">Плъзни снимки тук или натисни за избор</p>
+          <p className="text-sm font-semibold text-slate-900">Плъзни снимки тук</p>
+          <p className="mt-1 text-xs text-slate-700">Избери файлове</p>
           <p className="mt-1 text-xs text-slate-600">Поддържани формати: JPG, PNG, WEBP</p>
         </button>
         {fileError ? <p className="mt-1 text-sm text-red-600">{fileError}</p> : null}
@@ -497,7 +572,7 @@ export function PhotoUploadForm({
           disabled={!canSubmit}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isUploading ? 'Качване...' : 'Качи снимките'}
+          {isUploading ? 'Качване...' : 'Качи снимки'}
         </button>
       </div>
     </form>

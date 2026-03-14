@@ -9,6 +9,7 @@ import { LoadingState } from '../../components/feedback/LoadingState';
 import { AssetPicker } from '../../components/ui/AssetPicker';
 import { Badge } from '../../components/ui/Badge';
 import { ModalDrawer } from '../../components/ui/ModalDrawer';
+import { ScopedPhotosSection } from '../photos/ScopedPhotosSection';
 import { campTeamFormSchema, type CampTeamFormValues } from './camp-team-form.schema';
 import { useCampTeamMutations } from './use-camp-team-mutations';
 import { useCampTeamsByCampQuery } from './use-camp-teams-query';
@@ -229,7 +230,7 @@ function TeamForm({
             onClick={onCancel}
             className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Cancel
+            Отказ
           </button>
           <button
             type="submit"
@@ -266,6 +267,7 @@ function TeamForm({
 
 export function CampTeamsTab({ campId }: { campId: string }) {
   const [formMode, setFormMode] = useState<FormMode>(null);
+  const [photosTeam, setPhotosTeam] = useState<CampTeam | null>(null);
   const [feedback, setFeedback] = useState<{ kind: 'success' | 'error'; message: string } | null>(
     null,
   );
@@ -359,7 +361,7 @@ export function CampTeamsTab({ campId }: { campId: string }) {
       <SectionCard>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Camp Teams</h3>
+            <h3 className="text-base font-semibold text-slate-900">Отбори в лагера</h3>
             <p className="text-sm text-slate-600">Manage teams for this camp and clone from camp type templates.</p>
           </div>
 
@@ -372,7 +374,7 @@ export function CampTeamsTab({ campId }: { campId: string }) {
               disabled={isMutating}
               className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {cloneFromTemplatesMutation.isPending ? 'Cloning...' : 'Clone from Templates'}
+              {cloneFromTemplatesMutation.isPending ? 'Копиране...' : 'Копирай от шаблон'}
             </button>
             <button
               type="button"
@@ -383,7 +385,7 @@ export function CampTeamsTab({ campId }: { campId: string }) {
               disabled={isMutating}
               className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Add Team
+              Добави отбор
             </button>
           </div>
         </div>
@@ -403,7 +405,7 @@ export function CampTeamsTab({ campId }: { campId: string }) {
 
       <ModalDrawer
         open={Boolean(formMode)}
-        title={formMode?.kind === 'create' ? 'Create Camp Team' : `Edit: ${formMode?.team.name ?? ''}`}
+        title={formMode?.kind === 'create' ? 'Създай отбор в лагера' : `Редактирай: ${formMode?.team.name ?? ''}`}
         onClose={() => {
           setFormMode(null);
         }}
@@ -423,6 +425,26 @@ export function CampTeamsTab({ campId }: { campId: string }) {
 
               await handleUpdate(formMode.team.id, values);
             }}
+          />
+        ) : null}
+      </ModalDrawer>
+
+      <ModalDrawer
+        open={Boolean(photosTeam)}
+        title={photosTeam ? `Снимки: ${photosTeam.name}` : 'Снимки'}
+        onClose={() => {
+          setPhotosTeam(null);
+        }}
+      >
+        {photosTeam ? (
+          <ScopedPhotosSection
+            scopeType="team"
+            scopeId={photosTeam.id}
+            relatedCampId={campId}
+            title="Качване на снимки"
+            description="Добави снимки към този отбор. Изображенията се оптимизират автоматично преди качване."
+            galleryTitle="Галерия на отбора"
+            galleryDescription="Всички качени снимки за избрания отбор."
           />
         ) : null}
       </ModalDrawer>
@@ -493,12 +515,21 @@ export function CampTeamsTab({ campId }: { campId: string }) {
                   <button
                     type="button"
                     onClick={() => {
+                      setPhotosTeam(team);
+                    }}
+                    className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Снимки
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
                       setFeedback(null);
                       setFormMode({ kind: 'edit', team });
                     }}
                     className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    Edit
+                    Редактирай
                   </button>
                   <button
                     type="button"
@@ -508,7 +539,7 @@ export function CampTeamsTab({ campId }: { campId: string }) {
                     disabled={isMutating}
                     className="rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Delete
+                    Изтрий
                   </button>
                 </div>
               </div>
