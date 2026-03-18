@@ -115,6 +115,8 @@
 - Error messages should explain what happened and what to do next.
 - Empty states should state the situation and present a clear next action.
 - Keep terminology consistent across screens.
+- Write all visible UI labels/placeholders/titles directly in Bulgarian UTF-8 text.
+- Do not use escaped Unicode literals (e.g. `\u0418...`, `\U0000...`) for user-visible frontend text.
 
 ## Performance Philosophy
 - Prefer lightweight components and fast render paths.

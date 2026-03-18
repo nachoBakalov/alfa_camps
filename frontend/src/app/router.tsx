@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { ProtectedRoute } from './protected-route';
 import { AdminLayout } from '../components/layout/AdminLayout';
 import { PublicLayout } from '../components/layout/PublicLayout';
@@ -22,10 +22,6 @@ import { PlayerPage } from '../pages/public/PlayerPage';
 import { TeamPage } from '../pages/public/TeamPage';
 
 export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Navigate to="/login" replace />,
-  },
   {
     path: '/login',
     element: <LoginPage />,
@@ -96,6 +92,10 @@ export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
     children: [
+      {
+        path: '/',
+        element: <MainPage />,
+      },
       {
         path: '/public',
         element: <MainPage />,

@@ -7,9 +7,11 @@ type PublicHeroProps = {
   location?: string;
   dateLabel?: string;
   status: PublicStatus;
+  statusLabel?: string;
   backgroundImageUrl: string;
   primaryAction?: PublicHeroAction;
   secondaryAction?: PublicHeroAction;
+  statusPlacement?: 'center' | 'top-left';
   className?: string;
   topContent?: ReactNode;
 };
@@ -19,9 +21,11 @@ export function PublicHero({
   location,
   dateLabel,
   status,
+  statusLabel,
   backgroundImageUrl,
   primaryAction,
   secondaryAction,
+  statusPlacement = 'center',
   className,
   topContent,
 }: PublicHeroProps) {
@@ -46,7 +50,11 @@ export function PublicHero({
       />
 
       <div className="relative z-[1] flex min-h-[19.5rem] flex-col items-center justify-center px-4 py-7 text-center sm:min-h-[24rem] sm:px-8 sm:py-10">
-        <PublicStatusBadge status={status} />
+        {statusPlacement === 'top-left' ? (
+          <PublicStatusBadge status={status} label={statusLabel} className="absolute left-4 top-4 sm:left-5 sm:top-5" />
+        ) : (
+          <PublicStatusBadge status={status} label={statusLabel} />
+        )}
         {topContent ? <div className="mt-3">{topContent}</div> : null}
 
         <h1 className="mt-4 text-[clamp(1.8rem,7vw,3.4rem)] font-semibold uppercase leading-[1.03] tracking-[0.05em] text-[var(--public-text)]">

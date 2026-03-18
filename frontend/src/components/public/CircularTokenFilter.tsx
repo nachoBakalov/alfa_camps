@@ -13,6 +13,7 @@ type CircularTokenFilterProps = {
   onChange?: (id: string) => void;
   quickItem?: 'all' | 'top-players';
   quickItemLabel?: string;
+  cardSize?: 'md' | 'lg';
   className?: string;
 };
 
@@ -23,7 +24,15 @@ const QUICK_ITEM_LABELS: Record<'all' | 'top-players', string> = {
   'top-players': 'Топ играчи',
 };
 
-export function CircularTokenFilter({ items, activeId, onChange, quickItem, quickItemLabel, className }: CircularTokenFilterProps) {
+export function CircularTokenFilter({
+  items,
+  activeId,
+  onChange,
+  quickItem,
+  quickItemLabel,
+  cardSize = 'md',
+  className,
+}: CircularTokenFilterProps) {
   return (
     <div className={['overflow-x-auto pb-1', className].filter(Boolean).join(' ')}>
       <div className="flex min-w-max items-start gap-3">
@@ -33,6 +42,7 @@ export function CircularTokenFilter({ items, activeId, onChange, quickItem, quic
             tokenText={quickItem === 'all' ? 'ALL' : 'TOP'}
             isActive={activeId === QUICK_ITEM_ID}
             onClick={onChange ? () => onChange(QUICK_ITEM_ID) : undefined}
+            size={cardSize}
           />
         ) : null}
 
@@ -44,6 +54,7 @@ export function CircularTokenFilter({ items, activeId, onChange, quickItem, quic
             tokenText={item.tokenText}
             isActive={activeId === item.id}
             onClick={onChange ? () => onChange(item.id) : undefined}
+            size={cardSize}
           />
         ))}
       </div>

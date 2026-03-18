@@ -20,6 +20,9 @@ type ExpandablePlayersSectionProps = {
   loadMoreStep?: number;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
+  onItemClick?: (item: ExpandablePlayersSectionItem) => void;
+  mode?: 'block' | 'plain';
   emptyText?: string;
   className?: string;
 };
@@ -32,6 +35,9 @@ export function ExpandablePlayersSection({
   loadMoreStep = 6,
   searchValue,
   onSearchChange,
+  searchPlaceholder,
+  onItemClick,
+  mode = 'block',
   emptyText,
   className,
 }: ExpandablePlayersSectionProps) {
@@ -71,10 +77,15 @@ export function ExpandablePlayersSection({
     setVisibleCount(initialVisibleCount);
   };
 
-  return (
-    <DarkSectionBlock title={title} description={description} className={className}>
+  const content = (
+    <>
       {hasSearch ? (
-        <PlayerSearchBar value={searchValue} onChange={onSearchChange} className="mb-4" />
+        <PlayerSearchBar
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder={searchPlaceholder}
+          className="mb-4"
+        />
       ) : null}
 
       {visibleItems.length === 0 ? <p className="public-text-muted text-sm">{emptyText ?? 'Няма намерени играчи.'}</p> : null}
@@ -88,6 +99,7 @@ export function ExpandablePlayersSection({
               secondaryText={item.secondaryText}
               avatarUrl={item.avatarUrl}
               avatarFallback={item.avatarFallback}
+              onClick={onItemClick ? () => onItemClick(item) : undefined}
             />
           ))}
         </div>
@@ -116,6 +128,16 @@ export function ExpandablePlayersSection({
           </button>
         </div>
       ) : null}
+    </>
+  );
+
+  if (mode === 'plain') {
+    return <div className={className}>{content}</div>;
+  }
+
+  return (
+    <DarkSectionBlock title={title} description={description} className={className}>
+      {content}
     </DarkSectionBlock>
   );
 }
