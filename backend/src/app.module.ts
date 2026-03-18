@@ -8,6 +8,7 @@ import { BattlePlayerResultsModule } from './modules/battle-player-results/battl
 import { BattlesModule } from './modules/battles/battles.module';
 import { CampParticipationsModule } from './modules/camp-participations/camp-participations.module';
 import { CampPublicModule } from './modules/camp-public/camp-public.module';
+import { CampTeamPointAdjustmentsModule } from './modules/camp-team-point-adjustments/camp-team-point-adjustments.module';
 import { CampTeamsModule } from './modules/camp-teams/camp-teams.module';
 import { CampsModule } from './modules/camps/camps.module';
 import { CampTypesModule } from './modules/camp-types/camp-types.module';
@@ -42,6 +43,7 @@ import { typeOrmConfigFactory } from './common/config/typeorm.config';
     BattlesModule,
     CampParticipationsModule,
     CampPublicModule,
+    CampTeamPointAdjustmentsModule,
     CampTeamsModule,
     CampsModule,
     CampTypesModule,

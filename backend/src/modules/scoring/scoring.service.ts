@@ -450,11 +450,17 @@ export class ScoringService {
       delta.pointsDelta += 1;
     }
 
+    const teamDeltas: TeamScoreDelta[] = [];
+
+    if (battle.winningTeamId) {
+      teamDeltas.push({ teamId: battle.winningTeamId, teamPointsDelta: 5 });
+    }
+
     return {
       battleId: battle.id,
       battleType: battle.battleType,
       participationDeltas: Array.from(participationMap.values()),
-      teamDeltas: [],
+      teamDeltas,
     };
   }
 

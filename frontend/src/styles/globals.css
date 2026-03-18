@@ -2,8 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Oswald';
+  src: url('/fonts/Oswald-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Oswald';
+  src: url('/fonts/Oswald-Medium.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Oswald';
+  src: url('/fonts/Oswald-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Oswald';
+  src: url('/fonts/Oswald-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
+
+  --public-bg-950: #0f1115;
+  --public-bg-900: #171b22;
+  --public-bg-850: #1d2230;
+  --public-border: #d6dae3;
+  --public-text: #f1f4fa;
+  --public-text-muted: #bbc3d4;
+  --public-primary: #c4302b;
+  --public-primary-hover: #df3b36;
 }
 
 body {
@@ -11,4 +52,66 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
   background-color: #f8fafc;
   color: #0f172a;
+}
+
+@layer components {
+  .public-theme {
+    min-height: 100vh;
+    font-family: 'Oswald', 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at 50% -15%, #2a2f3d 0%, var(--public-bg-950) 55%);
+    color: var(--public-text);
+    letter-spacing: 0.01em;
+  }
+
+  .public-container {
+    width: 100%;
+    max-width: 70rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  .public-topbar {
+    background-color: color-mix(in srgb, var(--public-bg-900) 92%, #000 8%);
+    border-bottom: 1px solid color-mix(in srgb, var(--public-border) 24%, transparent);
+  }
+
+  .public-section {
+    background-color: color-mix(in srgb, var(--public-bg-850) 90%, #000 10%);
+    border: 1px solid color-mix(in srgb, var(--public-border) 22%, transparent);
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+
+  .public-primary-action {
+    background-color: var(--public-primary);
+    color: var(--public-text);
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--public-primary) 85%, #fff 15%);
+    font-weight: 600;
+    transition: background-color 180ms ease;
+  }
+
+  .public-primary-action:hover {
+    background-color: var(--public-primary-hover);
+  }
+
+  .public-token-ring {
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--public-border) 75%, transparent);
+    background-color: color-mix(in srgb, var(--public-bg-850) 85%, #000 15%);
+  }
+
+  .public-text-muted {
+    color: var(--public-text-muted);
+  }
+}
+
+@media (min-width: 640px) {
+  .public-container {
+    padding-inline: 1.5rem;
+  }
+
+  .public-section {
+    padding: 1.5rem;
+  }
 }

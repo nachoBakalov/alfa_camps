@@ -38,20 +38,25 @@ export function DuelSessionEditor({
   battleId,
   campId,
   battleStatus,
+  winningTeamId,
   participations,
   players,
+  campTeams,
   onRefreshBattle,
 }: {
   battleId: string;
   campId: string;
   battleStatus: BattleStatus;
+  winningTeamId: string | null;
   participations: CampParticipation[];
   players: Player[];
+  campTeams: Array<{ id: string; name: string }>;
   onRefreshBattle: () => Promise<void>;
 }) {
   const navigate = useNavigate();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [currentBattleStatus, setCurrentBattleStatus] = useState<BattleStatus>(battleStatus);
+  const [selectedWinningTeamId, setSelectedWinningTeamId] = useState(winningTeamId ?? '');
   const [feedback, setFeedback] = useState<{ kind: 'success' | 'error'; message: string } | null>(null);
   const duelsQuery = useDuelsByBattleQuery(battleId);
   const { createMutation, updateMutation, deleteMutation } = useDuelMutations(battleId);
@@ -61,6 +66,20 @@ export function DuelSessionEditor({
   useEffect(() => {
     setCurrentBattleStatus(battleStatus);
   }, [battleStatus]);
+
+  useEffect(() => {
+    setSelectedWinningTeamId(winningTeamId ?? '');
+  }, [winningTeamId]);
+
+  const teamNameById = useMemo(() => {
+    const map = new Map<string, string>();
+
+    for (const team of campTeams) {
+      map.set(team.id, team.name);
+    }
+
+    return map;
+  }, [campTeams]);
 
   const playersById = useMemo(() => {
     const map = new Map<string, Player>();
@@ -153,6 +172,12 @@ export function DuelSessionEditor({
 
   async function handleSaveDuels(): Promise<void> {
     try {
+      await updateBattleMutation.mutateAsync({
+        id: battleId,
+        payload: {
+          winningTeamId: selectedWinningTeamId || undefined,
+        },
+      });
       await duelsQuery.refetch();
       await onRefreshBattle();
       setFeedback({ kind: 'success', message: 'Данните за сесията с дуели са обновени успешно.' });
@@ -171,6 +196,12 @@ export function DuelSessionEditor({
     }
 
     try {
+      await updateBattleMutation.mutateAsync({
+        id: battleId,
+        payload: {
+          winningTeamId: selectedWinningTeamId || undefined,
+        },
+      });
       const result = await applyScoreMutation.mutateAsync();
       await duelsQuery.refetch();
       await onRefreshBattle();
@@ -184,7 +215,10 @@ export function DuelSessionEditor({
     try {
       await updateBattleMutation.mutateAsync({
         id: battleId,
-        payload: { status: 'COMPLETED' },
+        payload: {
+          status: 'COMPLETED',
+          winningTeamId: selectedWinningTeamId || undefined,
+        },
       });
       setCurrentBattleStatus('COMPLETED');
 
@@ -222,6 +256,33 @@ export function DuelSessionEditor({
           >
             Създай дуел
           </button>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Победил отбор (по избор)" description="Това поле е опционално за DUEL_SESSION.">
+        <div className="space-y-2">
+          <select
+            value={selectedWinningTeamId}
+            onChange={(event) => {
+              setSelectedWinningTeamId(event.target.value);
+            }}
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2 sm:max-w-sm"
+          >
+            <option value="">Без победил отбор</option>
+            {campTeams.map((team) => (
+              <option key={team.id} value={team.id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+
+          {selectedWinningTeamId ? (
+            <p className="text-sm text-slate-600">
+              Преглед: {teamNameById.get(selectedWinningTeamId) ?? selectedWinningTeamId} ще получи +5 отборни точки при прилагане.
+            </p>
+          ) : (
+            <p className="text-sm text-slate-600">Преглед: не е избран победил отбор, няма да се добавя отборен бонус.</p>
+          )}
         </div>
       </SectionCard>
 

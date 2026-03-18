@@ -198,8 +198,10 @@ export function BattleDetailPage() {
                   battleId={battleQuery.data.id}
                   campId={battleQuery.data.campId}
                   battleStatus={battleQuery.data.status}
+                  winningTeamId={battleQuery.data.winningTeamId}
                   participations={participationsQuery.data}
                   players={playersQuery.data}
+                  campTeams={(campTeamsQuery.data ?? []).map((team) => ({ id: team.id, name: team.name }))}
                   onRefreshBattle={async () => {
                     await battleQuery.refetch();
                   }}

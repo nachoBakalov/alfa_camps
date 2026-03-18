@@ -15,8 +15,11 @@ import { RanksPage } from '../pages/admin/RanksPage';
 import { TeamTemplatesPage } from '../pages/admin/TeamTemplatesPage';
 import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
 import { LoginPage } from '../pages/auth/LoginPage';
-import { CampPublicPage } from '../pages/public/CampPublicPage';
-import { PlayerProfilePage } from '../pages/public/PlayerProfilePage';
+import { CampPage } from '../pages/public/CampPage';
+import { CampTypeInfoPage } from '../pages/public/CampTypeInfoPage';
+import { MainPage } from '../pages/public/MainPage';
+import { PlayerPage } from '../pages/public/PlayerPage';
+import { TeamPage } from '../pages/public/TeamPage';
 
 export const router = createBrowserRouter([
   {
@@ -94,12 +97,24 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       {
+        path: '/public',
+        element: <MainPage />,
+      },
+      {
         path: '/camps/:campId',
-        element: <CampPublicPage />,
+        element: <CampPage />,
+      },
+      {
+        path: '/teams/:teamId',
+        element: <TeamPage />,
       },
       {
         path: '/players/:playerId',
-        element: <PlayerProfilePage />,
+        element: <PlayerPage />,
+      },
+      {
+        path: '/camp-types/:campTypeId',
+        element: <CampTypeInfoPage />,
       },
     ],
   },

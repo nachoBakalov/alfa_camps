@@ -14,6 +14,10 @@ import { campTeamFormSchema, type CampTeamFormValues } from './camp-team-form.sc
 import { useCampTeamMutations } from './use-camp-team-mutations';
 import { useCampTeamsByCampQuery } from './use-camp-teams-query';
 import { ApiClientError } from '../../lib/errors';
+import {
+  useCampTeamPointAdjustmentsByTeamQuery,
+  useCreateCampTeamPointAdjustmentMutation,
+} from './use-camp-team-point-adjustments';
 
 type FormMode =
   | {
@@ -37,6 +41,20 @@ function getMutationErrorMessage(error: unknown, fallback: string): string {
   }
 
   return fallback;
+}
+
+function formatSignedDelta(delta: number): string {
+  return `${delta >= 0 ? '+' : ''}${delta}`;
+}
+
+function formatDateTime(value: string): string {
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return parsed.toLocaleString();
 }
 
 function toCreatePayload(values: CampTeamFormValues, campId: string): CreateCampTeamInput {
@@ -265,9 +283,176 @@ function TeamForm({
   );
 }
 
+function TeamPointAdjustmentForm({
+  team,
+  isSubmitting,
+  onCancel,
+  onSubmit,
+}: {
+  team: CampTeam;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  onSubmit: (payload: { delta: number; reason?: string }) => Promise<void>;
+}) {
+  const [deltaInput, setDeltaInput] = useState('');
+  const [reasonInput, setReasonInput] = useState('');
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDeltaInput('');
+    setReasonInput('');
+    setValidationMessage(null);
+  }, [team.id]);
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={async (event) => {
+        event.preventDefault();
+
+        const rawDelta = deltaInput.trim();
+
+        if (!/^[+-]?\d+$/.test(rawDelta)) {
+          setValidationMessage('Въведи цяло число, например +5, -3 или 2.');
+          return;
+        }
+
+        const parsedDelta = Number.parseInt(rawDelta, 10);
+
+        if (parsedDelta === 0) {
+          setValidationMessage('Корекцията не може да е 0.');
+          return;
+        }
+
+        setValidationMessage(null);
+
+        await onSubmit({
+          delta: parsedDelta,
+          reason: reasonInput.trim() ? reasonInput.trim() : undefined,
+        });
+      }}
+      noValidate
+    >
+      <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+        <p className="text-sm text-slate-700">
+          Отбор: <span className="font-medium text-slate-900">{team.name}</span>
+        </p>
+        <p className="text-sm text-slate-700">
+          Текущи точки: <span className="font-medium text-slate-900">{team.teamPoints}</span>
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="adjustmentDelta" className="mb-1 block text-sm font-medium text-slate-700">
+          Корекция на точки
+        </label>
+        <input
+          id="adjustmentDelta"
+          inputMode="numeric"
+          placeholder="Пример: +5, -3, 2"
+          value={deltaInput}
+          onChange={(event) => {
+            setDeltaInput(event.target.value);
+          }}
+          className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
+        />
+        <p className="mt-1 text-xs text-slate-500">Положителна стойност добавя точки, отрицателна отнема.</p>
+      </div>
+
+      <div>
+        <label htmlFor="adjustmentReason" className="mb-1 block text-sm font-medium text-slate-700">
+          Основание (по избор)
+        </label>
+        <textarea
+          id="adjustmentReason"
+          rows={3}
+          value={reasonInput}
+          onChange={(event) => {
+            setReasonInput(event.target.value);
+          }}
+          className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none ring-sky-500 focus:ring-2"
+          placeholder="Причина за корекцията"
+        />
+      </div>
+
+      {validationMessage ? <p className="text-sm text-red-600">{validationMessage}</p> : null}
+
+      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Отказ
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Запазване...' : 'Запази корекцията'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function TeamPointAdjustmentsHistory({
+  teamId,
+  expanded,
+}: {
+  teamId: string;
+  expanded: boolean;
+}) {
+  const adjustmentsQuery = useCampTeamPointAdjustmentsByTeamQuery(teamId, expanded);
+
+  if (!expanded) {
+    return null;
+  }
+
+  if (adjustmentsQuery.isLoading) {
+    return <p className="text-sm text-slate-600">Зареждане на история...</p>;
+  }
+
+  if (adjustmentsQuery.isError) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p>Неуспешно зареждане на историята.</p>
+        <button
+          type="button"
+          onClick={() => {
+            void adjustmentsQuery.refetch();
+          }}
+          className="mt-2 rounded-md border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+        >
+          Опитай отново
+        </button>
+      </div>
+    );
+  }
+
+  if (adjustmentsQuery.isSuccess && adjustmentsQuery.data.length === 0) {
+    return <p className="text-sm text-slate-600">Няма записани ръчни корекции.</p>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {adjustmentsQuery.data?.map((item) => (
+        <div key={item.id} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+          <p className="font-medium text-slate-900">{formatSignedDelta(item.delta)} точки</p>
+          <p className="text-slate-700">{item.reason || 'Без основание'}</p>
+          <p className="text-xs text-slate-500">{formatDateTime(item.createdAt)}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CampTeamsTab({ campId }: { campId: string }) {
   const [formMode, setFormMode] = useState<FormMode>(null);
   const [photosTeam, setPhotosTeam] = useState<CampTeam | null>(null);
+  const [adjustmentTeam, setAdjustmentTeam] = useState<CampTeam | null>(null);
+  const [expandedHistoryByTeamId, setExpandedHistoryByTeamId] = useState<Record<string, boolean>>({});
   const [feedback, setFeedback] = useState<{ kind: 'success' | 'error'; message: string } | null>(
     null,
   );
@@ -275,18 +460,21 @@ export function CampTeamsTab({ campId }: { campId: string }) {
   const teamsQuery = useCampTeamsByCampQuery(campId);
   const { createMutation, updateMutation, deleteMutation, cloneFromTemplatesMutation } =
     useCampTeamMutations(campId);
+  const createPointAdjustmentMutation = useCreateCampTeamPointAdjustmentMutation(campId);
 
   const isMutating = useMemo(
     () =>
       createMutation.isPending ||
       updateMutation.isPending ||
       deleteMutation.isPending ||
-      cloneFromTemplatesMutation.isPending,
+      cloneFromTemplatesMutation.isPending ||
+      createPointAdjustmentMutation.isPending,
     [
       createMutation.isPending,
       updateMutation.isPending,
       deleteMutation.isPending,
       cloneFromTemplatesMutation.isPending,
+      createPointAdjustmentMutation.isPending,
     ],
   );
 
@@ -352,6 +540,30 @@ export function CampTeamsTab({ campId }: { campId: string }) {
       setFeedback({
         kind: 'error',
         message: getMutationErrorMessage(error, 'Unable to clone teams from templates.'),
+      });
+    }
+  }
+
+  async function handleCreatePointAdjustment(
+    team: CampTeam,
+    payload: { delta: number; reason?: string },
+  ): Promise<void> {
+    try {
+      await createPointAdjustmentMutation.mutateAsync({
+        campTeamId: team.id,
+        delta: payload.delta,
+        reason: payload.reason,
+      });
+
+      setFeedback({
+        kind: 'success',
+        message: `Добавена е корекция ${formatSignedDelta(payload.delta)} за отбор ${team.name}.`,
+      });
+      setAdjustmentTeam(null);
+    } catch (error) {
+      setFeedback({
+        kind: 'error',
+        message: getMutationErrorMessage(error, 'Неуспешно запазване на корекцията на точки.'),
       });
     }
   }
@@ -449,6 +661,27 @@ export function CampTeamsTab({ campId }: { campId: string }) {
         ) : null}
       </ModalDrawer>
 
+      <ModalDrawer
+        open={Boolean(adjustmentTeam)}
+        title={adjustmentTeam ? `Коригирай точки: ${adjustmentTeam.name}` : 'Коригирай точки'}
+        onClose={() => {
+          setAdjustmentTeam(null);
+        }}
+      >
+        {adjustmentTeam ? (
+          <TeamPointAdjustmentForm
+            team={adjustmentTeam}
+            isSubmitting={createPointAdjustmentMutation.isPending}
+            onCancel={() => {
+              setAdjustmentTeam(null);
+            }}
+            onSubmit={async (payload) => {
+              await handleCreatePointAdjustment(adjustmentTeam, payload);
+            }}
+          />
+        ) : null}
+      </ModalDrawer>
+
       {teamsQuery.isLoading ? <LoadingState label="Loading camp teams..." /> : null}
 
       {teamsQuery.isError ? (
@@ -515,6 +748,16 @@ export function CampTeamsTab({ campId }: { campId: string }) {
                   <button
                     type="button"
                     onClick={() => {
+                      setFeedback(null);
+                      setAdjustmentTeam(team);
+                    }}
+                    className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Коригирай точки
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
                       setPhotosTeam(team);
                     }}
                     className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -541,6 +784,26 @@ export function CampTeamsTab({ campId }: { campId: string }) {
                   >
                     Изтрий
                   </button>
+                </div>
+
+                <div className="space-y-2 border-t border-slate-200 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpandedHistoryByTeamId((prev) => ({
+                        ...prev,
+                        [team.id]: !prev[team.id],
+                      }));
+                    }}
+                    className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    {expandedHistoryByTeamId[team.id] ? 'Скрий история на корекциите' : 'Покажи история на корекциите'}
+                  </button>
+
+                  <TeamPointAdjustmentsHistory
+                    teamId={team.id}
+                    expanded={Boolean(expandedHistoryByTeamId[team.id])}
+                  />
                 </div>
               </div>
             </SectionCard>

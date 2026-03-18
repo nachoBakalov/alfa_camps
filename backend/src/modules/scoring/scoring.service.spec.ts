@@ -291,6 +291,28 @@ describe('ScoringService', () => {
         pointsDelta: 2,
       },
     ]);
+    expect(result.teamDeltas).toEqual([]);
+  });
+
+  it('DUEL_SESSION preview with winning team adds +5 team delta', async () => {
+    const duelBattleWithWinner: Battle = { ...duelBattle, winningTeamId: 't1' };
+    battlesRepository.findOne.mockResolvedValue(duelBattleWithWinner);
+    duelsRepository.find.mockResolvedValue([makeDuel('d1', 'p1')]);
+
+    const result = await service.previewBattleScore(duelBattleId);
+
+    expect(result.participationDeltas).toEqual([
+      {
+        participationId: 'p1',
+        killsDelta: 0,
+        knifeKillsDelta: 0,
+        survivalsDelta: 0,
+        duelWinsDelta: 1,
+        massBattleWinsDelta: 0,
+        pointsDelta: 1,
+      },
+    ]);
+    expect(result.teamDeltas).toEqual([{ teamId: 't1', teamPointsDelta: 5 }]);
   });
 
   it('apply on missing battle -> not found', async () => {
@@ -419,6 +441,42 @@ describe('ScoringService', () => {
     expect(transactionState.participationStats.p1.duelWins).toBe(2);
     expect(transactionState.participationStats.p2.points).toBe(1);
     expect(transactionState.teamStats).toEqual({});
+  });
+
+  it('apply on completed DUEL_SESSION with winning team applies +5 team points and stays idempotent', async () => {
+    const transactionState = setupTransactionalManager();
+    const duelBattleWithWinner: Battle = { ...duelBattle, winningTeamId: 't1' };
+
+    battlesRepository.findOne.mockResolvedValue(duelBattleWithWinner);
+    duelsRepository.find.mockResolvedValue([makeDuel('d1', 'p1'), makeDuel('d2', null)]);
+
+    const firstApply = await service.applyBattleScore(duelBattleId);
+
+    expect(firstApply.appliedParticipationCount).toBe(1);
+    expect(firstApply.appliedTeamCount).toBe(1);
+    expect(transactionState.participationStats.p1.duelWins).toBe(1);
+    expect(transactionState.participationStats.p1.points).toBe(1);
+    expect(transactionState.teamStats.t1).toBe(5);
+    expect(transactionState.teamLedgerStore).toEqual([
+      {
+        battleId: duelBattleId,
+        teamId: 't1',
+        teamPointsDelta: 5,
+      },
+    ]);
+
+    await service.applyBattleScore(duelBattleId);
+
+    expect(transactionState.participationStats.p1.duelWins).toBe(1);
+    expect(transactionState.participationStats.p1.points).toBe(1);
+    expect(transactionState.teamStats.t1).toBe(5);
+    expect(transactionState.teamLedgerStore).toEqual([
+      {
+        battleId: duelBattleId,
+        teamId: 't1',
+        teamPointsDelta: 5,
+      },
+    ]);
   });
 
   it('ledger rows are replaced with latest deltas', async () => {
