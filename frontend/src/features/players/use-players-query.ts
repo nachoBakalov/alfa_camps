@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getPlayer, getPlayers } from '../../api/players.api';
+import { getPlayer, getPlayers, getPublicPlayers } from '../../api/players.api';
 
 export const playersQueryKey = ['players'] as const;
 
@@ -13,6 +13,15 @@ export function usePlayersQuery(search?: string) {
   return useQuery({
     queryKey: [...playersQueryKey, normalizedSearch || 'all'],
     queryFn: () => getPlayers({ q: normalizedSearch || undefined }),
+  });
+}
+
+export function usePublicPlayersQuery(search?: string) {
+  const normalizedSearch = search?.trim() ?? '';
+
+  return useQuery({
+    queryKey: [...playersQueryKey, 'public', normalizedSearch || 'all'],
+    queryFn: () => getPublicPlayers({ q: normalizedSearch || undefined }),
   });
 }
 

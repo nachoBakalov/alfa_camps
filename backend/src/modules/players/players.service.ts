@@ -43,6 +43,34 @@ export class PlayersService {
     });
   }
 
+  async findPublic(query?: QueryPlayersDto): Promise<Player[]> {
+    const searchText = query?.q?.trim();
+
+    if (!searchText) {
+      return this.playersRepository.find({
+        where: {
+          isActive: true,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+    }
+
+    const pattern = `%${searchText}%`;
+
+    return this.playersRepository.find({
+      where: [
+        { isActive: true, firstName: ILike(pattern) },
+        { isActive: true, lastName: ILike(pattern) },
+        { isActive: true, nickname: ILike(pattern) },
+      ],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
   async findOne(id: string): Promise<Player> {
     const player = await this.playersRepository.findOne({ where: { id } });
 

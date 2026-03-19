@@ -23,6 +23,10 @@ export function getCampTypes(): Promise<CampType[]> {
   return apiGet<CampType[]>('/camp-types');
 }
 
+export function getPublicCampTypes(): Promise<CampType[]> {
+  return apiGet<CampType[]>('/camp-types/public/list');
+}
+
 export function createCampType(payload: CampTypeInput): Promise<CampType> {
   return apiPost<CampType, CampTypeInput>('/camp-types', payload);
 }

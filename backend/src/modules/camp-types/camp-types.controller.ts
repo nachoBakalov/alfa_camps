@@ -34,6 +34,11 @@ export class CampTypesController {
     return this.campTypesService.findAll();
   }
 
+  @Get('public/list')
+  findPublicList() {
+    return this.campTypesService.findAll();
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {

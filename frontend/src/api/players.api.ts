@@ -38,6 +38,17 @@ export function getPlayers(query?: PlayersQuery): Promise<Player[]> {
   return apiGet<Player[]>(buildPlayersPath(query));
 }
 
+export function getPublicPlayers(query?: PlayersQuery): Promise<Player[]> {
+  const search = query?.q?.trim();
+
+  if (!search) {
+    return apiGet<Player[]>('/players/public/list');
+  }
+
+  const params = new URLSearchParams({ q: search });
+  return apiGet<Player[]>(`/players/public/list?${params.toString()}`);
+}
+
 export function getPlayer(id: string): Promise<Player> {
   return apiGet<Player>(`/players/${id}`);
 }

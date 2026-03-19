@@ -35,6 +35,11 @@ export class PlayersController {
     return this.playersService.findAll(query);
   }
 
+  @Get('public/list')
+  findPublic(@Query() query: QueryPlayersDto) {
+    return this.playersService.findPublic(query);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {

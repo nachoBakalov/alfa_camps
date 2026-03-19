@@ -37,6 +37,10 @@ export function getCamps(): Promise<Camp[]> {
   return apiGet<Camp[]>('/camps');
 }
 
+export function getPublicCamps(): Promise<Camp[]> {
+  return apiGet<Camp[]>('/camps/public/list');
+}
+
 export function getCamp(id: string): Promise<Camp> {
   return apiGet<Camp>(`/camps/${id}`);
 }

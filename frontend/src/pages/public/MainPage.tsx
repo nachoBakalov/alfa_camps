@@ -14,9 +14,9 @@ import {
   RankingTabs,
   SectionTitle,
 } from '../../components/public';
-import { useCampTypesQuery } from '../../features/camp-types/use-camp-types-query';
-import { useCampsQuery } from '../../features/camps/use-camps-query';
-import { usePlayersQuery } from '../../features/players/use-players-query';
+import { usePublicCampTypesQuery } from '../../features/camp-types/use-camp-types-query';
+import { usePublicCampsQuery } from '../../features/camps/use-camps-query';
+import { usePublicPlayersQuery } from '../../features/players/use-players-query';
 import {
   useCampKillsRankingQuery,
   useCampPointsRankingQuery,
@@ -174,9 +174,9 @@ export function MainPage() {
   const [playersQuery, setPlayersQuery] = useState('');
   const [rankingTab, setRankingTab] = useState<'points' | 'kills' | 'survivals'>('points');
 
-  const campsQuery = useCampsQuery();
-  const campTypesQuery = useCampTypesQuery();
-  const playersListQuery = usePlayersQuery();
+  const campsQuery = usePublicCampsQuery();
+  const campTypesQuery = usePublicCampTypesQuery();
+  const playersListQuery = usePublicPlayersQuery();
 
   const heroCamp = selectHeroCamp(campsQuery.data ?? []);
   const campTypeById = new Map((campTypesQuery.data ?? []).map((campType) => [campType.id, campType] as const));

@@ -40,6 +40,7 @@
   --public-bg-950: #0f1115;
   --public-bg-900: #171b22;
   --public-bg-850: #1d2230;
+  --public-bg-800: #333333;
   --public-border: #d6dae3;
   --public-text: #f1f4fa;
   --public-text-muted: #bbc3d4;
@@ -77,6 +78,12 @@ body {
 
   .public-section {
     background-color: color-mix(in srgb, var(--public-bg-850) 90%, #000 10%);
+    border: 1px solid color-mix(in srgb, var(--public-border) 22%, transparent);
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+  .public-section-cards {
+    background-color: color-mix(in srgb, var(--public-bg-800) 90%, #000 10%);
     border: 1px solid color-mix(in srgb, var(--public-border) 22%, transparent);
     border-radius: 1rem;
     padding: 1rem;

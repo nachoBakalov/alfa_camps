@@ -1,8 +1,5 @@
-import { useQueries } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { Camp } from '../../api/camps.api';
-import { getCurrentTeamAssignmentByParticipation } from '../../api/team-assignments.api';
 import {
   CircularTokenCard,
   DarkSectionBlock,
@@ -15,11 +12,11 @@ import {
   type RankingTabKey,
   SectionTitle,
 } from '../../components/public';
-import { useCampTeamsByCampQuery } from '../../features/camp-teams/use-camp-teams-query';
-import { useCampTypesQuery } from '../../features/camp-types/use-camp-types-query';
-import { useCampQuery } from '../../features/camps/use-camps-query';
-import { useParticipationsByCampQuery } from '../../features/participations/use-participations-query';
-import { usePlayersQuery } from '../../features/players/use-players-query';
+import {
+  useCampPublicDetailsQuery,
+  useCampPublicParticipantsQuery,
+  useCampPublicTeamsQuery,
+} from '../../features/camp-public/use-camp-public-query';
 import { usePhotosQuery } from '../../features/photos/use-photos-query';
 import {
   useCampKillsRankingQuery,
@@ -43,7 +40,7 @@ function getStartOfTodayTimestamp(): number {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 }
 
-function isUpcomingCamp(camp: Camp): boolean {
+function isUpcomingCamp(camp: { status: 'DRAFT' | 'ACTIVE' | 'FINISHED'; startDate: string }): boolean {
   if (camp.status === 'ACTIVE' || camp.status === 'FINISHED') {
     return false;
   }
@@ -51,7 +48,9 @@ function isUpcomingCamp(camp: Camp): boolean {
   return toTimestamp(camp.startDate) >= getStartOfTodayTimestamp();
 }
 
-function getCampHeroStatus(camp: Camp): { status: 'active' | 'upcoming' | 'finished'; statusLabel: string } {
+function getCampHeroStatus(
+  camp: { status: 'DRAFT' | 'ACTIVE' | 'FINISHED'; startDate: string },
+): { status: 'active' | 'upcoming' | 'finished'; statusLabel: string } {
   if (camp.status === 'ACTIVE') {
     return { status: 'active', statusLabel: 'Активен' };
   }
@@ -110,18 +109,16 @@ export function CampPage() {
   const [activeRankingFilter, setActiveRankingFilter] = useState<string>(TOP_PLAYERS_FILTER_ID);
   const [activePhotoFilter, setActivePhotoFilter] = useState<string>(ALL_PHOTOS_FILTER_ID);
   const [visiblePhotoCount, setVisiblePhotoCount] = useState(20);
-  const campQuery = useCampQuery(campId);
-  const campTypesQuery = useCampTypesQuery();
-  const campTeamsQuery = useCampTeamsByCampQuery(campId);
-  const campParticipationsQuery = useParticipationsByCampQuery(campId);
-  const playersQueryResult = usePlayersQuery();
+  const campDetailsQuery = useCampPublicDetailsQuery(campId);
+  const campTeamsQuery = useCampPublicTeamsQuery(campId);
+  const campParticipantsQuery = useCampPublicParticipantsQuery(campId);
   const campPhotosQuery = usePhotosQuery('camp', campId);
   const pointsRankingQuery = useCampPointsRankingQuery(campId, undefined, rankingTab === 'points');
   const killsRankingQuery = useCampKillsRankingQuery(campId, undefined, rankingTab === 'kills');
   const survivalsRankingQuery = useCampSurvivalsRankingQuery(campId, undefined, rankingTab === 'survivals');
 
   const heroViewModel = useMemo(() => {
-    const camp = campQuery.data;
+    const camp = campDetailsQuery.data;
 
     if (!camp) {
       return {
@@ -135,15 +132,13 @@ export function CampPage() {
     }
 
     const statusModel = getCampHeroStatus(camp);
-    const campType = (campTypesQuery.data ?? []).find((item) => item.id === camp.campTypeId);
-
     return {
       status: statusModel.status,
       statusLabel: statusModel.statusLabel,
       title: camp.title,
       location: camp.location ?? 'България',
       dateLabel: getCampDateRange(camp.startDate, camp.endDate),
-      backgroundImageUrl: camp.coverImageUrl ?? campType?.coverImageUrl ?? '/assets/team_token/lion.png',
+      backgroundImageUrl: camp.coverImageUrl ?? camp.campType.campTypeCoverImageUrl ?? '/assets/team_token/lion.png',
       primaryAction:
         statusModel.status === 'upcoming'
           ? {
@@ -152,29 +147,30 @@ export function CampPage() {
             }
           : undefined,
     };
-  }, [campQuery.data, campTypesQuery.data]);
+  }, [campDetailsQuery.data]);
 
   const participatingTeams = useMemo(() => {
-    const teams = campTeamsQuery.data ?? [];
-    const activeTeams = teams.filter((team) => team.isActive);
+    const teams = (campTeamsQuery.data ?? []).map((team) => ({
+      id: team.teamId,
+      name: team.name,
+      logoUrl: team.logoUrl,
+      teamPoints: team.teamPoints,
+      isActive: team.isActive,
+    }));
 
+    const activeTeams = teams.filter((team) => team.isActive);
     return (activeTeams.length > 0 ? activeTeams : teams).slice().sort((a, b) => a.name.localeCompare(b.name, 'bg'));
   }, [campTeamsQuery.data]);
 
   const normalizedPlayersQuery = playersQuery.trim().toLowerCase();
   const campPlayers = useMemo(() => {
-    const participations = campParticipationsQuery.data ?? [];
-    const players = playersQueryResult.data ?? [];
+    const participants = campParticipantsQuery.data ?? [];
 
-    if (participations.length === 0 || players.length === 0) {
+    if (participants.length === 0) {
       return [];
     }
 
-    const playerIds = new Set(participations.map((item) => item.playerId));
-
-    const filteredPlayers = players
-      .filter((player) => playerIds.has(player.id))
-      .filter((player) => {
+    const filteredPlayers = participants.filter((player) => {
         if (!normalizedPlayersQuery) {
           return true;
         }
@@ -183,12 +179,12 @@ export function CampPage() {
         const lastName = player.lastName?.toLowerCase() ?? '';
         const nickname = player.nickname?.toLowerCase() ?? '';
 
-        return (
-          firstName.includes(normalizedPlayersQuery) ||
-          lastName.includes(normalizedPlayersQuery) ||
-          nickname.includes(normalizedPlayersQuery)
-        );
-      });
+      return (
+        firstName.includes(normalizedPlayersQuery) ||
+        lastName.includes(normalizedPlayersQuery) ||
+        nickname.includes(normalizedPlayersQuery)
+      );
+    });
 
     return filteredPlayers
       .map((player) => {
@@ -196,7 +192,7 @@ export function CampPage() {
         const fullName = getPlayerFullName(player.firstName, player.lastName);
 
         return {
-          id: player.id,
+          id: player.playerId,
           displayName,
           secondaryText: fullName && fullName !== displayName ? fullName : undefined,
           avatarUrl: player.avatarUrl ?? undefined,
@@ -204,7 +200,7 @@ export function CampPage() {
         };
       })
       .sort((a, b) => a.displayName.localeCompare(b.displayName, 'bg'));
-  }, [campParticipationsQuery.data, normalizedPlayersQuery, playersQueryResult.data]);
+  }, [campParticipantsQuery.data, normalizedPlayersQuery]);
 
   const activeRankingItems = useMemo(() => {
     if (rankingTab === 'kills') {
@@ -218,23 +214,15 @@ export function CampPage() {
     return pointsRankingQuery.data ?? [];
   }, [killsRankingQuery.data, pointsRankingQuery.data, rankingTab, survivalsRankingQuery.data]);
 
-  const teamAssignmentQueries = useQueries({
-    queries: activeRankingItems.map((item) => ({
-      queryKey: ['team-assignments', 'current', item.participationId],
-      queryFn: () => getCurrentTeamAssignmentByParticipation(item.participationId),
-      enabled: activeRankingFilter !== TOP_PLAYERS_FILTER_ID,
-    })),
-  });
-
   const teamByParticipationId = useMemo(() => {
     const map = new Map<string, string | null>();
 
-    activeRankingItems.forEach((item, index) => {
-      map.set(item.participationId, teamAssignmentQueries[index]?.data?.teamId ?? null);
+    (campParticipantsQuery.data ?? []).forEach((participant) => {
+      map.set(participant.participationId, participant.currentTeam?.teamId ?? null);
     });
 
     return map;
-  }, [activeRankingItems, teamAssignmentQueries]);
+  }, [campParticipantsQuery.data]);
 
   const filteredRankingItems = useMemo(() => {
     if (activeRankingFilter === TOP_PLAYERS_FILTER_ID) {
@@ -380,7 +368,7 @@ export function CampPage() {
             loadMoreStep={20}
             onItemClick={(item) => navigate(`/players/${item.id}`)}
             emptyText={
-              campParticipationsQuery.isLoading || playersQueryResult.isLoading
+              campParticipantsQuery.isLoading
                 ? 'Зареждане на играчи...'
                 : 'Няма играчи в този лагер.'
             }

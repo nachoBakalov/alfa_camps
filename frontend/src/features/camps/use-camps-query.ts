@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getCamp, getCamps } from '../../api/camps.api';
+import { getCamp, getCamps, getPublicCamps } from '../../api/camps.api';
 
 export const campsQueryKey = ['camps'] as const;
 
@@ -11,6 +11,13 @@ export function useCampsQuery() {
   return useQuery({
     queryKey: campsQueryKey,
     queryFn: getCamps,
+  });
+}
+
+export function usePublicCampsQuery() {
+  return useQuery({
+    queryKey: [...campsQueryKey, 'public'],
+    queryFn: getPublicCamps,
   });
 }
 
