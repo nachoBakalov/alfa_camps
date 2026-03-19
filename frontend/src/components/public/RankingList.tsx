@@ -11,11 +11,14 @@ type RankingListItem = {
 type RankingListProps = {
   items: RankingListItem[];
   emptyText?: string;
+  limit?: number;
   className?: string;
 };
 
-export function RankingList({ items, emptyText, className }: RankingListProps) {
-  if (items.length === 0) {
+export function RankingList({ items, emptyText, limit, className }: RankingListProps) {
+  const visibleItems = typeof limit === 'number' && limit > 0 ? items.slice(0, limit) : items;
+
+  if (visibleItems.length === 0) {
     return <p className={['public-text-muted text-sm', className].filter(Boolean).join(' ')}>{emptyText ?? 'Няма класиране.'}</p>;
   }
 
@@ -28,7 +31,7 @@ export function RankingList({ items, emptyText, className }: RankingListProps) {
         .filter(Boolean)
         .join(' ')}
     >
-      {items.map((item, index) => (
+      {visibleItems.map((item, index) => (
         <RankingRow
           key={item.id}
           rank={index + 1}
@@ -36,7 +39,7 @@ export function RankingList({ items, emptyText, className }: RankingListProps) {
           scoreLabel={item.scoreLabel}
           avatarUrl={item.avatarUrl}
           avatarFallback={item.avatarFallback}
-          showDivider={index < items.length - 1}
+          showDivider={index < visibleItems.length - 1}
         />
       ))}
     </ol>

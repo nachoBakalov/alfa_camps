@@ -150,18 +150,6 @@ function getCampLabel(camp: Camp): string {
   return `${camp.title} ${camp.year}`;
 }
 
-function getDefaultCampStatusTab(hasActive: boolean, hasUpcoming: boolean): CampStatusTabKey {
-  if (hasActive) {
-    return 'active';
-  }
-
-  if (hasUpcoming) {
-    return 'upcoming';
-  }
-
-  return 'finished';
-}
-
 function getPlayerDisplayName(item: PlayerRankingItem): string {
   const fullName = [item.firstName, item.lastName].filter(Boolean).join(' ').trim();
   return item.nickname?.trim() || fullName || item.firstName;
@@ -282,20 +270,6 @@ export function MainPage() {
       finished,
     };
   }, [campsQuery.data]);
-
-  const campStatusCounts = {
-    active: campStatusBuckets.active.length,
-    upcoming: campStatusBuckets.upcoming.length,
-    finished: campStatusBuckets.finished.length,
-  };
-
-  useEffect(() => {
-    const defaultTab = getDefaultCampStatusTab(campStatusCounts.active > 0, campStatusCounts.upcoming > 0);
-
-    if (campStatusCounts[activeCampStatusTab] === 0) {
-      setActiveCampStatusTab(defaultTab);
-    }
-  }, [activeCampStatusTab, campStatusCounts]);
 
   const activeTabCamps = campStatusBuckets[activeCampStatusTab];
 
@@ -429,7 +403,7 @@ export function MainPage() {
 
               {activeTabCamps.length === 0 ? (
                 <p className="public-text-muted rounded-lg border border-[color-mix(in_srgb,var(--public-border)_16%,transparent)] px-3 py-4 text-center text-sm uppercase tracking-[0.08em]">
-                  {'Няма намерени лагери'}
+                  {'Няма лагери'}
                 </p>
               ) : null}
             </div>
@@ -447,6 +421,7 @@ export function MainPage() {
             <RankingTabs activeTab={rankingTab} onChange={setRankingTab} />
             <RankingList
               items={activeRankingItems}
+              limit={10}
               emptyText={
                 pointsRankingQuery.isLoading || killsRankingQuery.isLoading || survivalsRankingQuery.isLoading
                   ? 'Зареждане на резултати...'
@@ -460,9 +435,9 @@ export function MainPage() {
       <section className="scroll-mt-24 space-y-4">
         <div className={MAIN_SECTION_SHELL_CLASS}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="inline-flex w-fit rounded-lg border border-[color-mix(in_srgb,var(--public-primary)_88%,#fff_12%)] bg-[var(--public-primary)] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--public-text)]">
-              {'Играчи'}
-            </div>
+            <SectionTitle
+            title="Играчи"
+          />
             <div className="w-full sm:max-w-xs">
               <PlayerSearchBar value={playersQuery} onChange={setPlayersQuery} placeholder="Име или никнейм" />
             </div>
