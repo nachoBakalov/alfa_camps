@@ -13,9 +13,8 @@ import { useCampsQuery } from '../../features/camps/use-camps-query';
 import { usePhotoMutations } from '../../features/photos/use-photo-mutations';
 import { usePhotosQuery, type PhotoTargetType } from '../../features/photos/use-photos-query';
 import { usePlayersQuery } from '../../features/players/use-players-query';
+import { resolveBackendAssetUrl } from '../../lib/asset-url';
 import { ApiClientError } from '../../lib/errors';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || '';
 
 function getMutationErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiClientError) {
@@ -55,22 +54,6 @@ function getCampLabel(camp: Camp): string {
 
 function getTeamLabel(team: CampTeam): string {
   return team.name;
-}
-
-function resolvePhotoImageUrl(imageUrl: string): string {
-  if (/^https?:\/\//i.test(imageUrl)) {
-    return imageUrl;
-  }
-
-  if (!imageUrl.startsWith('/')) {
-    return imageUrl;
-  }
-
-  if (!API_BASE_URL) {
-    return imageUrl;
-  }
-
-  return `${API_BASE_URL}${imageUrl}`;
 }
 
 const TARGET_OPTIONS: Array<{ value: PhotoTargetType; label: string }> = [
@@ -409,7 +392,7 @@ export function PhotosPage() {
             {(photosQuery.data ?? []).map((photo) => (
               <article key={photo.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <img
-                  src={resolvePhotoImageUrl(photo.imageUrl)}
+                  src={resolveBackendAssetUrl(photo.imageUrl)}
                   alt="Снимка от галерията"
                   className="h-44 w-full rounded-lg border border-slate-200 object-cover"
                   loading="lazy"

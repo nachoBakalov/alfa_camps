@@ -3,12 +3,11 @@ import { SectionCard } from '../../components/cards/SectionCard';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
+import { resolveBackendAssetUrl } from '../../lib/asset-url';
 import { ApiClientError } from '../../lib/errors';
 import { PhotoUploadForm, type PhotoUploadSubmitInput } from './PhotoUploadForm';
 import { usePhotoMutations } from './use-photo-mutations';
 import { usePhotosQuery, type PhotoTargetType } from './use-photos-query';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || '';
 
 function getMutationErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiClientError) {
@@ -24,22 +23,6 @@ function getQueryErrorMessage(error: unknown): string {
   }
 
   return 'Не успяхме да заредим снимките.';
-}
-
-function resolvePhotoImageUrl(imageUrl: string): string {
-  if (/^https?:\/\//i.test(imageUrl)) {
-    return imageUrl;
-  }
-
-  if (!imageUrl.startsWith('/')) {
-    return imageUrl;
-  }
-
-  if (!API_BASE_URL) {
-    return imageUrl;
-  }
-
-  return `${API_BASE_URL}${imageUrl}`;
 }
 
 function formatCreatedAt(createdAt: string): string {
@@ -207,7 +190,7 @@ export function ScopedPhotosSection({
             {sortedPhotos.map((photo) => (
               <article key={photo.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <img
-                  src={resolvePhotoImageUrl(photo.imageUrl)}
+                  src={resolveBackendAssetUrl(photo.imageUrl)}
                   alt="Снимка"
                   className="h-44 w-full rounded-lg border border-slate-200 object-cover"
                   loading="lazy"
