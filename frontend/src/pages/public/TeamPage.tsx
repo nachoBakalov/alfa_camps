@@ -5,6 +5,7 @@ import {
   ExpandablePlayersSection,
   LoadMoreButton,
   PhotoGalleryGrid,
+  PublicBackButton,
   PublicHero,
   RankingList,
   RankingTabs,
@@ -130,6 +131,8 @@ export function TeamPage() {
       .sort((a, b) => a.displayName.localeCompare(b.displayName, 'bg'));
   }, [campParticipantsQuery.data, teamId]);
 
+  const normalizedPlayersQuery = playersQuery.trim().toLowerCase();
+
   const teamIdByParticipationId = useMemo(() => {
     const map = new Map<string, string | null>();
 
@@ -164,6 +167,7 @@ export function TeamPage() {
 
         return {
           id: item.participationId,
+          playerId: item.playerId,
           displayName,
           scoreLabel: rankingTab === 'kills' ? String(item.kills) : rankingTab === 'survivals' ? String(item.survivals) : String(item.points),
           avatarUrl: resolveOptionalAssetUrl(item.avatarUrl),
@@ -207,24 +211,27 @@ export function TeamPage() {
   const heroLocation = campDetailsQuery.data?.location ?? 'България';
   const heroDateLabel = getCampDateLabel(campDetailsQuery.data?.startDate, campDetailsQuery.data?.endDate, campDetailsQuery.data?.year);
   const heroBackground = resolveOptionalAssetUrl(selectedTeam?.logoUrl) ?? '/assets/team_token/lion.png';
-  const backToCampHref = campId ? `/camps/${campId}` : '/public';
+  const backToCampHref = campId ? `/camps/${campId}` : '/';
 
   return (
     <div className="space-y-8 sm:space-y-10">
+      <PublicBackButton fallbackTo={backToCampHref} className="mb-2" />
+
       <PublicHero
         status="active"
         title={heroTitle}
         location={heroLocation}
         dateLabel={heroDateLabel}
         backgroundImageUrl={heroBackground}
-        primaryAction={{ label: 'Към лагера', href: backToCampHref }}
+        primaryAction={campId ? { label: 'Към лагера', href: backToCampHref } : undefined}
         className="[&>div.relative>span]:hidden"
       />
 
       <section id="team-players" className={TEAM_SECTION_CLASS}>
         <DarkSectionBlock>
-          <SectionTitle title="Играчи" className='mb-4'/>
+          <SectionTitle title="Играчи" className="mb-4" />
           <ExpandablePlayersSection
+            key={normalizedPlayersQuery || 'all'}
             mode="plain"
             items={teamPlayers}
             initialVisibleCount={20}
@@ -232,7 +239,7 @@ export function TeamPage() {
             searchValue={playersQuery}
             onSearchChange={setPlayersQuery}
             searchPlaceholder="Име или никнейм"
-            emptyText={isLoading ? 'Зареждане на играчи...' : 'Няма играчи в този отбор за текущия лагер.'}
+            emptyText={isLoading ? 'Зареждане на играчи...' : 'Няма играчи'}
             onItemClick={(item) => navigate(`/players/${item.id}${campId ? `?campId=${campId}` : ''}`)}
           />
           <p className="public-text-muted mt-3 text-sm">Открити играчи в отбора: {teamPlayersCount}</p>
@@ -242,14 +249,20 @@ export function TeamPage() {
       </section>
 
       <section id="team-results" className={TEAM_SECTION_CLASS}>
-        
         <DarkSectionBlock>
-          <SectionTitle title="Резултати" className='mb-4'  />
+          <SectionTitle title="Резултати" className="mb-4" />
           <div className="space-y-4">
             <RankingTabs activeTab={rankingTab} onChange={setRankingTab} />
             <RankingList
               items={teamRankingItems}
-              emptyText={isRankingLoading ? 'Зареждане на резултати...' : 'Няма резултати за този отбор в текущия лагер.'}
+              onItemClick={(item) => {
+                if (!item.playerId) {
+                  return;
+                }
+
+                navigate(`/players/${item.playerId}${campId ? `?campId=${campId}` : ''}`);
+              }}
+              emptyText={isRankingLoading ? 'Зареждане на резултати...' : 'Няма резултати'}
               rankLabelBuilder={(rank) => (rank <= 3 ? String(rank) : `#${rank}`)}
             />
           </div>
@@ -258,11 +271,11 @@ export function TeamPage() {
 
       <section id="team-photos" className={TEAM_SECTION_CLASS}>
         <DarkSectionBlock>
-          <SectionTitle title="Снимки" className='mb-4'/>
+          <SectionTitle title="Снимки" className="mb-4" />
           <PhotoGalleryGrid
             className="!rounded-none !border-0 !bg-transparent !p-0"
             items={visibleTeamPhotos}
-            emptyText={teamPhotosQuery.isLoading ? 'Зареждане на снимки...' : 'Няма снимки за този отбор в текущия лагер.'}
+            emptyText={teamPhotosQuery.isLoading ? 'Зареждане на снимки...' : 'Няма снимки'}
           />
 
           {canLoadMorePhotos ? (

@@ -6,6 +6,7 @@ import {
   ExpandablePlayersSection,
   LoadMoreButton,
   PhotoGalleryGrid,
+  PublicBackButton,
   PublicHero,
   RankingList,
   RankingTabs,
@@ -29,6 +30,7 @@ const TOP_PLAYERS_FILTER_ID = '__top-players__';
 const ALL_PHOTOS_FILTER_ID = '__all-photos__';
 const CAMP_SECTION_CLASS = 'scroll-mt-24 space-y-4';
 const TOKEN_ROW_CLASS = 'flex flex-wrap items-start justify-center gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-7';
+const FILTER_TOKEN_SLOT_CLASS = 'w-[7.8rem]';
 
 function toTimestamp(value: string): number {
   const parsed = new Date(value).getTime();
@@ -238,6 +240,7 @@ export function CampPage() {
 
       return {
         id: item.participationId,
+        playerId: item.playerId,
         displayName,
         scoreLabel: getRankingValueLabel(rankingTab, item),
         avatarUrl: item.avatarUrl ?? undefined,
@@ -270,6 +273,8 @@ export function CampPage() {
 
   return (
     <div className="space-y-8 sm:space-y-10">
+      <PublicBackButton fallbackTo="/public" className="mb-2" />
+
       <PublicHero
         status={heroViewModel.status}
         statusLabel={heroViewModel.statusLabel}
@@ -282,9 +287,8 @@ export function CampPage() {
       />
 
       <section id="camp-teams" className={CAMP_SECTION_CLASS}>
-        {/* <SectionTitle title="Отбори" /> */}
         <DarkSectionBlock>
-          <SectionTitle title="Отбори" className='mb-5' />
+          <SectionTitle title="Отбори" className="mb-4" />
           <div className={TOKEN_ROW_CLASS}>
             {participatingTeams.map((team) => (
               <CircularTokenCard
@@ -306,12 +310,11 @@ export function CampPage() {
       
 
       <section id="camp-rankings" className={CAMP_SECTION_CLASS}>
-        {/* <SectionTitle title="Класиране" /> */}
         <DarkSectionBlock>
-          <SectionTitle title="Класиране" />
-          <div className="space-y-4 mt-6">
+          <SectionTitle title="Класиране" className="mb-4" />
+          <div className="space-y-4">
             <div className={TOKEN_ROW_CLASS}>
-              <div className="w-[7.8rem]">
+              <div className={FILTER_TOKEN_SLOT_CLASS}>
                 <CircularTokenCard
                   label="Топ играчи"
                   tokenText="TOP"
@@ -323,7 +326,7 @@ export function CampPage() {
               </div>
 
               {participatingTeams.map((team) => (
-                <div key={team.id} className="w-[7.8rem]">
+                <div key={team.id} className={FILTER_TOKEN_SLOT_CLASS}>
                   <CircularTokenCard
                     label={team.name}
                     imageUrl={team.logoUrl ?? undefined}
@@ -343,22 +346,28 @@ export function CampPage() {
             <RankingList
               items={rankingListItems}
               limit={activeRankingFilter === TOP_PLAYERS_FILTER_ID ? 10 : undefined}
+              onItemClick={(item) => {
+                if (!item.playerId) {
+                  return;
+                }
+
+                navigate(`/players/${item.playerId}${campId ? `?campId=${campId}` : ''}`);
+              }}
               emptyText={
                 isRankingLoading
-                  ? 'Зареждане на класиране...'
-                  : activeRankingFilter === TOP_PLAYERS_FILTER_ID
-                    ? 'Няма класиране за този лагер.'
-                    : 'Няма класиране за избрания отбор.'
+                  ? 'Зареждане на резултати...'
+                  : 'Няма резултати'
               }
             />
           </div>
         </DarkSectionBlock>
       </section>
-<section id="camp-players" className={CAMP_SECTION_CLASS}>
-        {/* <SectionTitle title="Играчи" /> */}
+
+      <section id="camp-players" className={CAMP_SECTION_CLASS}>
         <DarkSectionBlock>
-          <SectionTitle title="Играчи" className='mb-5' />
+          <SectionTitle title="Играчи" className="mb-4" />
           <ExpandablePlayersSection
+            key={normalizedPlayersQuery || 'all'}
             mode="plain"
             items={campPlayers}
             searchValue={playersQuery}
@@ -370,48 +379,50 @@ export function CampPage() {
             emptyText={
               campParticipantsQuery.isLoading
                 ? 'Зареждане на играчи...'
-                : 'Няма играчи в този лагер.'
+                : 'Няма играчи'
             }
           />
         </DarkSectionBlock>
       </section>
 
       <section id="camp-photos" className={CAMP_SECTION_CLASS}>
-        {/* <SectionTitle title="Снимки" /> */}
         <DarkSectionBlock>
-          <SectionTitle title="Снимки" />
-          <div className="space-y-4 mt-6">
+          <SectionTitle title="Снимки" className="mb-4" />
+          <div className="space-y-4">
             <div className={TOKEN_ROW_CLASS}>
-              <CircularTokenCard
-                label="Всички"
-                tokenText="ALL"
-                isActive={activePhotoFilter === ALL_PHOTOS_FILTER_ID}
-                onClick={() => {
-                  setActivePhotoFilter(ALL_PHOTOS_FILTER_ID);
-                  setVisiblePhotoCount(20);
-                }}
-                size="lg"
-              />
-
-              {participatingTeams.map((team) => (
+              <div className={FILTER_TOKEN_SLOT_CLASS}>
                 <CircularTokenCard
-                  key={team.id}
-                  label={team.name}
-                  imageUrl={team.logoUrl ?? undefined}
-                  isActive={activePhotoFilter === team.id}
+                  label="Всички"
+                  tokenText="ALL"
+                  isActive={activePhotoFilter === ALL_PHOTOS_FILTER_ID}
                   onClick={() => {
-                    setActivePhotoFilter(team.id);
+                    setActivePhotoFilter(ALL_PHOTOS_FILTER_ID);
                     setVisiblePhotoCount(20);
                   }}
                   size="lg"
                 />
+              </div>
+
+              {participatingTeams.map((team) => (
+                <div key={team.id} className={FILTER_TOKEN_SLOT_CLASS}>
+                  <CircularTokenCard
+                    label={team.name}
+                    imageUrl={team.logoUrl ?? undefined}
+                    isActive={activePhotoFilter === team.id}
+                    onClick={() => {
+                      setActivePhotoFilter(team.id);
+                      setVisiblePhotoCount(20);
+                    }}
+                    size="lg"
+                  />
+                </div>
               ))}
             </div>
 
             <PhotoGalleryGrid
               className="!rounded-none !border-0 !bg-transparent !p-0"
               items={visibleCampPhotos}
-              emptyText={campPhotosQuery.isLoading ? 'Зареждане на снимки...' : 'Няма снимки за избрания филтър.'}
+              emptyText={campPhotosQuery.isLoading ? 'Зареждане на снимки...' : 'Няма снимки'}
             />
 
             {canLoadMorePhotos ? (

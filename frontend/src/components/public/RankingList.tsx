@@ -2,6 +2,7 @@ import { RankingRow } from './RankingRow';
 
 type RankingListItem = {
   id: string;
+  playerId?: string;
   displayName: string;
   scoreLabel: string;
   avatarUrl?: string;
@@ -13,14 +14,15 @@ type RankingListProps = {
   emptyText?: string;
   limit?: number;
   rankLabelBuilder?: (rank: number) => string;
+  onItemClick?: (item: RankingListItem) => void;
   className?: string;
 };
 
-export function RankingList({ items, emptyText, limit, rankLabelBuilder, className }: RankingListProps) {
+export function RankingList({ items, emptyText, limit, rankLabelBuilder, onItemClick, className }: RankingListProps) {
   const visibleItems = typeof limit === 'number' && limit > 0 ? items.slice(0, limit) : items;
 
   if (visibleItems.length === 0) {
-    return <p className={['public-text-muted text-sm', className].filter(Boolean).join(' ')}>{emptyText ?? 'Няма класиране.'}</p>;
+    return <p className={['public-text-muted text-sm', className].filter(Boolean).join(' ')}>{emptyText ?? 'Няма резултати'}</p>;
   }
 
   return (
@@ -41,6 +43,7 @@ export function RankingList({ items, emptyText, limit, rankLabelBuilder, classNa
           scoreLabel={item.scoreLabel}
           avatarUrl={item.avatarUrl}
           avatarFallback={item.avatarFallback}
+          onClick={onItemClick ? () => onItemClick(item) : undefined}
           showDivider={index < visibleItems.length - 1}
         />
       ))}

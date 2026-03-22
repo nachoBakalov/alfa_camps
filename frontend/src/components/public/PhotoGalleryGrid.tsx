@@ -21,7 +21,7 @@ export function PhotoGalleryGrid({ items, className, emptyText }: PhotoGalleryGr
         .filter(Boolean)
         .join(' ')}
     >
-      {items.length === 0 ? <p className="public-text-muted text-sm">{emptyText ?? 'Няма снимки.'}</p> : null}
+      {items.length === 0 ? <p className="public-text-muted text-sm">{emptyText ?? 'Няма снимки'}</p> : null}
 
       {items.length > 0 ? (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">

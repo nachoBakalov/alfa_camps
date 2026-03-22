@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { DarkSectionBlock, PublicHero, SectionTitle } from '../../components/public';
+import { DarkSectionBlock, PublicBackButton, PublicHero, SectionTitle } from '../../components/public';
 import { getCampPublicParticipants } from '../../api/camp-public.api';
 import { useCampPublicDetailsQuery, useCampPublicParticipantsQuery } from '../../features/camp-public/use-camp-public-query';
 import { usePublicCampTypesQuery } from '../../features/camp-types/use-camp-types-query';
@@ -44,6 +44,11 @@ function getCampDateLabel(startDate: string, endDate: string): string {
   return `${formatter.format(new Date(startDate))} - ${formatter.format(new Date(endDate))}`;
 }
 
+function toTimestamp(value: string): number {
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 function getKillsRankImage(kills: number): string {
   const thresholds = [1, 5, 10, 15, 20, 25, 30, 35, 40];
   const value = thresholds.reduce((acc, current) => (kills >= current ? current : acc), 1);
@@ -81,6 +86,7 @@ export function PlayerPage() {
   const { playerId } = useParams();
   const [searchParams] = useSearchParams();
   const campId = searchParams.get('campId') ?? undefined;
+  const playerFallbackBackHref = campId ? `/camps/${campId}` : '/public';
 
   const publicPlayersQuery = usePublicPlayersQuery();
   const publicCampsQuery = usePublicCampsQuery();
@@ -104,14 +110,6 @@ export function PlayerPage() {
     return (publicPlayersQuery.data ?? []).find((item) => item.id === playerId) ?? null;
   }, [playerId, publicPlayersQuery.data]);
 
-  const campParticipant = useMemo(() => {
-    if (!campId || !playerId) {
-      return null;
-    }
-
-    return (campParticipantsQuery.data ?? []).find((item) => item.playerId === playerId) ?? null;
-  }, [campId, playerId, campParticipantsQuery.data]);
-
   const displayName = player
     ? getPlayerDisplayName(player.firstName, player.lastName, player.nickname)
     : 'Играч';
@@ -123,18 +121,9 @@ export function PlayerPage() {
       ? `Лагер ${campId}`
       : 'Профил';
   const heroAvatarUrl = resolveOptionalAssetUrl(player?.avatarUrl) ?? '/assets/avatars/119.png';
-  const heroBackground = '/assets/team_token/black.png';
 
   const isLoading = publicPlayersQuery.isLoading || (Boolean(campId) && campParticipantsQuery.isLoading);
   const hasError = publicPlayersQuery.isError || campDetailsQuery.isError || campParticipantsQuery.isError;
-
-  const campContextLabel = campDetailsQuery.data
-    ? campDetailsQuery.data.title
-    : campId
-      ? `Лагер ${campId}`
-      : 'Няма избран лагер';
-
-  const playerTeamLabel = campParticipant?.currentTeam?.name ?? 'Без отбор';
 
   const campTypeById = useMemo(() => {
     const map = new Map<string, { coverImageUrl: string | null }>();
@@ -171,6 +160,7 @@ export function PlayerPage() {
           title: camp.title,
           location: camp.location ?? 'България',
           dateLabel: getCampDateLabel(camp.startDate, camp.endDate),
+          sortTimestamp: toTimestamp(camp.endDate || camp.startDate),
           backgroundImageUrl,
           kills: participation.kills,
           survivals: participation.survivals,
@@ -183,7 +173,7 @@ export function PlayerPage() {
         };
       })
       .filter((item): item is NonNullable<typeof item> => Boolean(item))
-      .sort((a, b) => b.dateLabel.localeCompare(a.dateLabel, 'bg'));
+        .sort((a, b) => b.sortTimestamp - a.sortTimestamp);
   }, [campParticipantQueries, campTypeById, playerId, publicCampsQuery.data]);
 
   const isProgressLoading =
@@ -198,6 +188,8 @@ export function PlayerPage() {
 
   return (
     <div className="space-y-8 sm:space-y-10">
+      <PublicBackButton fallbackTo={playerFallbackBackHref} className="mb-2" />
+
       <PublicHero
         status="active"
         title={displayName}
@@ -205,21 +197,21 @@ export function PlayerPage() {
         dateLabel={heroDateLabel}
         backgroundImageUrl={heroAvatarUrl}
         topContent={
-          <span className="inline-flex h-24 w-24 overflow-hidden rounded-full border-2 border-[color-mix(in_srgb,var(--public-border)_78%,#fff_22%)] bg-[color-mix(in_srgb,var(--public-bg-900)_88%,#000_12%)] shadow-[0_8px_22px_rgba(0,0,0,0.35)] sm:h-28 sm:w-28">
+          <span className="inline-flex h-24 w-24 overflow-hidden rounded-full border-2 border-[color-mix(in_srgb,var(--public-border)_78%,#fff_22%)] bg-[color-mix(in_srgb,var(--public-bg-900)_88%,#000_12%)] shadow-[0_10px_24px_rgba(0,0,0,0.38)] sm:h-28 sm:w-28">
             <img src={heroAvatarUrl} alt={displayName} className="h-full w-full object-cover" />
           </span>
         }
         className="[&>div.relative>span]:hidden"
       />
 
-      <section id="player-achievements" className="space-y-4">
+      <section id="player-achievements" className="space-y-5">
         <SectionTitle title="Постижения" />
-        <DarkSectionBlock >
-          <div className="space-y-4">
+        <DarkSectionBlock>
+          <div className="space-y-5">
             {playerParticipationCards.map((item) => (
               <article
                 key={item.id}
-                className="relative isolate overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--public-border)_28%,transparent)]"
+                className="relative isolate overflow-hidden rounded-3xl border border-[color-mix(in_srgb,var(--public-border)_28%,transparent)]"
               >
                 <div
                   className="absolute inset-0 bg-cover bg-center"
@@ -245,10 +237,10 @@ export function PlayerPage() {
                         Рангове
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        <span className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden">
+                        <span className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden border-[color-mix(in_srgb,var(--public-border)_64%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_74%,#000_26%)]">
                           <img src={item.killsRankImage} alt="Ранг убийства" className="h-full w-full object-cover" loading="lazy" />
                         </span>
-                        <span className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden">
+                        <span className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden border-[color-mix(in_srgb,var(--public-border)_64%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_74%,#000_26%)]">
                           <img src={item.survivalsRankImage} alt="Ранг оцеляване" className="h-full w-full object-cover" loading="lazy" />
                         </span>
                       </div>
@@ -260,7 +252,10 @@ export function PlayerPage() {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {item.medalImages.map((medalImage, index) => (
-                          <span key={`${item.id}-medal-${index}`} className="grid h-20 w-20 place-items-center overflow-hidden">
+                          <span
+                            key={`${item.id}-medal-${index}`}
+                            className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden border-[color-mix(in_srgb,var(--public-border)_64%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_74%,#000_26%)]"
+                          >
                             <img src={medalImage} alt="Медал" className="h-full w-full object-cover" loading="lazy" />
                           </span>
                         ))}
@@ -275,15 +270,15 @@ export function PlayerPage() {
                     <dl className="mt-2 space-y-2 text-sm">
                       <div className="flex items-center justify-between gap-3">
                         <dt className="public-text-muted">Убийства</dt>
-                        <dd className="font-semibold text-[var(--public-text)]">{item.kills}</dd>
+                        <dd className="min-w-[2.5rem] text-right font-semibold tabular-nums text-[var(--public-text)]">{item.kills}</dd>
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <dt className="public-text-muted">Оцеляване</dt>
-                        <dd className="font-semibold text-[var(--public-text)]">{item.survivals}</dd>
+                        <dd className="min-w-[2.5rem] text-right font-semibold tabular-nums text-[var(--public-text)]">{item.survivals}</dd>
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <dt className="public-text-muted">Точки</dt>
-                        <dd className="font-semibold text-[var(--public-text)]">{item.points}</dd>
+                        <dd className="min-w-[2.5rem] text-right font-semibold tabular-nums text-[var(--public-text)]">{item.points}</dd>
                       </div>
                     </dl>
                   </div>
@@ -310,9 +305,6 @@ export function PlayerPage() {
               <p className="public-text-muted text-sm">Няма участия на играча в публичните лагери.</p>
             ) : null}
             {hasProgressError ? <p className="text-sm text-red-300">Възникна проблем при зареждането на участията.</p> : null}
-
-            {/* <p className="public-text-muted text-sm">Контекст лагер: {campContextLabel}</p> */}
-            {/* <p className="public-text-muted text-sm">Текущ отбор в лагера: {playerTeamLabel}</p> */}
             {isLoading ? <p className="public-text-muted text-sm">Зареждане на профил...</p> : null}
             {!isLoading && !player ? <p className="public-text-muted text-sm">Играчът не е намерен в публичния списък.</p> : null}
             {hasError ? <p className="text-sm text-red-300">Възникна проблем при зареждането на профила.</p> : null}

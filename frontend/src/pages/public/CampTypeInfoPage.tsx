@@ -8,6 +8,7 @@ import {
   DarkSectionBlock,
   LoadMoreButton,
   PhotoGalleryGrid,
+  PublicBackButton,
   PublicHero,
   SectionTitle,
 } from '../../components/public';
@@ -183,6 +184,8 @@ export function CampTypeInfoPage() {
 
   return (
     <div className="space-y-8 sm:space-y-10">
+      <PublicBackButton fallbackTo="/public" className="mb-2" />
+
       <PublicHero
         status="active"
         title={heroTitle}
@@ -198,7 +201,7 @@ export function CampTypeInfoPage() {
               {selectedCampType?.name ?? 'Няма избран тип лагер'}
             </p>
 
-            <p className="public-text-muted text-sm leading-relaxed">
+            <p className="public-text-muted max-w-[68ch] text-sm leading-relaxed sm:text-[0.95rem]">
               {selectedCampType?.description?.trim() || 'Няма въведено публично описание за този тип лагер.'}
             </p>
 
@@ -210,7 +213,8 @@ export function CampTypeInfoPage() {
       </section>
 
       <section id="camp-type-camps" className={CAMP_TYPE_SECTION_CLASS}>
-        <DarkSectionBlock >
+        <DarkSectionBlock>
+          <SectionTitle title="Лагери" className="mb-4" />
           <div className="space-y-4">
             <CampStatusTabs
               activeTab={activeStatusTab}
@@ -223,7 +227,9 @@ export function CampTypeInfoPage() {
             />
 
             {statusFilteredCamps.length === 0 ? (
-              <p className="public-text-muted text-sm">Няма лагери</p>
+              <p className="public-text-muted rounded-lg border border-[color-mix(in_srgb,var(--public-border)_16%,transparent)] px-3 py-4 text-center text-sm uppercase tracking-[0.08em]">
+                Няма лагери
+              </p>
             ) : (
               <div className="grid grid-cols-1 gap-3">
                 {statusFilteredCamps.map((camp) => (
@@ -247,11 +253,10 @@ export function CampTypeInfoPage() {
       </section>
 
       <section id="camp-type-photos" className={CAMP_TYPE_SECTION_CLASS}>
-        
-        <DarkSectionBlock >
-          <SectionTitle title="Снимки" className='mb-4'/>
+        <DarkSectionBlock>
+          <SectionTitle title="Снимки" className="mb-4" />
           <PhotoGalleryGrid
-          className="!rounded-none !border-0 !bg-transparent !p-0"
+            className="!rounded-none !border-0 !bg-transparent !p-0"
             items={visiblePhotos}
             emptyText={isPhotosLoading ? 'Зареждане на снимки...' : 'Няма снимки'}
           />

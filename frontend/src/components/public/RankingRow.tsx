@@ -8,6 +8,7 @@ type RankingRowProps = {
   avatarUrl?: string;
   avatarFallback?: string;
   showDivider?: boolean;
+  onClick?: () => void;
   className?: string;
 };
 
@@ -19,14 +20,31 @@ export function RankingRow({
   avatarUrl,
   avatarFallback,
   showDivider = true,
+  onClick,
   className,
 }: RankingRowProps) {
   const isTopThree = rank <= 3;
 
   return (
     <li
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={[
         'flex items-center gap-3 py-3',
+        onClick
+          ? 'cursor-pointer rounded-md px-1 transition-colors hover:bg-[color-mix(in_srgb,var(--public-bg-850)_74%,#fff_26%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--public-border)_60%,#fff_40%)]'
+          : '',
         showDivider ? 'border-b border-[color-mix(in_srgb,var(--public-border)_20%,transparent)]' : '',
         className,
       ]

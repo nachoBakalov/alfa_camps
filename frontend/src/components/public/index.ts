@@ -15,6 +15,7 @@ export { PlayerSearchBar } from './PlayerSearchBar';
 export { PublicHero } from './PublicHero';
 export { PublicHeroActions } from './PublicHeroActions';
 export type { PublicHeroAction } from './PublicHeroActions';
+export { PublicBackButton } from './PublicBackButton';
 export { PublicStatusBadge } from './PublicStatusBadge';
 export type { PublicStatus } from './PublicStatusBadge';
 export { RankingList } from './RankingList';

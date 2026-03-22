@@ -210,6 +210,7 @@ export function MainPage() {
 
       return {
         id: item.participationId,
+        playerId: item.playerId,
         displayName,
         scoreLabel: String(getRankingValue(item, rankingTab)),
         avatarUrl: item.avatarUrl ?? undefined,
@@ -306,7 +307,7 @@ export function MainPage() {
   }, [normalizedPlayersQuery, playersListQuery.data]);
 
   return (
-    <div className="space-y-6 pb-3 sm:space-y-8 sm:pb-4">
+    <div className="space-y-8 pb-3 sm:space-y-10 sm:pb-4">
       <PublicHero
         status={heroCamp?.status ?? 'finished'}
         statusLabel={heroCamp?.statusLabel ?? 'Изминал'}
@@ -324,7 +325,7 @@ export function MainPage() {
 
           {campTypeFilterItems.length > 0 ? (
             <div className="mt-5 pb-1">
-              <div className="flex w-full flex-wrap items-start justify-center gap-2">
+              <div className="flex w-full flex-wrap items-start justify-center gap-x-2 gap-y-4">
                 {campTypeFilterItems.map((campTypeItem) => {
                   const isSelected = campTypeItem.id === activeTypeId;
                   const relatedCamps = isSelected ? selectedCampTypeCamps : [];
@@ -340,7 +341,7 @@ export function MainPage() {
                       />
 
                       {isSelected ? (
-                        <div className="mt-4 flex w-full flex-col items-stretch gap-2">
+                        <div className="mt-4 flex w-full flex-col items-stretch gap-2 rounded-lg border border-[color-mix(in_srgb,var(--public-border)_18%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_64%,#000_36%)] p-2">
                           <Link
                             to={`/camp-types/${campTypeItem.id}`}
                             className="rounded-md border border-[color-mix(in_srgb,var(--public-border)_34%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-850)_84%,#000_16%)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--public-text)] transition-colors hover:bg-[color-mix(in_srgb,var(--public-bg-850)_68%,#fff_32%)]"
@@ -422,10 +423,17 @@ export function MainPage() {
             <RankingList
               items={activeRankingItems}
               limit={10}
+              onItemClick={(item) => {
+                if (!item.playerId) {
+                  return;
+                }
+
+                navigate(`/players/${item.playerId}`);
+              }}
               emptyText={
                 pointsRankingQuery.isLoading || killsRankingQuery.isLoading || survivalsRankingQuery.isLoading
                   ? 'Зареждане на резултати...'
-                  : 'Няма класиране.'
+                  : 'Няма резултати'
               }
             />
           </div>
@@ -435,15 +443,14 @@ export function MainPage() {
       <section className="scroll-mt-24 space-y-4">
         <div className={MAIN_SECTION_SHELL_CLASS}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <SectionTitle
-            title="Играчи"
-          />
+            <SectionTitle title="Играчи" />
             <div className="w-full sm:max-w-xs">
               <PlayerSearchBar value={playersQuery} onChange={setPlayersQuery} placeholder="Име или никнейм" />
             </div>
           </div>
 
           <ExpandablePlayersSection
+            key={normalizedPlayersQuery || 'all'}
             mode="plain"
             className="mt-4"
             items={mainPlayers}
@@ -453,7 +460,7 @@ export function MainPage() {
             emptyText={
               playersListQuery.isLoading
                 ? 'Зареждане на играчи...'
-                : 'Няма намерени играчи.'
+                : 'Няма играчи'
             }
           />
         </div>
