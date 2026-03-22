@@ -1,97 +1,276 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
+  DarkSectionBlock,
   ExpandablePlayersSection,
   LoadMoreButton,
   PhotoGalleryGrid,
   PublicHero,
   RankingList,
   RankingTabs,
+  type RankingTabKey,
   SectionTitle,
-  TopRankIcon,
 } from '../../components/public';
+import {
+  useCampPublicDetailsQuery,
+  useCampPublicParticipantsQuery,
+  useCampPublicTeamsQuery,
+} from '../../features/camp-public/use-camp-public-query';
+import {
+  useCampKillsRankingQuery,
+  useCampPointsRankingQuery,
+  useCampSurvivalsRankingQuery,
+} from '../../features/rankings/use-rankings-query';
+import { usePhotosQuery } from '../../features/photos/use-photos-query';
+import { resolveBackendAssetUrl } from '../../lib/asset-url';
 
-const TEAM_PLAYERS = [
-  { id: 'tp1', displayName: 'Гръм', secondaryText: 'Капитан', avatarUrl: '/assets/avatars/24.png' },
-  { id: 'tp2', displayName: 'Вихър', secondaryText: 'Щурмовак', avatarUrl: '/assets/avatars/12.png' },
-  { id: 'tp3', displayName: 'Титан', secondaryText: 'Защита', avatarUrl: '/assets/avatars/42.png' },
-  { id: 'tp4', displayName: 'Лисицата', secondaryText: 'Скаут', avatarUrl: '/assets/avatars/88.png' },
-];
+const TEAM_SECTION_CLASS = 'scroll-mt-24 space-y-4';
 
-const TEAM_PHOTOS = [
-  { id: 'tph1', imageUrl: '/assets/avatars/107.png' },
-  { id: 'tph2', imageUrl: '/assets/avatars/108.png' },
-  { id: 'tph3', imageUrl: '/assets/avatars/109.png' },
-  { id: 'tph4', imageUrl: '/assets/avatars/110.png' },
-];
-
-function getTeamRanking(tab: 'points' | 'kills' | 'survivals') {
-  if (tab === 'kills') {
-    return [
-      { id: 'tk1', displayName: 'Вихър', scoreLabel: '12', avatarUrl: '/assets/avatars/12.png' },
-      { id: 'tk2', displayName: 'Гръм', scoreLabel: '10', avatarUrl: '/assets/avatars/24.png' },
-      { id: 'tk3', displayName: 'Лисицата', scoreLabel: '8', avatarUrl: '/assets/avatars/88.png' },
-    ];
+function resolveOptionalAssetUrl(url: string | null | undefined): string | undefined {
+  if (!url) {
+    return undefined;
   }
 
-  if (tab === 'survivals') {
-    return [
-      { id: 'ts1', displayName: 'Титан', scoreLabel: '9', avatarUrl: '/assets/avatars/42.png' },
-      { id: 'ts2', displayName: 'Лисицата', scoreLabel: '8', avatarUrl: '/assets/avatars/88.png' },
-      { id: 'ts3', displayName: 'Гръм', scoreLabel: '7', avatarUrl: '/assets/avatars/24.png' },
-    ];
+  if (/^https?:\/\//i.test(url)) {
+    return url;
   }
 
-  return [
-    { id: 'tt1', displayName: 'Вихър', scoreLabel: '380', avatarUrl: '/assets/avatars/12.png' },
-    { id: 'tt2', displayName: 'Титан', scoreLabel: '352', avatarUrl: '/assets/avatars/42.png' },
-    { id: 'tt3', displayName: 'Гръм', scoreLabel: '340', avatarUrl: '/assets/avatars/24.png' },
-  ];
+  // Team token assets are served by the frontend from /public/assets.
+  if (url.startsWith('/assets/') || url.startsWith('assets/')) {
+    return url.startsWith('/') ? url : `/${url}`;
+  }
+
+  return resolveBackendAssetUrl(url);
+}
+
+function getCampDateLabel(startDate: string | undefined, endDate: string | undefined, year: number | undefined): string {
+  if (!startDate || !endDate) {
+    return year ? String(year) : 'Лагер';
+  }
+
+  const formatter = new Intl.DateTimeFormat('bg-BG', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+
+  return `${formatter.format(new Date(startDate))} - ${formatter.format(new Date(endDate))}`;
+}
+
+function getPlayerDisplayName(firstName: string, lastName: string | null, nickname: string | null): string {
+  const normalizedNickname = nickname?.trim();
+  if (normalizedNickname) {
+    return normalizedNickname;
+  }
+
+  return [firstName, lastName].filter(Boolean).join(' ').trim() || firstName;
+}
+
+function getPlayerSecondaryText(firstName: string, lastName: string | null, nickname: string | null): string | undefined {
+  const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+  if (!fullName) {
+    return undefined;
+  }
+
+  const normalizedNickname = nickname?.trim();
+  return normalizedNickname ? fullName : undefined;
 }
 
 export function TeamPage() {
+  const navigate = useNavigate();
   const { teamId } = useParams();
+  const [searchParams] = useSearchParams();
   const [playersQuery, setPlayersQuery] = useState('');
-  const [rankingTab, setRankingTab] = useState<'points' | 'kills' | 'survivals'>('points');
+  const [rankingTab, setRankingTab] = useState<RankingTabKey>('points');
+  const [visiblePhotoCount, setVisiblePhotoCount] = useState(20);
+  const campId = searchParams.get('campId') ?? undefined;
+
+  const campDetailsQuery = useCampPublicDetailsQuery(campId);
+  const campTeamsQuery = useCampPublicTeamsQuery(campId);
+  const campParticipantsQuery = useCampPublicParticipantsQuery(campId);
+  const pointsRankingQuery = useCampPointsRankingQuery(campId, undefined, rankingTab === 'points');
+  const killsRankingQuery = useCampKillsRankingQuery(campId, undefined, rankingTab === 'kills');
+  const survivalsRankingQuery = useCampSurvivalsRankingQuery(campId, undefined, rankingTab === 'survivals');
+  const teamPhotosQuery = usePhotosQuery('team', teamId);
+
+  const selectedTeam = useMemo(() => {
+    if (!teamId) {
+      return null;
+    }
+
+    return (campTeamsQuery.data ?? []).find((team) => team.teamId === teamId) ?? null;
+  }, [campTeamsQuery.data, teamId]);
+
+  const teamPlayersCount = useMemo(() => {
+    if (!teamId) {
+      return 0;
+    }
+
+    return (campParticipantsQuery.data ?? []).filter((participant) => participant.currentTeam?.teamId === teamId).length;
+  }, [campParticipantsQuery.data, teamId]);
+
+  const teamPlayers = useMemo(() => {
+    if (!teamId) {
+      return [];
+    }
+
+    return (campParticipantsQuery.data ?? [])
+      .filter((participant) => participant.currentTeam?.teamId === teamId)
+      .map((participant) => {
+        const displayName = getPlayerDisplayName(participant.firstName, participant.lastName, participant.nickname);
+
+        return {
+          id: participant.playerId,
+          displayName,
+          secondaryText: getPlayerSecondaryText(participant.firstName, participant.lastName, participant.nickname),
+          avatarUrl: resolveOptionalAssetUrl(participant.avatarUrl),
+          avatarFallback: displayName.slice(0, 2).toUpperCase(),
+        };
+      })
+      .sort((a, b) => a.displayName.localeCompare(b.displayName, 'bg'));
+  }, [campParticipantsQuery.data, teamId]);
+
+  const teamIdByParticipationId = useMemo(() => {
+    const map = new Map<string, string | null>();
+
+    (campParticipantsQuery.data ?? []).forEach((participant) => {
+      map.set(participant.participationId, participant.currentTeam?.teamId ?? null);
+    });
+
+    return map;
+  }, [campParticipantsQuery.data]);
+
+  const activeRankingItems = useMemo(() => {
+    if (rankingTab === 'kills') {
+      return killsRankingQuery.data ?? [];
+    }
+
+    if (rankingTab === 'survivals') {
+      return survivalsRankingQuery.data ?? [];
+    }
+
+    return pointsRankingQuery.data ?? [];
+  }, [killsRankingQuery.data, pointsRankingQuery.data, rankingTab, survivalsRankingQuery.data]);
+
+  const teamRankingItems = useMemo(() => {
+    if (!teamId) {
+      return [];
+    }
+
+    return activeRankingItems
+      .filter((item) => teamIdByParticipationId.get(item.participationId) === teamId)
+      .map((item) => {
+        const displayName = getPlayerDisplayName(item.firstName, item.lastName, item.nickname);
+
+        return {
+          id: item.participationId,
+          displayName,
+          scoreLabel: rankingTab === 'kills' ? String(item.kills) : rankingTab === 'survivals' ? String(item.survivals) : String(item.points),
+          avatarUrl: resolveOptionalAssetUrl(item.avatarUrl),
+          avatarFallback: displayName.slice(0, 2).toUpperCase(),
+        };
+      });
+  }, [activeRankingItems, rankingTab, teamId, teamIdByParticipationId]);
+
+  const isRankingLoading = pointsRankingQuery.isLoading || killsRankingQuery.isLoading || survivalsRankingQuery.isLoading;
+
+  const filteredTeamPhotos = useMemo(() => {
+    const photos = teamPhotosQuery.data ?? [];
+
+    return photos.filter((photo) => {
+      const matchesTeam = !teamId || photo.teamId === teamId;
+      const matchesCamp = !campId || photo.campId === campId;
+      return matchesTeam && matchesCamp;
+    });
+  }, [campId, teamId, teamPhotosQuery.data]);
+
+  const visibleTeamPhotos = useMemo(() => {
+    return filteredTeamPhotos.slice(0, visiblePhotoCount).map((photo) => ({
+      id: photo.id,
+      imageUrl: resolveBackendAssetUrl(photo.imageUrl),
+      alt: 'Снимка на отбора',
+    }));
+  }, [filteredTeamPhotos, visiblePhotoCount]);
+
+  const canLoadMorePhotos = visiblePhotoCount < filteredTeamPhotos.length;
+
+  useEffect(() => {
+    setPlayersQuery('');
+    setRankingTab('points');
+    setVisiblePhotoCount(20);
+  }, [campId, teamId]);
+
+  const isLoading = campDetailsQuery.isLoading || campTeamsQuery.isLoading || campParticipantsQuery.isLoading;
+  const hasError = campDetailsQuery.isError || campTeamsQuery.isError || campParticipantsQuery.isError;
+
+  const heroTitle = selectedTeam?.name ?? 'Отбор';
+  const heroLocation = campDetailsQuery.data?.location ?? 'България';
+  const heroDateLabel = getCampDateLabel(campDetailsQuery.data?.startDate, campDetailsQuery.data?.endDate, campDetailsQuery.data?.year);
+  const heroBackground = resolveOptionalAssetUrl(selectedTeam?.logoUrl) ?? '/assets/team_token/lion.png';
+  const backToCampHref = campId ? `/camps/${campId}` : '/public';
 
   return (
     <div className="space-y-8 sm:space-y-10">
       <PublicHero
         status="active"
-        title="Team Shell"
-        location={`Team ${teamId ?? 'demo'}`}
-        dateLabel="Сезон 2026"
-        backgroundImageUrl="/assets/team_token/griffon.png"
-        topContent={<TopRankIcon rank={1} size={32} />}
-        primaryAction={{ label: 'Играчите', href: '#team-players' }}
-        secondaryAction={{ label: 'Класиране', href: '#team-ranking' }}
+        title={heroTitle}
+        location={heroLocation}
+        dateLabel={heroDateLabel}
+        backgroundImageUrl={heroBackground}
+        primaryAction={{ label: 'Към лагера', href: backToCampHref }}
+        className="[&>div.relative>span]:hidden"
       />
 
-      <section id="team-players" className="space-y-4">
-        <SectionTitle title="Играчите на отбора" subtitle="Компактен изглед" />
-        <ExpandablePlayersSection
-          items={TEAM_PLAYERS}
-          searchValue={playersQuery}
-          onSearchChange={setPlayersQuery}
-          initialVisibleCount={3}
-          loadMoreStep={2}
-        />
+      <section id="team-players" className={TEAM_SECTION_CLASS}>
+        <DarkSectionBlock>
+          <SectionTitle title="Играчи" className='mb-4'/>
+          <ExpandablePlayersSection
+            mode="plain"
+            items={teamPlayers}
+            initialVisibleCount={20}
+            loadMoreStep={20}
+            searchValue={playersQuery}
+            onSearchChange={setPlayersQuery}
+            searchPlaceholder="Име или никнейм"
+            emptyText={isLoading ? 'Зареждане на играчи...' : 'Няма играчи в този отбор за текущия лагер.'}
+            onItemClick={(item) => navigate(`/players/${item.id}${campId ? `?campId=${campId}` : ''}`)}
+          />
+          <p className="public-text-muted mt-3 text-sm">Открити играчи в отбора: {teamPlayersCount}</p>
+          {isLoading ? <p className="public-text-muted mt-2 text-sm">Зареждане на данни...</p> : null}
+          {hasError ? <p className="mt-2 text-sm text-red-300">Възникна проблем при зареждането на данните за отбора.</p> : null}
+        </DarkSectionBlock>
       </section>
 
-      <section id="team-ranking" className="space-y-4">
-        <SectionTitle title="Отборно класиране" subtitle="Вътрешна подредба" />
-        <div className="public-section space-y-3">
-          <RankingTabs activeTab={rankingTab} onChange={setRankingTab} />
-          <RankingList items={getTeamRanking(rankingTab)} />
-        </div>
+      <section id="team-results" className={TEAM_SECTION_CLASS}>
+        
+        <DarkSectionBlock>
+          <SectionTitle title="Резултати" className='mb-4'  />
+          <div className="space-y-4">
+            <RankingTabs activeTab={rankingTab} onChange={setRankingTab} />
+            <RankingList
+              items={teamRankingItems}
+              emptyText={isRankingLoading ? 'Зареждане на резултати...' : 'Няма резултати за този отбор в текущия лагер.'}
+              rankLabelBuilder={(rank) => (rank <= 3 ? String(rank) : `#${rank}`)}
+            />
+          </div>
+        </DarkSectionBlock>
       </section>
 
-      <section className="space-y-4">
-        <SectionTitle title="Снимки" subtitle="Отборна галерия" />
-        <PhotoGalleryGrid items={TEAM_PHOTOS} />
-        <div className="flex justify-center">
-          <LoadMoreButton />
-        </div>
+      <section id="team-photos" className={TEAM_SECTION_CLASS}>
+        <DarkSectionBlock>
+          <SectionTitle title="Снимки" className='mb-4'/>
+          <PhotoGalleryGrid
+            className="!rounded-none !border-0 !bg-transparent !p-0"
+            items={visibleTeamPhotos}
+            emptyText={teamPhotosQuery.isLoading ? 'Зареждане на снимки...' : 'Няма снимки за този отбор в текущия лагер.'}
+          />
+
+          {canLoadMorePhotos ? (
+            <div className="mt-4 flex justify-center">
+              <LoadMoreButton onClick={() => setVisiblePhotoCount((current) => current + 20)} />
+            </div>
+          ) : null}
+        </DarkSectionBlock>
       </section>
     </div>
   );

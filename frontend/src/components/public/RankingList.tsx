@@ -12,10 +12,11 @@ type RankingListProps = {
   items: RankingListItem[];
   emptyText?: string;
   limit?: number;
+  rankLabelBuilder?: (rank: number) => string;
   className?: string;
 };
 
-export function RankingList({ items, emptyText, limit, className }: RankingListProps) {
+export function RankingList({ items, emptyText, limit, rankLabelBuilder, className }: RankingListProps) {
   const visibleItems = typeof limit === 'number' && limit > 0 ? items.slice(0, limit) : items;
 
   if (visibleItems.length === 0) {
@@ -35,6 +36,7 @@ export function RankingList({ items, emptyText, limit, className }: RankingListP
         <RankingRow
           key={item.id}
           rank={index + 1}
+          rankLabel={rankLabelBuilder ? rankLabelBuilder(index + 1) : undefined}
           displayName={item.displayName}
           scoreLabel={item.scoreLabel}
           avatarUrl={item.avatarUrl}

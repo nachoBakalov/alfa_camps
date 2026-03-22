@@ -15,7 +15,7 @@ export function PhotoGalleryGrid({ items, className, emptyText }: PhotoGalleryGr
   return (
     <section
       className={[
-        'public-section',
+        'public-section-cards',
         className,
       ]
         .filter(Boolean)

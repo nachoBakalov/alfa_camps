@@ -1,10 +1,12 @@
 import { Outlet } from 'react-router-dom';
+import GlobalLoading from '../ui/GlobalLoading';
 import { PublicContainer } from './PublicContainer';
 import { PublicTopBar } from './PublicTopBar';
 
 export function PublicLayout() {
   return (
     <div className="public-theme">
+      <GlobalLoading />
       <PublicTopBar />
       <main className="py-5 sm:py-8">
         <PublicContainer>

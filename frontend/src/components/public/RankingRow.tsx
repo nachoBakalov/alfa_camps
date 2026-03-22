@@ -2,6 +2,7 @@ import { TopRankIcon } from './TopRankIcon';
 
 type RankingRowProps = {
   rank: number;
+  rankLabel?: string;
   displayName: string;
   scoreLabel: string;
   avatarUrl?: string;
@@ -12,6 +13,7 @@ type RankingRowProps = {
 
 export function RankingRow({
   rank,
+  rankLabel,
   displayName,
   scoreLabel,
   avatarUrl,
@@ -35,7 +37,7 @@ export function RankingRow({
         {isTopThree ? (
           <TopRankIcon rank={rank} size={26} />
         ) : (
-          <span className="text-sm font-semibold text-[var(--public-text)]">{rank}</span>
+          <span className="text-sm font-semibold text-[var(--public-text)]">{rankLabel ?? rank}</span>
         )}
       </div>
 
