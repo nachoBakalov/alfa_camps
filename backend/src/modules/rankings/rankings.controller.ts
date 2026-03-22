@@ -6,6 +6,21 @@ import { RankingsService } from './rankings.service';
 export class RankingsController {
   constructor(private readonly rankingsService: RankingsService) {}
 
+  @Get('rankings/global/points')
+  getGlobalPointsRanking(@Query() query: QueryRankingLimitDto) {
+    return this.rankingsService.getGlobalPointsRanking(query.limit);
+  }
+
+  @Get('rankings/global/kills')
+  getGlobalKillsRanking(@Query() query: QueryRankingLimitDto) {
+    return this.rankingsService.getGlobalKillsRanking(query.limit);
+  }
+
+  @Get('rankings/global/survivals')
+  getGlobalSurvivalsRanking(@Query() query: QueryRankingLimitDto) {
+    return this.rankingsService.getGlobalSurvivalsRanking(query.limit);
+  }
+
   @Get('camps/:campId/rankings/points')
   getCampPointsRanking(@Param('campId', new ParseUUIDPipe()) campId: string, @Query() query: QueryRankingLimitDto) {
     return this.rankingsService.getCampPointsRanking(campId, query.limit);

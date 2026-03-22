@@ -26,6 +26,17 @@ export type TeamStandingItem = {
   isActive: boolean;
 };
 
+export type GlobalPlayerRankingItem = {
+  playerId: string;
+  firstName: string;
+  lastName: string | null;
+  nickname: string | null;
+  avatarUrl: string | null;
+  points: number;
+  kills: number;
+  survivals: number;
+};
+
 function toLimitQuery(limit?: number): string {
   if (limit === undefined) {
     return '';
@@ -44,6 +55,18 @@ export function getCampKillsRanking(campId: string, limit?: number): Promise<Pla
 
 export function getCampSurvivalsRanking(campId: string, limit?: number): Promise<PlayerRankingItem[]> {
   return apiGet<PlayerRankingItem[]>(`/camps/${campId}/rankings/survivals${toLimitQuery(limit)}`);
+}
+
+export function getGlobalPointsRanking(limit?: number): Promise<GlobalPlayerRankingItem[]> {
+  return apiGet<GlobalPlayerRankingItem[]>(`/rankings/global/points${toLimitQuery(limit)}`);
+}
+
+export function getGlobalKillsRanking(limit?: number): Promise<GlobalPlayerRankingItem[]> {
+  return apiGet<GlobalPlayerRankingItem[]>(`/rankings/global/kills${toLimitQuery(limit)}`);
+}
+
+export function getGlobalSurvivalsRanking(limit?: number): Promise<GlobalPlayerRankingItem[]> {
+  return apiGet<GlobalPlayerRankingItem[]>(`/rankings/global/survivals${toLimitQuery(limit)}`);
 }
 
 export function getCampTeamStandings(campId: string): Promise<TeamStandingItem[]> {

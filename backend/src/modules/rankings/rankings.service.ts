@@ -4,6 +4,7 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CampParticipation } from '../camp-participations/entities/camp-participation.entity';
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Camp } from '../camps/entities/camp.entity';
+import { GlobalPlayerRankingItemDto } from './dto/global-player-ranking-item.dto';
 import { PlayerRankingItemDto } from './dto/player-ranking-item.dto';
 import { TeamStandingItemDto } from './dto/team-standing-item.dto';
 
@@ -19,6 +20,39 @@ export class RankingsService {
     @InjectRepository(CampTeam)
     private readonly campTeamsRepository: Repository<CampTeam>,
   ) {}
+
+  async getGlobalPointsRanking(limit?: number): Promise<GlobalPlayerRankingItemDto[]> {
+    return this.createGlobalPlayerRankingQuery()
+      .orderBy('SUM(cp.points)', 'DESC')
+      .addOrderBy('SUM(cp.kills)', 'DESC')
+      .addOrderBy('SUM(cp.survivals)', 'DESC')
+      .addOrderBy('player.firstName', 'ASC')
+      .addOrderBy('player.lastName', 'ASC', 'NULLS LAST')
+      .limit(this.resolveLimit(limit))
+      .getRawMany<GlobalPlayerRankingItemDto>();
+  }
+
+  async getGlobalKillsRanking(limit?: number): Promise<GlobalPlayerRankingItemDto[]> {
+    return this.createGlobalPlayerRankingQuery()
+      .orderBy('SUM(cp.kills)', 'DESC')
+      .addOrderBy('SUM(cp.points)', 'DESC')
+      .addOrderBy('SUM(cp.survivals)', 'DESC')
+      .addOrderBy('player.firstName', 'ASC')
+      .addOrderBy('player.lastName', 'ASC', 'NULLS LAST')
+      .limit(this.resolveLimit(limit))
+      .getRawMany<GlobalPlayerRankingItemDto>();
+  }
+
+  async getGlobalSurvivalsRanking(limit?: number): Promise<GlobalPlayerRankingItemDto[]> {
+    return this.createGlobalPlayerRankingQuery()
+      .orderBy('SUM(cp.survivals)', 'DESC')
+      .addOrderBy('SUM(cp.points)', 'DESC')
+      .addOrderBy('SUM(cp.kills)', 'DESC')
+      .addOrderBy('player.firstName', 'ASC')
+      .addOrderBy('player.lastName', 'ASC', 'NULLS LAST')
+      .limit(this.resolveLimit(limit))
+      .getRawMany<GlobalPlayerRankingItemDto>();
+  }
 
   async getCampPointsRanking(campId: string, limit?: number): Promise<PlayerRankingItemDto[]> {
     await this.ensureCampExists(campId);
@@ -93,6 +127,25 @@ export class RankingsService {
       .addSelect('cp.duelWins', 'duelWins')
       .addSelect('cp.massBattleWins', 'massBattleWins')
       .where('cp.campId = :campId', { campId });
+  }
+
+  private createGlobalPlayerRankingQuery(): SelectQueryBuilder<CampParticipation> {
+    return this.campParticipationsRepository
+      .createQueryBuilder('cp')
+      .innerJoin('cp.player', 'player')
+      .select('cp.playerId', 'playerId')
+      .addSelect('player.firstName', 'firstName')
+      .addSelect('player.lastName', 'lastName')
+      .addSelect('player.nickname', 'nickname')
+      .addSelect('player.avatarUrl', 'avatarUrl')
+      .addSelect('SUM(cp.points)', 'points')
+      .addSelect('SUM(cp.kills)', 'kills')
+      .addSelect('SUM(cp.survivals)', 'survivals')
+      .groupBy('cp.playerId')
+      .addGroupBy('player.firstName')
+      .addGroupBy('player.lastName')
+      .addGroupBy('player.nickname')
+      .addGroupBy('player.avatarUrl');
   }
 
   private resolveLimit(limit?: number): number {

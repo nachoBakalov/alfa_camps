@@ -18,9 +18,9 @@ import { usePublicCampTypesQuery } from '../../features/camp-types/use-camp-type
 import { usePublicCampsQuery } from '../../features/camps/use-camps-query';
 import { usePublicPlayersQuery } from '../../features/players/use-players-query';
 import {
-  useCampKillsRankingQuery,
-  useCampPointsRankingQuery,
-  useCampSurvivalsRankingQuery,
+  useGlobalKillsRankingQuery,
+  useGlobalPointsRankingQuery,
+  useGlobalSurvivalsRankingQuery,
 } from '../../features/rankings/use-rankings-query';
 
 const MAIN_SECTION_SHELL_CLASS =
@@ -192,10 +192,9 @@ export function MainPage() {
       : { label: 'Класиране', href: `/camps/${heroCamp.camp.id}` }
     : { label: 'Класиране', href: '#global-rankings' };
 
-  const rankingCampId = heroCamp?.camp.id;
-  const pointsRankingQuery = useCampPointsRankingQuery(rankingCampId, 30, rankingTab === 'points');
-  const killsRankingQuery = useCampKillsRankingQuery(rankingCampId, 30, rankingTab === 'kills');
-  const survivalsRankingQuery = useCampSurvivalsRankingQuery(rankingCampId, 30, rankingTab === 'survivals');
+  const pointsRankingQuery = useGlobalPointsRankingQuery(30, rankingTab === 'points');
+  const killsRankingQuery = useGlobalKillsRankingQuery(30, rankingTab === 'kills');
+  const survivalsRankingQuery = useGlobalSurvivalsRankingQuery(30, rankingTab === 'survivals');
 
   const activeRankingItemsRaw =
     rankingTab === 'points'
@@ -209,7 +208,7 @@ export function MainPage() {
       const displayName = getPlayerDisplayName(item);
 
       return {
-        id: item.participationId,
+        id: item.playerId,
         playerId: item.playerId,
         displayName,
         scoreLabel: String(getRankingValue(item, rankingTab)),
@@ -416,7 +415,7 @@ export function MainPage() {
         <div className={MAIN_SECTION_SHELL_CLASS}>
           <SectionTitle
             title="Резултати"
-            subtitle="Глобално класиране"
+            subtitle="Топ играчи от всички лагери"
           />
           <div className="mt-6 space-y-3">
             <RankingTabs activeTab={rankingTab} onChange={setRankingTab} />

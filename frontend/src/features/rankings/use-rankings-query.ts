@@ -1,5 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import {
+  getGlobalKillsRanking,
+  getGlobalPointsRanking,
+  getGlobalSurvivalsRanking,
   getCampKillsRanking,
   getCampPointsRanking,
   getCampSurvivalsRanking,
@@ -22,6 +25,42 @@ export function getCampSurvivalsRankingQueryKey(campId: string, limit?: number) 
 
 export function getCampTeamStandingsQueryKey(campId: string) {
   return [...rankingsQueryKey, 'camp', campId, 'teams'] as const;
+}
+
+export function getGlobalPointsRankingQueryKey(limit?: number) {
+  return [...rankingsQueryKey, 'global', 'points', limit ?? 'all'] as const;
+}
+
+export function getGlobalKillsRankingQueryKey(limit?: number) {
+  return [...rankingsQueryKey, 'global', 'kills', limit ?? 'all'] as const;
+}
+
+export function getGlobalSurvivalsRankingQueryKey(limit?: number) {
+  return [...rankingsQueryKey, 'global', 'survivals', limit ?? 'all'] as const;
+}
+
+export function useGlobalPointsRankingQuery(limit?: number, enabled = true) {
+  return useQuery({
+    queryKey: getGlobalPointsRankingQueryKey(limit),
+    queryFn: () => getGlobalPointsRanking(limit),
+    enabled,
+  });
+}
+
+export function useGlobalKillsRankingQuery(limit?: number, enabled = true) {
+  return useQuery({
+    queryKey: getGlobalKillsRankingQueryKey(limit),
+    queryFn: () => getGlobalKillsRanking(limit),
+    enabled,
+  });
+}
+
+export function useGlobalSurvivalsRankingQuery(limit?: number, enabled = true) {
+  return useQuery({
+    queryKey: getGlobalSurvivalsRankingQueryKey(limit),
+    queryFn: () => getGlobalSurvivalsRanking(limit),
+    enabled,
+  });
 }
 
 export function useCampPointsRankingQuery(campId?: string, limit?: number, enabled = true) {
