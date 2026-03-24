@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, QueryFailedError, Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CampType } from '../camp-types/entities/camp-type.entity';
 import { CreateCampDto } from './dto/create-camp.dto';
 import { UpdateCampDto } from './dto/update-camp.dto';
@@ -47,9 +47,6 @@ export class CampsService {
 
   async findPublicList(): Promise<Camp[]> {
     return this.campsRepository.find({
-      where: {
-        status: Not(CampStatus.DRAFT),
-      },
       order: {
         createdAt: 'DESC',
       },

@@ -32,11 +32,6 @@ type HeroCampViewModel = {
   statusLabel: string;
 };
 
-function getStartOfTodayTimestamp(): number {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-}
-
 function toTimestamp(value: string): number {
   const parsed = new Date(value).getTime();
   return Number.isNaN(parsed) ? 0 : parsed;
@@ -52,20 +47,14 @@ function getCampDateRange(startDate: string, endDate: string): string {
   return `${formatter.format(new Date(startDate))} - ${formatter.format(new Date(endDate))}`;
 }
 
-function isUpcomingCamp(camp: Camp, startOfToday: number): boolean {
-  if (camp.status === 'ACTIVE' || camp.status === 'FINISHED') {
-    return false;
-  }
-
-  return toTimestamp(camp.startDate) >= startOfToday;
+function isUpcomingCamp(camp: Camp): boolean {
+  return camp.status === 'DRAFT';
 }
 
 function selectHeroCamp(camps: Camp[]): HeroCampViewModel | null {
   if (camps.length === 0) {
     return null;
   }
-
-  const startOfToday = getStartOfTodayTimestamp();
 
   const activeCamp = [...camps]
     .filter((camp) => camp.status === 'ACTIVE')
@@ -80,7 +69,7 @@ function selectHeroCamp(camps: Camp[]): HeroCampViewModel | null {
   }
 
   const upcomingCamp = [...camps]
-    .filter((camp) => isUpcomingCamp(camp, startOfToday))
+    .filter((camp) => isUpcomingCamp(camp))
     .sort((a, b) => toTimestamp(a.startDate) - toTimestamp(b.startDate))[0];
 
   if (upcomingCamp) {
@@ -191,7 +180,7 @@ export function MainPage() {
 
   const heroPrimaryAction = heroCamp
     ? heroCamp.status === 'upcoming'
-      ? { label: 'Запиши се', href: `/camps/${heroCamp.camp.id}` }
+      ? { label: 'Запиши се', href: `https://alfasport.bg/contact/` }
       : { label: 'Класиране', href: `/camps/${heroCamp.camp.id}` }
     : { label: 'Класиране', href: '#global-rankings' };
 
@@ -253,18 +242,17 @@ export function MainPage() {
 
   const campStatusBuckets = useMemo(() => {
     const camps = campsQuery.data ?? [];
-    const startOfToday = getStartOfTodayTimestamp();
 
     const active = camps
       .filter((camp) => camp.status === 'ACTIVE')
       .sort((a, b) => toTimestamp(b.startDate) - toTimestamp(a.startDate));
 
     const upcoming = camps
-      .filter((camp) => isUpcomingCamp(camp, startOfToday))
+      .filter((camp) => isUpcomingCamp(camp))
       .sort((a, b) => toTimestamp(a.startDate) - toTimestamp(b.startDate));
 
     const finished = camps
-      .filter((camp) => camp.status === 'FINISHED' || (camp.status !== 'ACTIVE' && !isUpcomingCamp(camp, startOfToday)))
+      .filter((camp) => camp.status === 'FINISHED' || (camp.status !== 'ACTIVE' && !isUpcomingCamp(camp)))
       .sort((a, b) => toTimestamp(b.endDate) - toTimestamp(a.endDate));
 
     return {
