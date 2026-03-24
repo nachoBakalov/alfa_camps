@@ -150,12 +150,15 @@ function getCampLabel(camp: Camp): string {
   return `${camp.title} ${camp.year}`;
 }
 
-function getPlayerDisplayName(item: PlayerRankingItem): string {
+function getPlayerDisplayName(item: Pick<PlayerRankingItem, 'firstName' | 'lastName' | 'nickname'>): string {
   const fullName = [item.firstName, item.lastName].filter(Boolean).join(' ').trim();
   return item.nickname?.trim() || fullName || item.firstName;
 }
 
-function getRankingValue(item: PlayerRankingItem, tab: 'points' | 'kills' | 'survivals'): number {
+function getRankingValue(
+  item: Pick<PlayerRankingItem, 'points' | 'kills' | 'survivals'>,
+  tab: 'points' | 'kills' | 'survivals',
+): number {
   if (tab === 'kills') {
     return item.kills;
   }
@@ -340,7 +343,7 @@ export function MainPage() {
                       />
 
                       {isSelected ? (
-                        <div className="mt-4 flex w-full flex-col items-stretch gap-2 rounded-lg border border-[color-mix(in_srgb,var(--public-border)_18%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_64%,#000_36%)] p-2">
+                        <div className="mt-4 flex w-full flex-col items-stretch gap-2 rounded-lg border-[color-mix(in_srgb,var(--public-border)_18%,transparent)] p-2">
                           <Link
                             to={`/camp-types/${campTypeItem.id}`}
                             className="rounded-md border border-[color-mix(in_srgb,var(--public-border)_34%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-850)_84%,#000_16%)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--public-text)] transition-colors hover:bg-[color-mix(in_srgb,var(--public-bg-850)_68%,#fff_32%)]"

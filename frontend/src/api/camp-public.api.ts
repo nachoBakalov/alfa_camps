@@ -40,6 +40,14 @@ export type CampPublicParticipantCurrentTeam = {
   logoUrl: string | null;
 };
 
+export type CampPublicParticipantMedalItem = {
+  playerMedalId: string;
+  medalId: string;
+  name: string;
+  iconUrl: string | null;
+  awardedAt: string;
+};
+
 export type CampPublicParticipantItem = {
   participationId: string;
   playerId: string;
@@ -54,6 +62,7 @@ export type CampPublicParticipantItem = {
   duelWins: number;
   massBattleWins: number;
   currentTeam: CampPublicParticipantCurrentTeam | null;
+  medals: CampPublicParticipantMedalItem[];
 };
 
 export function getCampPublicDetails(campId: string): Promise<CampPublicDetails> {

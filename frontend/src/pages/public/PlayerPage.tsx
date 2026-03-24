@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { DarkSectionBlock, PublicBackButton, PublicHero, SectionTitle } from '../../components/public';
+import { DarkSectionBlock, MedalCard, PublicBackButton, PublicHero, RankCard, SectionTitle } from '../../components/public';
 import { getCampPublicParticipants } from '../../api/camp-public.api';
 import { useCampPublicDetailsQuery, useCampPublicParticipantsQuery } from '../../features/camp-public/use-camp-public-query';
 import { usePublicCampTypesQuery } from '../../features/camp-types/use-camp-types-query';
@@ -60,23 +60,23 @@ function getSurvivalsRankImage(survivals: number): string {
   return `/assets/ranks/survive/${level}_survive.png`;
 }
 
-function getMedalImages(duelWins: number, massBattleWins: number, kills: number): string[] {
-  const medals: string[] = [];
+function getFallbackMedals(duelWins: number, massBattleWins: number, kills: number): Array<{ name: string; iconUrl: string }> {
+  const medals: Array<{ name: string; iconUrl: string }> = [];
 
   if (duelWins > 0) {
-    medals.push('/assets/ranks/medals/comando.png');
+    medals.push({ name: 'Командо', iconUrl: '/assets/ranks/medals/comando.png' });
   }
 
   if (massBattleWins > 0) {
-    medals.push('/assets/ranks/medals/lionheart.png');
+    medals.push({ name: 'Лъвско сърце', iconUrl: '/assets/ranks/medals/lionheart.png' });
   }
 
   if (kills >= 20) {
-    medals.push('/assets/ranks/medals/ironcrest.png');
+    medals.push({ name: 'Железен кръст', iconUrl: '/assets/ranks/medals/ironcrest.png' });
   }
 
   if (medals.length === 0) {
-    medals.push('/assets/ranks/medals/survivor.png');
+    medals.push({ name: 'Безсмъртен войн', iconUrl: '/assets/ranks/medals/survivor.png' });
   }
 
   return medals.slice(0, 2);
@@ -167,7 +167,29 @@ export function PlayerPage() {
           points: participation.points,
           killsRankImage: getKillsRankImage(participation.kills),
           survivalsRankImage: getSurvivalsRankImage(participation.survivals),
-          medalImages: getMedalImages(participation.duelWins, participation.massBattleWins, participation.kills),
+          medals:
+            participation.medals.length > 0
+              ? participation.medals
+                  .map((medal) => {
+                    const medalImageUrl = resolveOptionalAssetUrl(medal.iconUrl);
+
+                    if (!medalImageUrl) {
+                      return null;
+                    }
+
+                    return {
+                      id: medal.playerMedalId,
+                      name: medal.name,
+                      imageUrl: medalImageUrl,
+                    };
+                  })
+                  .filter((medal): medal is NonNullable<typeof medal> => Boolean(medal))
+                  .slice(0, 2)
+              : getFallbackMedals(participation.duelWins, participation.massBattleWins, participation.kills).map((medal) => ({
+                  id: `${participation.participationId}-${medal.iconUrl}`,
+                  name: medal.name,
+                  imageUrl: medal.iconUrl,
+                })),
           teamName: participation.currentTeam?.name ?? null,
           teamLogoUrl: resolveOptionalAssetUrl(participation.currentTeam?.logoUrl),
         };
@@ -236,13 +258,9 @@ export function PlayerPage() {
                       <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[color-mix(in_srgb,var(--public-text-muted)_92%,#fff_8%)]">
                         Рангове
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden border-[color-mix(in_srgb,var(--public-border)_64%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_74%,#000_26%)]">
-                          <img src={item.killsRankImage} alt="Ранг убийства" className="h-full w-full object-cover" loading="lazy" />
-                        </span>
-                        <span className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden border-[color-mix(in_srgb,var(--public-border)_64%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_74%,#000_26%)]">
-                          <img src={item.survivalsRankImage} alt="Ранг оцеляване" className="h-full w-full object-cover" loading="lazy" />
-                        </span>
+                      <div className="flex flex-wrap gap-3">
+                        <RankCard imageUrl={item.killsRankImage} alt="Ранг убийства" label="Убийства" />
+                        <RankCard imageUrl={item.survivalsRankImage} alt="Ранг оцеляване" label="Оцеляване" />
                       </div>
                     </div>
 
@@ -250,14 +268,14 @@ export function PlayerPage() {
                       <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[color-mix(in_srgb,var(--public-text-muted)_92%,#fff_8%)]">
                         Медали
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {item.medalImages.map((medalImage, index) => (
-                          <span
-                            key={`${item.id}-medal-${index}`}
-                            className="public-token-ring grid h-12 w-12 place-items-center overflow-hidden border-[color-mix(in_srgb,var(--public-border)_64%,transparent)] bg-[color-mix(in_srgb,var(--public-bg-900)_74%,#000_26%)]"
-                          >
-                            <img src={medalImage} alt="Медал" className="h-full w-full object-cover" loading="lazy" />
-                          </span>
+                      <div className="flex flex-wrap gap-3">
+                        {item.medals.map((medal) => (
+                          <MedalCard
+                            key={medal.id}
+                            imageUrl={medal.imageUrl}
+                            alt={medal.name}
+                            label={medal.name}
+                          />
                         ))}
                       </div>
                     </div>

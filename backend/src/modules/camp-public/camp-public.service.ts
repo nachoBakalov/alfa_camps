@@ -4,8 +4,10 @@ import { In, Repository } from 'typeorm';
 import { CampParticipation } from '../camp-participations/entities/camp-participation.entity';
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Camp } from '../camps/entities/camp.entity';
+import { PlayerMedal } from '../medals/entities/player-medal.entity';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
 import { CampPublicDetailsDto } from './dto/camp-public-details.dto';
+import { CampPublicParticipantMedalItemDto } from './dto/camp-public-participant-medal-item.dto';
 import { CampPublicParticipantItemDto } from './dto/camp-public-participant-item.dto';
 import { CampPublicTeamItemDto } from './dto/camp-public-team-item.dto';
 
@@ -20,6 +22,8 @@ export class CampPublicService {
     private readonly campParticipationsRepository: Repository<CampParticipation>,
     @InjectRepository(TeamAssignment)
     private readonly teamAssignmentsRepository: Repository<TeamAssignment>,
+    @InjectRepository(PlayerMedal)
+    private readonly playerMedalsRepository: Repository<PlayerMedal>,
   ) {}
 
   async getCampPublicDetails(campId: string): Promise<CampPublicDetailsDto> {
@@ -106,7 +110,21 @@ export class CampPublicService {
         })
       : [];
 
+    const medals = participationIds.length
+      ? await this.playerMedalsRepository.find({
+          where: { participationId: In(participationIds) },
+          relations: {
+            medal: true,
+          },
+          order: {
+            awardedAt: 'DESC',
+            createdAt: 'DESC',
+          },
+        })
+      : [];
+
     const currentTeamByParticipationId = new Map<string, CampPublicParticipantItemDto['currentTeam']>();
+    const medalsByParticipationId = new Map<string, CampPublicParticipantMedalItemDto[]>();
 
     for (const assignment of assignments) {
       if (currentTeamByParticipationId.has(assignment.participationId)) {
@@ -121,9 +139,24 @@ export class CampPublicService {
       });
     }
 
+    for (const playerMedal of medals) {
+      const medalItems = medalsByParticipationId.get(playerMedal.participationId) ?? [];
+
+      medalItems.push({
+        playerMedalId: playerMedal.id,
+        medalId: playerMedal.medalId,
+        name: playerMedal.medal.name,
+        iconUrl: playerMedal.medal.iconUrl,
+        awardedAt: playerMedal.awardedAt,
+      });
+
+      medalsByParticipationId.set(playerMedal.participationId, medalItems);
+    }
+
     return participants.map((participant) => ({
       ...participant,
       currentTeam: currentTeamByParticipationId.get(participant.participationId) ?? null,
+      medals: medalsByParticipationId.get(participant.participationId) ?? [],
     }));
   }
 

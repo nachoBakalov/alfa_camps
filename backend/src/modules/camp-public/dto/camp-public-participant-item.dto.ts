@@ -1,4 +1,5 @@
 import { CampPublicCurrentTeamDto } from './camp-public-current-team.dto';
+import { CampPublicParticipantMedalItemDto } from './camp-public-participant-medal-item.dto';
 
 export class CampPublicParticipantItemDto {
   participationId!: string;
@@ -14,4 +15,5 @@ export class CampPublicParticipantItemDto {
   duelWins!: number;
   massBattleWins!: number;
   currentTeam!: CampPublicCurrentTeamDto | null;
+  medals!: CampPublicParticipantMedalItemDto[];
 }

@@ -3,12 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CampParticipation } from '../camp-participations/entities/camp-participation.entity';
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Camp } from '../camps/entities/camp.entity';
+import { PlayerMedal } from '../medals/entities/player-medal.entity';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
 import { CampPublicController } from './camp-public.controller';
 import { CampPublicService } from './camp-public.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Camp, CampTeam, CampParticipation, TeamAssignment])],
+  imports: [TypeOrmModule.forFeature([Camp, CampTeam, CampParticipation, TeamAssignment, PlayerMedal])],
   controllers: [CampPublicController],
   providers: [CampPublicService],
   exports: [CampPublicService],
