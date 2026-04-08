@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { Battle } from '../../battles/entities/battle.entity';
 import { CampParticipation } from '../../camp-participations/entities/camp-participation.entity';
 import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
@@ -19,10 +19,7 @@ import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 @Index('UQ_battle_player_results_battle_participation', ['battleId', 'participationId'], {
   unique: true,
 })
-export class BattlePlayerResult {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class BattlePlayerResult extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'battle_id' })
   battleId!: string;
 

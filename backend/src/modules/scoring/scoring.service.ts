@@ -28,6 +28,7 @@ import { BattleTeamScoreLedger } from './entities/battle-team-score-ledger.entit
 import { CampFinalizationLedger } from './entities/camp-finalization-ledger.entity';
 import { ParticipationScoreDelta } from './interfaces/participation-score-delta.interface';
 import { TeamScoreDelta } from './interfaces/team-score-delta.interface';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ScoringService {
@@ -172,6 +173,7 @@ export class ScoringService {
           await manager.insert(
             BattleParticipationScoreLedger,
             preview.participationDeltas.map((row) => ({
+              id: randomUUID(),
               battleId,
               participationId: row.participationId,
               killsDelta: row.killsDelta,
@@ -188,6 +190,7 @@ export class ScoringService {
           await manager.insert(
             BattleTeamScoreLedger,
             preview.teamDeltas.map((row) => ({
+              id: randomUUID(),
               battleId,
               teamId: row.teamId,
               teamPointsDelta: row.teamPointsDelta,
@@ -354,6 +357,7 @@ export class ScoringService {
 
       if (!existingLedger) {
         await manager.insert(CampFinalizationLedger, {
+          id: randomUUID(),
           campId,
           appliedAt: now,
         });

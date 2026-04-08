@@ -3,18 +3,15 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 
 @Entity({ name: 'players' })
 @Index('IDX_players_first_name', ['firstName'])
 @Index('IDX_players_last_name', ['lastName'])
 @Index('IDX_players_nickname', ['nickname'])
-export class Player {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class Player extends BaseUuidEntity {
   @Column({ type: 'varchar', name: 'first_name' })
   firstName!: string;
 

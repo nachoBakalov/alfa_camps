@@ -4,6 +4,7 @@ import { In, Repository } from 'typeorm';
 import { PlayerAchievement } from '../achievements/entities/player-achievement.entity';
 import { CampParticipation } from '../camp-participations/entities/camp-participation.entity';
 import { PlayerMedal } from '../medals/entities/player-medal.entity';
+import { normalizeMedalIconUrl } from '../medals/medal-icon-url';
 import { Player } from '../players/entities/player.entity';
 import { PlayerRank } from '../ranks/entities/player-rank.entity';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
@@ -156,7 +157,7 @@ export class PlayerProfilesService {
         medalId: playerMedal.medalId,
         name: playerMedal.medal.name,
         description: playerMedal.medal.description,
-        iconUrl: playerMedal.medal.iconUrl,
+        iconUrl: normalizeMedalIconUrl(playerMedal.medal.iconUrl),
         type: playerMedal.medal.type,
         note: playerMedal.note,
         awardedAt: playerMedal.awardedAt,

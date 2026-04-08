@@ -5,19 +5,16 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity({ name: 'camp_team_point_adjustments' })
 @Index('IDX_camp_team_point_adjustments_camp_team_id', ['campTeamId'])
 @Index('IDX_camp_team_point_adjustments_created_by', ['createdBy'])
-export class CampTeamPointAdjustment {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class CampTeamPointAdjustment extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'camp_team_id' })
   campTeamId!: string;
 

@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { CampParticipation } from '../../camp-participations/entities/camp-participation.entity';
 import { RankCategory } from './rank-category.entity';
 import { RankDefinition } from './rank-definition.entity';
@@ -19,10 +19,7 @@ import { RankDefinition } from './rank-definition.entity';
 @Index('UQ_player_ranks_participation_category', ['participationId', 'categoryId'], {
   unique: true,
 })
-export class PlayerRank {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class PlayerRank extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'participation_id' })
   participationId!: string;
 

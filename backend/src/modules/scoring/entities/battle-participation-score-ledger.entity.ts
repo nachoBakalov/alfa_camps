@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { Battle } from '../../battles/entities/battle.entity';
 import { CampParticipation } from '../../camp-participations/entities/camp-participation.entity';
 
@@ -19,10 +19,7 @@ import { CampParticipation } from '../../camp-participations/entities/camp-parti
   ['battleId', 'participationId'],
   { unique: true },
 )
-export class BattleParticipationScoreLedger {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class BattleParticipationScoreLedger extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'battle_id' })
   battleId!: string;
 

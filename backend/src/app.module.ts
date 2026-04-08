@@ -12,6 +12,7 @@ import { CampTeamPointAdjustmentsModule } from './modules/camp-team-point-adjust
 import { CampTeamsModule } from './modules/camp-teams/camp-teams.module';
 import { CampsModule } from './modules/camps/camps.module';
 import { CampTypesModule } from './modules/camp-types/camp-types.module';
+import { DatabaseBootstrapModule } from './database/bootstrap/database-bootstrap.module';
 import { HealthModule } from './modules/health/health.module';
 import { MedalsModule } from './modules/medals/medals.module';
 import { PlayersModule } from './modules/players/players.module';
@@ -37,6 +38,7 @@ import { typeOrmConfigFactory } from './common/config/typeorm.config';
       inject: [ConfigService],
       useFactory: typeOrmConfigFactory,
     }),
+    DatabaseBootstrapModule,
     AchievementsModule,
     AuthModule,
     BattlePlayerResultsModule,

@@ -3,17 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { Camp } from '../../camps/entities/camp.entity';
 import { TeamTemplate } from '../../team-templates/entities/team-template.entity';
 
 @Entity({ name: 'camp_types' })
-export class CampType {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class CampType extends BaseUuidEntity {
   @Column({ type: 'varchar', unique: true })
   name!: string;
 

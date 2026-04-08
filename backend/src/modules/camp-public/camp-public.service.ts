@@ -5,6 +5,7 @@ import { CampParticipation } from '../camp-participations/entities/camp-particip
 import { CampTeam } from '../camp-teams/entities/camp-team.entity';
 import { Camp } from '../camps/entities/camp.entity';
 import { PlayerMedal } from '../medals/entities/player-medal.entity';
+import { normalizeMedalIconUrl } from '../medals/medal-icon-url';
 import { TeamAssignment } from '../team-assignments/entities/team-assignment.entity';
 import { CampPublicDetailsDto } from './dto/camp-public-details.dto';
 import { CampPublicParticipantMedalItemDto } from './dto/camp-public-participant-medal-item.dto';
@@ -146,7 +147,7 @@ export class CampPublicService {
         playerMedalId: playerMedal.id,
         medalId: playerMedal.medalId,
         name: playerMedal.medal.name,
-        iconUrl: playerMedal.medal.iconUrl,
+        iconUrl: normalizeMedalIconUrl(playerMedal.medal.iconUrl),
         awardedAt: playerMedal.awardedAt,
       });
 

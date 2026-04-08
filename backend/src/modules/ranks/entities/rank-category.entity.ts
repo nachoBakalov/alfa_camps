@@ -4,18 +4,15 @@ import {
   Entity,
   Index,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { PlayerRank } from './player-rank.entity';
 import { RankDefinition } from './rank-definition.entity';
 
 @Entity({ name: 'rank_categories' })
 @Index('UQ_rank_categories_code', ['code'], { unique: true })
-export class RankCategory {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class RankCategory extends BaseUuidEntity {
   @Column({ type: 'varchar' })
   code!: string;
 

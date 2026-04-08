@@ -6,9 +6,9 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { PlayerRank } from './player-rank.entity';
 import { RankCategory } from './rank-category.entity';
 
@@ -16,10 +16,7 @@ import { RankCategory } from './rank-category.entity';
 @Index('IDX_rank_definitions_category_id', ['categoryId'])
 @Index('UQ_rank_definitions_category_threshold', ['categoryId', 'threshold'], { unique: true })
 @Index('UQ_rank_definitions_category_rank_order', ['categoryId', 'rankOrder'], { unique: true })
-export class RankDefinition {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class RankDefinition extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'category_id' })
   categoryId!: string;
 

@@ -1,7 +1,9 @@
 import { plainToInstance } from 'class-transformer';
 import {
+  IsIn,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Max,
   Min,
@@ -9,6 +11,11 @@ import {
 } from 'class-validator';
 
 class EnvironmentVariables {
+  @IsOptional()
+  @IsString()
+  @IsIn(['development', 'production', 'test'])
+  NODE_ENV?: string;
+
   @IsString()
   @IsNotEmpty()
   DB_HOST!: string;
@@ -37,6 +44,22 @@ class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   JWT_EXPIRES_IN!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SUPER_ADMIN_EMAIL!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SUPER_ADMIN_PASSWORD!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SUPER_ADMIN_FIRST_NAME!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SUPER_ADMIN_LAST_NAME!: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

@@ -5,19 +5,16 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 import { CampType } from '../../camp-types/entities/camp-type.entity';
 import { User } from '../../users/entities/user.entity';
 import { CampStatus } from '../enums/camp-status.enum';
 
 @Entity({ name: 'camps' })
-export class Camp {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class Camp extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'camp_type_id' })
   campTypeId!: string;
 

@@ -2,16 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { UserRole } from '../enums/user-role.enum';
 
 @Entity({ name: 'users' })
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class User extends BaseUuidEntity {
   @Column({ type: 'varchar', unique: true })
   email!: string;
 

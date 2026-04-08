@@ -4,9 +4,9 @@ import {
   Entity,
   Index,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { PlayerMedal } from './player-medal.entity';
 import { MedalAutoAwardConditionType } from '../enums/medal-auto-award-condition-type.enum';
 import { MedalType } from '../enums/medal-type.enum';
@@ -15,10 +15,7 @@ import { MedalType } from '../enums/medal-type.enum';
 @Index('UQ_medal_definitions_name', ['name'], { unique: true })
 @Index('IDX_medal_definitions_type', ['type'])
 @Index('IDX_medal_definitions_condition_type', ['conditionType'])
-export class MedalDefinition {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class MedalDefinition extends BaseUuidEntity {
   @Column({ type: 'varchar' })
   name!: string;
 

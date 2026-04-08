@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { CampParticipation } from '../../camp-participations/entities/camp-participation.entity';
 import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 import { User } from '../../users/entities/user.entity';
@@ -16,10 +16,7 @@ import { User } from '../../users/entities/user.entity';
 @Index('IDX_team_assignments_participation_id', ['participationId'])
 @Index('IDX_team_assignments_team_id', ['teamId'])
 @Index('IDX_team_assignments_assigned_at', ['assignedAt'])
-export class TeamAssignment {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class TeamAssignment extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'participation_id' })
   participationId!: string;
 

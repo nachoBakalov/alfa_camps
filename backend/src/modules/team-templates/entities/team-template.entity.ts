@@ -4,15 +4,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { CampType } from '../../camp-types/entities/camp-type.entity';
 
 @Entity({ name: 'team_templates' })
-export class TeamTemplate {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class TeamTemplate extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'camp_type_id' })
   campTypeId!: string;
 

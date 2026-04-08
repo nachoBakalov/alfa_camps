@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { Camp } from '../../camps/entities/camp.entity';
 import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 import { User } from '../../users/entities/user.entity';
@@ -21,10 +21,7 @@ import { BattleType } from '../enums/battle-type.enum';
 @Index('IDX_battles_status', ['status'])
 @Index('IDX_battles_battle_date', ['battleDate'])
 @Index('IDX_battles_winning_team_id', ['winningTeamId'])
-export class Battle {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class Battle extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'camp_id' })
   campId!: string;
 

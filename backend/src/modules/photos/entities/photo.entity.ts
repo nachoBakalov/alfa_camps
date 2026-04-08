@@ -5,8 +5,8 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 import { Camp } from '../../camps/entities/camp.entity';
 import { Player } from '../../players/entities/player.entity';
@@ -17,10 +17,7 @@ import { User } from '../../users/entities/user.entity';
 @Index('IDX_photos_team_id', ['teamId'])
 @Index('IDX_photos_player_id', ['playerId'])
 @Index('IDX_photos_uploaded_by', ['uploadedBy'])
-export class Photo {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class Photo extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'camp_id', nullable: true })
   campId!: string | null;
 

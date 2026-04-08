@@ -4,6 +4,11 @@ import { AchievementConditionType } from '../../modules/achievements/enums/achie
 import { MedalDefinition } from '../../modules/medals/entities/medal-definition.entity';
 import { MedalAutoAwardConditionType } from '../../modules/medals/enums/medal-auto-award-condition-type.enum';
 import { MedalType } from '../../modules/medals/enums/medal-type.enum';
+import {
+  DEFAULT_MEDAL_ICON_URL_BY_NAME,
+  isLegacyMedalIconUrl,
+  normalizeMedalIconUrl,
+} from '../../modules/medals/medal-icon-url';
 import { RankCategory } from '../../modules/ranks/entities/rank-category.entity';
 import { RankDefinition } from '../../modules/ranks/entities/rank-definition.entity';
 
@@ -87,7 +92,7 @@ const medalSeeds: Array<{
   {
     name: 'Лъвско сърце',
     description: 'Спечели три масови битки',
-    iconUrl: '/medals/lavsko-sarce.png',
+    iconUrl: DEFAULT_MEDAL_ICON_URL_BY_NAME['Лъвско сърце'],
     type: MedalType.AUTO,
     conditionType: MedalAutoAwardConditionType.MASS_BATTLE_WINS,
     threshold: 3,
@@ -95,7 +100,7 @@ const medalSeeds: Array<{
   {
     name: 'Железен кръст',
     description: 'Над 40 убийства',
-    iconUrl: '/medals/jelezen-krast.png',
+    iconUrl: DEFAULT_MEDAL_ICON_URL_BY_NAME['Железен кръст'],
     type: MedalType.AUTO,
     conditionType: MedalAutoAwardConditionType.KILLS,
     threshold: 40,
@@ -103,7 +108,7 @@ const medalSeeds: Array<{
   {
     name: 'Безсмъртен войн',
     description: 'Оцелял в повече от 8 битки',
-    iconUrl: '/medals/bezsmarten-voin.png',
+    iconUrl: DEFAULT_MEDAL_ICON_URL_BY_NAME['Безсмъртен войн'],
     type: MedalType.AUTO,
     conditionType: MedalAutoAwardConditionType.SURVIVALS,
     threshold: 9,
@@ -111,7 +116,7 @@ const medalSeeds: Array<{
   {
     name: 'Командо',
     description: 'Спечелил 7 индивидуални битки',
-    iconUrl: '/medals/komando.png',
+    iconUrl: DEFAULT_MEDAL_ICON_URL_BY_NAME['Командо'],
     type: MedalType.AUTO,
     conditionType: MedalAutoAwardConditionType.DUEL_WINS,
     threshold: 7,
@@ -119,7 +124,7 @@ const medalSeeds: Array<{
   {
     name: 'Ура',
     description: 'Над 10 убийства с нож',
-    iconUrl: '/medals/ura.png',
+    iconUrl: DEFAULT_MEDAL_ICON_URL_BY_NAME['Ура'],
     type: MedalType.AUTO,
     conditionType: MedalAutoAwardConditionType.KNIFE_KILLS,
     threshold: 10,
@@ -243,16 +248,20 @@ export async function seedProgression(dataSource: DataSource): Promise<SeedSumma
     });
 
     if (existingMedal) {
+      const normalizedExistingIconUrl = normalizeMedalIconUrl(existingMedal.iconUrl);
+      const shouldRepairIconUrl =
+        normalizedExistingIconUrl === null || isLegacyMedalIconUrl(existingMedal.iconUrl);
+      const nextIconUrl = shouldRepairIconUrl ? medalSeed.iconUrl : normalizedExistingIconUrl;
       const shouldUpdate =
         existingMedal.description !== medalSeed.description ||
-        existingMedal.iconUrl !== medalSeed.iconUrl ||
+        existingMedal.iconUrl !== nextIconUrl ||
         existingMedal.type !== medalSeed.type ||
         existingMedal.conditionType !== medalSeed.conditionType ||
         existingMedal.threshold !== medalSeed.threshold;
 
       if (shouldUpdate) {
         existingMedal.description = medalSeed.description;
-        existingMedal.iconUrl = medalSeed.iconUrl;
+        existingMedal.iconUrl = nextIconUrl;
         existingMedal.type = medalSeed.type;
         existingMedal.conditionType = medalSeed.conditionType;
         existingMedal.threshold = medalSeed.threshold;

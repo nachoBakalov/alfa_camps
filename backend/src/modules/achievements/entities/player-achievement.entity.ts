@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { CampParticipation } from '../../camp-participations/entities/camp-participation.entity';
 import { AchievementDefinition } from './achievement-definition.entity';
 
@@ -17,10 +17,7 @@ import { AchievementDefinition } from './achievement-definition.entity';
 @Index('UQ_player_achievements_participation_achievement', ['participationId', 'achievementId'], {
   unique: true,
 })
-export class PlayerAchievement {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class PlayerAchievement extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'participation_id' })
   participationId!: string;
 

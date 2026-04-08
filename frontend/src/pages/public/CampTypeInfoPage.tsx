@@ -197,16 +197,16 @@ export function CampTypeInfoPage() {
         <SectionTitle title="Информация за лагера" />
         <DarkSectionBlock>
           <div className="space-y-3">
-            <p className="text-base font-semibold uppercase tracking-[0.06em] text-[var(--public-text)]">
+            <p className="text-base font-semibold uppercase text-center tracking-[0.06em] text-[var(--public-text)]">
               {selectedCampType?.name ?? 'Няма избран тип лагер'}
             </p>
 
-            <p className="public-text-muted max-w-[68ch] text-sm leading-relaxed sm:text-[0.95rem]">
+            <p className="public-text-muted max-w-[100%] text-center text-sm leading-relaxed sm:text-[0.95rem]">
               {selectedCampType?.description?.trim() || 'Няма въведено публично описание за този тип лагер.'}
             </p>
 
-            {isLoading ? <p className="public-text-muted text-sm">Зареждане на данни...</p> : null}
-            {!isLoading && !selectedCampType ? <p className="public-text-muted text-sm">Типът лагер не е намерен.</p> : null}
+            {isLoading ? <p className="public-text-muted text-sm text-center">Зареждане на данни...</p> : null}
+            {!isLoading && !selectedCampType ? <p className="public-text-muted text-sm text-center">Типът лагер не е намерен.</p> : null}
             {hasError ? <p className="text-sm text-red-300">Възникна проблем при зареждането на данните.</p> : null}
           </div>
         </DarkSectionBlock>

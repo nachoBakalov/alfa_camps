@@ -13,6 +13,7 @@ import { MedalDefinition } from './entities/medal-definition.entity';
 import { MedalAutoAwardConditionType } from './enums/medal-auto-award-condition-type.enum';
 import { MedalType } from './enums/medal-type.enum';
 import { PlayerMedal } from './entities/player-medal.entity';
+import { normalizeMedalIconUrl } from './medal-icon-url';
 
 @Injectable()
 export class MedalsService {
@@ -29,13 +30,13 @@ export class MedalsService {
     const medalDefinition = this.medalDefinitionsRepository.create({
       ...createMedalDefinitionDto,
       description: createMedalDefinitionDto.description ?? null,
-      iconUrl: createMedalDefinitionDto.iconUrl ?? null,
+      iconUrl: normalizeMedalIconUrl(createMedalDefinitionDto.iconUrl),
       conditionType: createMedalDefinitionDto.conditionType ?? null,
       threshold: createMedalDefinitionDto.threshold ?? null,
     });
 
     try {
-      return await this.medalDefinitionsRepository.save(medalDefinition);
+      return this.normalizeDefinition(await this.medalDefinitionsRepository.save(medalDefinition));
     } catch (error: unknown) {
       this.handleDefinitionUniqueError(error);
       throw error;
@@ -43,11 +44,13 @@ export class MedalsService {
   }
 
   async findAllDefinitions(): Promise<MedalDefinition[]> {
-    return this.medalDefinitionsRepository.find({
+    const definitions = await this.medalDefinitionsRepository.find({
       order: {
         createdAt: 'DESC',
       },
     });
+
+    return definitions.map((definition) => this.normalizeDefinition(definition));
   }
 
   async findOneDefinition(id: string): Promise<MedalDefinition> {
@@ -57,7 +60,7 @@ export class MedalsService {
       throw new NotFoundException(`Medal definition with id ${id} was not found`);
     }
 
-    return definition;
+    return this.normalizeDefinition(definition);
   }
 
   async updateDefinition(
@@ -73,7 +76,7 @@ export class MedalsService {
           : definition.description,
       iconUrl:
         updateMedalDefinitionDto.iconUrl !== undefined
-          ? updateMedalDefinitionDto.iconUrl
+          ? normalizeMedalIconUrl(updateMedalDefinitionDto.iconUrl)
           : definition.iconUrl,
       conditionType:
         updateMedalDefinitionDto.conditionType !== undefined
@@ -86,7 +89,7 @@ export class MedalsService {
     });
 
     try {
-      return await this.medalDefinitionsRepository.save(updatedDefinition);
+      return this.normalizeDefinition(await this.medalDefinitionsRepository.save(updatedDefinition));
     } catch (error: unknown) {
       this.handleDefinitionUniqueError(error);
       throw error;
@@ -225,6 +228,11 @@ export class MedalsService {
     }
 
     return participation.massBattleWins;
+  }
+
+  private normalizeDefinition(definition: MedalDefinition): MedalDefinition {
+    definition.iconUrl = normalizeMedalIconUrl(definition.iconUrl);
+    return definition;
   }
 
   private handleDefinitionUniqueError(error: unknown): void {

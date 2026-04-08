@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { Battle } from '../../battles/entities/battle.entity';
 import { CampParticipation } from '../../camp-participations/entities/camp-participation.entity';
 
@@ -16,10 +16,7 @@ import { CampParticipation } from '../../camp-participations/entities/camp-parti
 @Index('IDX_duels_player_a_participation_id', ['playerAParticipationId'])
 @Index('IDX_duels_player_b_participation_id', ['playerBParticipationId'])
 @Index('IDX_duels_winner_participation_id', ['winnerParticipationId'])
-export class Duel {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class Duel extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'battle_id' })
   battleId!: string;
 

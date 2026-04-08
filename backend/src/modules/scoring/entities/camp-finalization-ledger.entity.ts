@@ -5,17 +5,14 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { Camp } from '../../camps/entities/camp.entity';
 
 @Entity({ name: 'camp_finalization_ledger' })
 @Index('UQ_camp_finalization_ledger_camp_id', ['campId'], { unique: true })
-export class CampFinalizationLedger {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class CampFinalizationLedger extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'camp_id' })
   campId!: string;
 

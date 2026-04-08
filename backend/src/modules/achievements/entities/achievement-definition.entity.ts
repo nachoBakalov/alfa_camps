@@ -4,9 +4,9 @@ import {
   Entity,
   Index,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { PlayerAchievement } from './player-achievement.entity';
 import { AchievementConditionType } from '../enums/achievement-condition-type.enum';
 
@@ -15,10 +15,7 @@ import { AchievementConditionType } from '../enums/achievement-condition-type.en
 @Index('UQ_achievement_definitions_condition_threshold_name', ['conditionType', 'threshold', 'name'], {
   unique: true,
 })
-export class AchievementDefinition {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class AchievementDefinition extends BaseUuidEntity {
   @Column({ type: 'varchar' })
   name!: string;
 

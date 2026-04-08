@@ -5,9 +5,9 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseUuidEntity } from '../../../common/database/base-uuid.entity';
 import { Battle } from '../../battles/entities/battle.entity';
 import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 
@@ -15,10 +15,7 @@ import { CampTeam } from '../../camp-teams/entities/camp-team.entity';
 @Index('IDX_battle_team_score_ledger_battle_id', ['battleId'])
 @Index('IDX_battle_team_score_ledger_team_id', ['teamId'])
 @Index('UQ_battle_team_score_ledger_battle_team', ['battleId', 'teamId'], { unique: true })
-export class BattleTeamScoreLedger {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class BattleTeamScoreLedger extends BaseUuidEntity {
   @Column({ type: 'uuid', name: 'battle_id' })
   battleId!: string;
 
